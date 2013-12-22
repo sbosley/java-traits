@@ -14,52 +14,52 @@ import javax.tools.Diagnostic.Kind;
 
 public class TraitElement extends TypeElementWrapper {
 
-	public static final String INTERFACE_SUFFIX = "Interface";
-	
-	private List<ExecutableElement> declaredMethods;
-	private List<ExecutableElement> abstractMethods;
-	
-	public TraitElement(TypeElement elem, Messager messager) {
-		super(elem, messager);
-		validateElement();
-	}
-	
-	private void validateElement() {
-		declaredMethods = new ArrayList<ExecutableElement>();
-		abstractMethods = new ArrayList<ExecutableElement>();
-		List<? extends Element> enclosedElements = elem.getEnclosedElements();
-		for (Element e : enclosedElements) {
-			if (e.getKind() != ElementKind.METHOD || !(e instanceof ExecutableElement))
-				if (e.getKind() == ElementKind.CONSTRUCTOR && (e instanceof ExecutableElement)) {
-					if (((ExecutableElement) e).getParameters().size() > 0)
-						messager.printMessage(Kind.ERROR, "Trait constructors cannot have arguments", e);
-				} else {					
-					messager.printMessage(Kind.ERROR, "Trait elements may only declare methods or abstract methods", e);
-				}
-			else {
-				ExecutableElement exec = (ExecutableElement) e; 
-				declaredMethods.add(exec);
-				Set<Modifier> modifiers = exec.getModifiers();
-				if (modifiers.contains(Modifier.ABSTRACT))
-					abstractMethods.add(exec);
-			}
-		}
-	}
-	
-	public String getFullyQualifiedInterfaceName() {
-		return fqn.toString() + INTERFACE_SUFFIX;
-	}
-	
-	public String getSimpleInterfaceName() {
-		return getSimpleName() + INTERFACE_SUFFIX;
-	}
-	
-	public List<? extends ExecutableElement> getDeclaredMethods() {
-		return declaredMethods;
-	}
-	
-	public List<? extends ExecutableElement> getAbstractMethods() {
-		return abstractMethods;
-	}
-	
+    public static final String INTERFACE_SUFFIX = "Interface";
+
+    private List<ExecutableElement> declaredMethods;
+    private List<ExecutableElement> abstractMethods;
+
+    public TraitElement(TypeElement elem, Messager messager) {
+        super(elem, messager);
+        validateElement();
+    }
+
+    private void validateElement() {
+        declaredMethods = new ArrayList<ExecutableElement>();
+        abstractMethods = new ArrayList<ExecutableElement>();
+        List<? extends Element> enclosedElements = elem.getEnclosedElements();
+        for (Element e : enclosedElements) {
+            if (e.getKind() != ElementKind.METHOD || !(e instanceof ExecutableElement))
+                if (e.getKind() == ElementKind.CONSTRUCTOR && (e instanceof ExecutableElement)) {
+                    if (((ExecutableElement) e).getParameters().size() > 0)
+                        messager.printMessage(Kind.ERROR, "Trait constructors cannot have arguments", e);
+                } else {					
+                    messager.printMessage(Kind.ERROR, "Trait elements may only declare methods or abstract methods", e);
+                }
+            else {
+                ExecutableElement exec = (ExecutableElement) e; 
+                declaredMethods.add(exec);
+                Set<Modifier> modifiers = exec.getModifiers();
+                if (modifiers.contains(Modifier.ABSTRACT))
+                    abstractMethods.add(exec);
+            }
+        }
+    }
+
+    public String getFullyQualifiedInterfaceName() {
+        return fqn.toString() + INTERFACE_SUFFIX;
+    }
+
+    public String getSimpleInterfaceName() {
+        return getSimpleName() + INTERFACE_SUFFIX;
+    }
+
+    public List<? extends ExecutableElement> getDeclaredMethods() {
+        return declaredMethods;
+    }
+
+    public List<? extends ExecutableElement> getAbstractMethods() {
+        return abstractMethods;
+    }
+
 }

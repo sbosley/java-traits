@@ -19,86 +19,86 @@ import javax.tools.Diagnostic.Kind;
 
 public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<String>> {
 
-	private Element elem;
-	private Messager messager;
-	
-	public ImportGatheringTypeVisitor(Element elem, Messager messager) {
-		this.elem = elem;
-		this.messager = messager;
-	}
-	
-	@Override
-	public Void visit(TypeMirror t) {
-		messager.printMessage(Kind.WARNING, "No arg visit() called accumulating imports", elem);
-		return null;
-	}
+    private Element elem;
+    private Messager messager;
 
-	@Override
-	public Void visit(TypeMirror t, Set<String> p) {
-		t.accept(this, p);
-		messager.printMessage(Kind.WARNING, "Generic visit() called accumulating imports", elem);
-		return null;
-	}
+    public ImportGatheringTypeVisitor(Element elem, Messager messager) {
+        this.elem = elem;
+        this.messager = messager;
+    }
 
-	@Override
-	public Void visitArray(ArrayType t, Set<String> p) {
-		t.getComponentType().accept(this, p);
-		return null;
-	}
+    @Override
+    public Void visit(TypeMirror t) {
+        messager.printMessage(Kind.WARNING, "No arg visit() called accumulating imports", elem);
+        return null;
+    }
 
-	@Override
-	public Void visitDeclared(DeclaredType t, Set<String> p) {
-		p.add(t.toString());
-		return null;
-	}
+    @Override
+    public Void visit(TypeMirror t, Set<String> p) {
+        t.accept(this, p);
+        messager.printMessage(Kind.WARNING, "Generic visit() called accumulating imports", elem);
+        return null;
+    }
 
-	@Override
-	public Void visitError(ErrorType t, Set<String> p) {
-		messager.printMessage(Kind.ERROR, "Encountered ErrorType accumulating imports", t.asElement());
-		return null;
-	}
+    @Override
+    public Void visitArray(ArrayType t, Set<String> p) {
+        t.getComponentType().accept(this, p);
+        return null;
+    }
 
-	@Override
-	public Void visitExecutable(ExecutableType t, Set<String> p) {
-		messager.printMessage(Kind.ERROR, "Encountered ExecutableType accumulating imports", elem);
-		return null;
-	}
+    @Override
+    public Void visitDeclared(DeclaredType t, Set<String> p) {
+        p.add(t.toString());
+        return null;
+    }
 
-	@Override
-	public Void visitNoType(NoType t, Set<String> p) {
-		return null; // Nothing to do
-	}
+    @Override
+    public Void visitError(ErrorType t, Set<String> p) {
+        messager.printMessage(Kind.ERROR, "Encountered ErrorType accumulating imports", t.asElement());
+        return null;
+    }
 
-	@Override
-	public Void visitNull(NullType t, Set<String> p) {
-		return null; // Nothing to do
-	}
+    @Override
+    public Void visitExecutable(ExecutableType t, Set<String> p) {
+        messager.printMessage(Kind.ERROR, "Encountered ExecutableType accumulating imports", elem);
+        return null;
+    }
 
-	@Override
-	public Void visitPrimitive(PrimitiveType t, Set<String> p) {
-		return null; // Nothing to do
-	}
+    @Override
+    public Void visitNoType(NoType t, Set<String> p) {
+        return null; // Nothing to do
+    }
 
-	@Override
-	public Void visitTypeVariable(TypeVariable t, Set<String> p) {
-		messager.printMessage(Kind.WARNING, "Encountered TypeVariable accumulating imports", t.asElement());
-		return null;
-	}
+    @Override
+    public Void visitNull(NullType t, Set<String> p) {
+        return null; // Nothing to do
+    }
 
-	@Override
-	public Void visitUnknown(TypeMirror t, Set<String> p) {
-		messager.printMessage(Kind.WARNING, "Encountered unknown TypeMirror accumulating imports", elem);
-		return null;
-	}
+    @Override
+    public Void visitPrimitive(PrimitiveType t, Set<String> p) {
+        return null; // Nothing to do
+    }
 
-	@Override
-	public Void visitWildcard(WildcardType t, Set<String> p) {
-		TypeMirror extendsBound = t.getExtendsBound();
-		if (extendsBound != null)
-			extendsBound.accept(this, p);
-		TypeMirror superBound = t.getSuperBound();
-		if (superBound != null)
-			superBound.accept(this, p);
-		return null;
-	}
+    @Override
+    public Void visitTypeVariable(TypeVariable t, Set<String> p) {
+        messager.printMessage(Kind.WARNING, "Encountered TypeVariable accumulating imports", t.asElement());
+        return null;
+    }
+
+    @Override
+    public Void visitUnknown(TypeMirror t, Set<String> p) {
+        messager.printMessage(Kind.WARNING, "Encountered unknown TypeMirror accumulating imports", elem);
+        return null;
+    }
+
+    @Override
+    public Void visitWildcard(WildcardType t, Set<String> p) {
+        TypeMirror extendsBound = t.getExtendsBound();
+        if (extendsBound != null)
+            extendsBound.accept(this, p);
+        TypeMirror superBound = t.getSuperBound();
+        if (superBound != null)
+            superBound.accept(this, p);
+        return null;
+    }
 }

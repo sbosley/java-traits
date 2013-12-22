@@ -5,6 +5,6 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 public @interface HasTraits {
-	Class<?>[] traits();
-	Class<?> desiredSuperclass() default Object.class;
+    Class<?>[] traits();
+    Class<?> desiredSuperclass() default Object.class;
 }
