@@ -53,10 +53,10 @@ public class TraitProcessor extends AbstractProcessor {
 				messager.printMessage(Kind.ERROR, "Only a class can be annotated with @Trait", e);
 			else {
 				TypeElement typeElem = (TypeElement) e;
-				TraitInterfaceGenerator traitInterfaceGenerator = new TraitInterfaceGenerator(typeElem, messager);
+				TraitElement traitElement = new TraitElement(typeElem, messager);
 				String typeName = typeElem.getQualifiedName().toString();
-				result.put(typeName, traitInterfaceGenerator.getInterfaceName());
-				traitInterfaceGenerator.writeInterface(filer);
+				result.put(typeName, traitElement.getFullyQualifiedInterfaceName());
+				new TraitInterfaceWriter(traitElement, messager).writeInterface(filer);
 			}
 		}
 		return result;
