@@ -47,6 +47,6 @@ public class ClassWithTraits extends TypeElementWrapper {
 	}
 	
 	public FullyQualifiedName getDelegateClassNameForTraitElement(TraitElement traitElement) {
-		return new FullyQualifiedName(traitElement.getFullyQualifiedName() + "$$" + getSimpleName() + DELEGATE_SUFFIX);
+		return new FullyQualifiedName(traitElement.getFullyQualifiedName() + "__" + getSimpleName() + DELEGATE_SUFFIX);
 	}
 }
