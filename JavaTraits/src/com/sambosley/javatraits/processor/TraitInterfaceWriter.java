@@ -2,6 +2,7 @@ package com.sambosley.javatraits.processor;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.processing.Filer;
@@ -47,8 +48,9 @@ public class TraitInterfaceWriter {
 	}
 	
 	private void emitImports(StringBuilder builder) {
-		Set<String> necessaryImports = Utils.generateImportsFromExecutableElements(element.getDeclaredMethods(), messager);
-		for (String s : necessaryImports) {
+		Set<String> imports = new HashSet<String>();
+		Utils.accumulateImportsFromExecutableElements(imports, element.getDeclaredMethods(), messager);
+		for (String s : imports) {
 			builder.append("import ").append(s).append(";\n");
 		}
 		builder.append("\n");
@@ -68,7 +70,7 @@ public class TraitInterfaceWriter {
 	}
 	
 	private void emitMethodDeclarationForExecutableElement(StringBuilder builder, ExecutableElement exec) {
-		Utils.emitMethodSignature(builder, exec);
+		Utils.emitMethodSignature(builder, exec, false);
 		builder.append(";\n");
 	}
 	

@@ -12,6 +12,7 @@ import com.sambosley.javatraits.utils.Utils;
 public class ClassWithTraits extends TypeElementWrapper {
 	
 	public static final String GEN_SUFFIX = "Gen";
+	public static final String DELEGATE_SUFFIX = "Delegate";
 	
 	private List<FullyQualifiedName> traitClasses;
 	private FullyQualifiedName desiredSuperclass;
@@ -43,5 +44,9 @@ public class ClassWithTraits extends TypeElementWrapper {
 	
 	public FullyQualifiedName getDesiredSuperclass() {
 		return desiredSuperclass;
+	}
+	
+	public FullyQualifiedName getDelegateClassNameForTraitElement(TraitElement traitElement) {
+		return new FullyQualifiedName(traitElement.getFullyQualifiedName() + "$$" + getSimpleName() + DELEGATE_SUFFIX);
 	}
 }

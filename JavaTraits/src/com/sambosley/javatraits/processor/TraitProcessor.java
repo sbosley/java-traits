@@ -12,6 +12,8 @@ import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedSourceVersion;
+import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
@@ -21,6 +23,7 @@ import com.sambosley.javatraits.annotations.HasTraits;
 import com.sambosley.javatraits.annotations.Trait;
 import com.sambosley.javatraits.utils.FullyQualifiedName;
 
+@SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class TraitProcessor extends AbstractProcessor {
 
 	private Messager messager;
@@ -62,7 +65,6 @@ public class TraitProcessor extends AbstractProcessor {
 			else {
 				TypeElement typeElem = (TypeElement) e;
 				TraitElement traitElement = new TraitElement(typeElem, messager);
-				messager.printMessage(Kind.WARNING, "Mapping trait element " + traitElement.fqn);
 				result.put(traitElement.fqn, traitElement);
 			}
 		}
@@ -95,7 +97,7 @@ public class TraitProcessor extends AbstractProcessor {
 			for (FullyQualifiedName fqn : allTraits) {
 				TraitElement correspondingTrait = traitInterfaceMap.get(fqn);
 				if (correspondingTrait == null)
-					messager.printMessage(Kind.ERROR, "No trait found for fqn " + fqn);
+					messager.printMessage(Kind.ERROR, "Couldn't find TraitElement for name " + fqn.toString());
 				new TraitDelegateWriter(cls, correspondingTrait, messager).writeDelegate(filer);
 			}
 		}
@@ -103,7 +105,7 @@ public class TraitProcessor extends AbstractProcessor {
 	
 	private void generateTraitImplementingSuperclasses(Set<ClassWithTraits> classesWithTraits, Map<FullyQualifiedName, TraitElement> traitInterfaceMap) {
 		for (ClassWithTraits cls : classesWithTraits) {
-			
+			new ClassWithTraitsSuperclassWriter(cls, traitInterfaceMap, messager).writeClass(filer);
 		}
 	}
 }

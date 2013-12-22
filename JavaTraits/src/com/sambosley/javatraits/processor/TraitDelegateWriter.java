@@ -2,12 +2,14 @@ package com.sambosley.javatraits.processor;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.type.TypeKind;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
@@ -22,13 +24,11 @@ public class TraitDelegateWriter {
 	private FullyQualifiedName traitDelegateClass;
 	private FullyQualifiedName delegateClass;
 	
-	private static final String DELEGATE_SUFFIX = "Delegate";
-	
 	public TraitDelegateWriter(ClassWithTraits cls, TraitElement traitElement, Messager messager) {
 		this.cls = cls;
 		this.traitElement = traitElement;
 		this.messager = messager;
-		this.traitDelegateClass = new FullyQualifiedName(traitElement.getFullyQualifiedName() + "$" + cls.getSimpleName() + DELEGATE_SUFFIX);
+		this.traitDelegateClass = cls.getDelegateClassNameForTraitElement(traitElement);
 		this.delegateClass = cls.getFullyQualifiedGeneratedSuperclassName();
 	}
 	
@@ -58,9 +58,10 @@ public class TraitDelegateWriter {
 	}
 	
 	private void emitImports(StringBuilder builder) {
-		Set<String> necessaryImports = Utils.generateImportsFromExecutableElements(traitElement.getAbstractMethods(), messager);
-		necessaryImports.add(delegateClass.toString());
-		for (String s : necessaryImports) {
+		Set<String> imports = new HashSet<String>();
+		Utils.accumulateImportsFromExecutableElements(imports, traitElement.getAbstractMethods(), messager);
+		imports.add(delegateClass.toString());
+		for (String s : imports) {
 			builder.append("import ").append(s).append(";\n");
 		}
 		builder.append("\n");
@@ -85,15 +86,18 @@ public class TraitDelegateWriter {
 		builder.append("\tpublic ").append(traitDelegateClass.getSimpleName())
 		.append("(").append(delegateClass.getSimpleName()).append(" delegate) {\n")
 		.append("\t\tthis.delegate = delegate;\n")
-		.append("}\n\n");
+		.append("\t}\n\n");
 	}
 	
 	private void emitAbstractMethodImplementations(StringBuilder builder) {
 		List<? extends ExecutableElement> abstractMethods = traitElement.getAbstractMethods();
 		for (ExecutableElement exec : abstractMethods) {
-			List<String> argNames = Utils.emitMethodSignature(builder, exec);
+			List<String> argNames = Utils.emitMethodSignature(builder, exec, false);
 			builder.append(" {\n");
-			builder.append("\t\tdelegate.").append(exec.getSimpleName().toString()).append("(");
+			builder.append("\t\t");
+			if (exec.getReturnType().getKind() != TypeKind.VOID)
+				builder.append("return ");
+			builder.append("delegate.").append(exec.getSimpleName().toString()).append("(");
 			for (int i = 0; i < argNames.size(); i++) {
 				builder.append(argNames.get(i));
 				if (i < argNames.size() - 1)

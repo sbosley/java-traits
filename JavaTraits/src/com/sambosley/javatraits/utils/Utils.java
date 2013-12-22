@@ -1,7 +1,6 @@
 package com.sambosley.javatraits.utils;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -36,6 +35,18 @@ public class Utils {
 		return name.lastIndexOf('.');
 	}
 	
+	public static interface MapFunction<A, B> {
+		public B map(A arg);
+	}
+	
+	public static <A, B> List<B> map(List<A> list, MapFunction<A, B> mapFunction) {
+		List<B> result = new ArrayList<B>();
+		for (A elem : list) {
+			result.add(mapFunction.map(elem));
+		}
+		return result;
+	}
+	
 	public static List<FullyQualifiedName> getClassFromAnnotation(Class<?> annotationClass, Element elem, String propertyName, Messager messager) {
 		List<FullyQualifiedName> result = new ArrayList<FullyQualifiedName>();
 		List<? extends AnnotationMirror> annotationMirrors = elem.getAnnotationMirrors();
@@ -64,24 +75,23 @@ public class Utils {
 		return result;
 	}
 	
-	public static Set<String> generateImportsFromExecutableElements(List<? extends ExecutableElement> elems, Messager messager) {
-		Set<String> imports = new HashSet<String>();
+	public static void accumulateImportsFromExecutableElements(Set<String> accumulate, List<? extends ExecutableElement> elems, Messager messager) {
 		for (ExecutableElement exec : elems) {
 			ImportGatheringTypeVisitor visitor = new ImportGatheringTypeVisitor(exec, messager);
 			TypeMirror returnType = exec.getReturnType();
-			returnType.accept(visitor, imports);
+			returnType.accept(visitor, accumulate);
 			List<? extends VariableElement> parameters = exec.getParameters();
 			for (VariableElement var : parameters) {
-				var.asType().accept(visitor, imports);
+				var.asType().accept(visitor, accumulate);
 			}
 		}
-		
-		return imports;
 	}
 	
-	public static List<String> emitMethodSignature(StringBuilder builder, ExecutableElement exec) {
+	public static List<String> emitMethodSignature(StringBuilder builder, ExecutableElement exec, boolean isAbstract) {
 		List<String> argNames = new ArrayList<String>();
 		builder.append("\tpublic ");
+		if (isAbstract)
+			builder.append("abstract ");
 		builder.append(Utils.getSimpleNameFromFullyQualifiedName(exec.getReturnType().toString()))
 		.append(" ").append(exec.getSimpleName().toString())
 		.append("(");
