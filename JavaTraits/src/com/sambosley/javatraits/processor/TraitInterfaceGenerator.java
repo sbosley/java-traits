@@ -45,7 +45,12 @@ public class TraitInterfaceGenerator {
 		List<? extends Element> enclosedElements = elem.getEnclosedElements();
 		for (Element e : enclosedElements) {
 			if (e.getKind() != ElementKind.METHOD || !(e instanceof ExecutableElement))
-				messager.printMessage(Kind.ERROR, "Trait elements may only declare methods or abstract methods", e);
+				if (e.getKind() == ElementKind.CONSTRUCTOR && (e instanceof ExecutableElement)) {
+					if (((ExecutableElement) e).getParameters().size() > 0)
+						messager.printMessage(Kind.ERROR, "Trait constructors cannot have arguments", e);
+				} else {					
+					messager.printMessage(Kind.ERROR, "Trait elements may only declare methods or abstract methods, " + e.getKind() + ", " + e.toString(), e);
+				}
 			else
 				declaredMethods.add((ExecutableElement) e);
 		}
@@ -117,11 +122,14 @@ public class TraitInterfaceGenerator {
 	
 	private void emitMethodDeclarationForExecutableElement(StringBuilder builder, ExecutableElement exec) {
 		builder.append("\tpublic ");
-		builder.append(Utils.getSimpleNameFromFullyQualifiedName(exec.getReturnType().toString())).append("(");
+		builder.append(Utils.getSimpleNameFromFullyQualifiedName(exec.getReturnType().toString()))
+		.append(" ").append(exec.getSimpleName().toString())
+		.append("(");
 		List<? extends VariableElement> parameters = exec.getParameters();
 		for (int i = 0; i < parameters.size(); i++) {
 			VariableElement var = parameters.get(i);
-			builder.append(var.toString());
+			String typeString = Utils.getSimpleNameFromFullyQualifiedName(var.asType().toString());
+			builder.append(typeString).append(" ").append(var.toString());
 			if (i < parameters.size() - 1)
 				builder.append(", ");
 		}

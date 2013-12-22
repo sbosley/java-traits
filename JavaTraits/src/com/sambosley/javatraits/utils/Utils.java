@@ -4,11 +4,15 @@ public class Utils {
 
 	public static String getPackageFromFullyQualifiedName(String name) {
 		int split = getFQNSplitIndex(name);
+		if (split < 0)
+			return "";
 		return name.substring(0, split);
 	}
 	
 	public static String getSimpleNameFromFullyQualifiedName(String name) {
 		int split = getFQNSplitIndex(name);
+		if (split < 0)
+			return name;
 		return name.substring(split + 1);
 	}
 	
@@ -18,10 +22,7 @@ public class Utils {
 	}
 	
 	private static int getFQNSplitIndex(String name) {
-		int toReturn = name.lastIndexOf('.');
-		if (toReturn < 0)
-			throw new RuntimeException("Couldn't find '.' in fully qualified class name " + name);
-		return toReturn;
+		return name.lastIndexOf('.');
 	}
 	
 }
