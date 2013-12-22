@@ -21,6 +21,11 @@ import javax.tools.Diagnostic.Kind;
 
 import com.sambosley.javatraits.annotations.HasTraits;
 import com.sambosley.javatraits.annotations.Trait;
+import com.sambosley.javatraits.processor.data.ClassWithTraits;
+import com.sambosley.javatraits.processor.data.TraitElement;
+import com.sambosley.javatraits.processor.writers.ClassWithTraitsSuperclassWriter;
+import com.sambosley.javatraits.processor.writers.TraitDelegateWriter;
+import com.sambosley.javatraits.processor.writers.TraitInterfaceWriter;
 import com.sambosley.javatraits.utils.FullyQualifiedName;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
@@ -65,7 +70,7 @@ public class TraitProcessor extends AbstractProcessor {
 			else {
 				TypeElement typeElem = (TypeElement) e;
 				TraitElement traitElement = new TraitElement(typeElem, messager);
-				result.put(traitElement.fqn, traitElement);
+				result.put(traitElement.getFullyQualifiedName(), traitElement);
 			}
 		}
 		return result;

@@ -1,4 +1,4 @@
-package com.sambosley.javatraits.processor;
+package com.sambosley.javatraits.processor.data;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.TypeElement;
@@ -21,7 +21,11 @@ public abstract class TypeElementWrapper {
 		return elem;
 	}
 	
-	public String getFullyQualifiedName() {
+	public FullyQualifiedName getFullyQualifiedName() {
+		return fqn;
+	}
+	
+	public String getFullyQualifiedNameAsString() {
 		return fqn.toString();
 	}
 	

@@ -1,4 +1,4 @@
-package com.sambosley.javatraits.processor;
+package com.sambosley.javatraits.processor.data;
 
 import java.util.ArrayList;
 import java.util.List;

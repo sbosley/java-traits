@@ -1,4 +1,4 @@
-package com.sambosley.javatraits.processor;
+package com.sambosley.javatraits.processor.writers;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -11,6 +11,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
+import com.sambosley.javatraits.processor.data.TraitElement;
 import com.sambosley.javatraits.utils.Utils;
 
 public class TraitInterfaceWriter {
