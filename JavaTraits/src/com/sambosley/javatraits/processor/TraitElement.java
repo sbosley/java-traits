@@ -2,37 +2,31 @@ package com.sambosley.javatraits.processor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 
-import com.sambosley.javatraits.utils.Pair;
-import com.sambosley.javatraits.utils.Utils;
-
-public class TraitElement {
+public class TraitElement extends TypeElementWrapper {
 
 	public static final String INTERFACE_SUFFIX = "Interface";
 	
-	private TypeElement elem;
-	private Messager messager;
-	private String fullyQualifiedName;
-	private Pair<String, String> nameElements;
 	private List<ExecutableElement> declaredMethods;
+	private List<ExecutableElement> abstractMethods;
 	
 	public TraitElement(TypeElement elem, Messager messager) {
-		this.elem = elem;
-		this.messager = messager;
-		this.fullyQualifiedName = elem.getQualifiedName().toString();
-		this.nameElements = Utils.splitFullyQualifiedName(fullyQualifiedName);
+		super(elem, messager);
 		validateElement();
 	}
 	
 	private void validateElement() {
 		declaredMethods = new ArrayList<ExecutableElement>();
+		abstractMethods = new ArrayList<ExecutableElement>();
 		List<? extends Element> enclosedElements = elem.getEnclosedElements();
 		for (Element e : enclosedElements) {
 			if (e.getKind() != ElementKind.METHOD || !(e instanceof ExecutableElement))
@@ -42,33 +36,30 @@ public class TraitElement {
 				} else {					
 					messager.printMessage(Kind.ERROR, "Trait elements may only declare methods or abstract methods", e);
 				}
-			else
-				declaredMethods.add((ExecutableElement) e);
+			else {
+				ExecutableElement exec = (ExecutableElement) e; 
+				declaredMethods.add(exec);
+				Set<Modifier> modifiers = exec.getModifiers();
+				if (modifiers.contains(Modifier.ABSTRACT))
+					abstractMethods.add(exec);
+			}
 		}
 	}
 	
-	public TypeElement getSourceElement() {
-		return elem;
-	}
-	
 	public String getFullyQualifiedInterfaceName() {
-		return fullyQualifiedName + INTERFACE_SUFFIX;
+		return fqn.toString() + INTERFACE_SUFFIX;
 	}
 	
 	public String getSimpleInterfaceName() {
 		return getSimpleName() + INTERFACE_SUFFIX;
 	}
-
-	public String getPackageName() {
-		return nameElements.getLeft();
-	}
-	
-	public String getSimpleName() {
-		return nameElements.getRight();
-	}
 	
 	public List<? extends ExecutableElement> getDeclaredMethods() {
 		return declaredMethods;
+	}
+	
+	public List<? extends ExecutableElement> getAbstractMethods() {
+		return abstractMethods;
 	}
 	
 }
