@@ -2,7 +2,6 @@ package com.sambosley.javatraits.processor;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,6 +11,7 @@ import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
@@ -29,10 +29,16 @@ import com.sambosley.javatraits.processor.writers.TraitInterfaceWriter;
 import com.sambosley.javatraits.utils.FullyQualifiedName;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
+@SupportedAnnotationTypes(value="com.sambosley.javatraits.annotations.*")
 public class TraitProcessor extends AbstractProcessor {
 
     private Messager messager;
     private Filer filer;
+    
+    private int invocations = 0;
+    
+    private Set<? extends Element> traitElements = null;
+    private Set<? extends Element> elementsWithTraits = null;
 
     @Override
     public synchronized void init(ProcessingEnvironment env) {
@@ -43,27 +49,42 @@ public class TraitProcessor extends AbstractProcessor {
     }
 
     @Override
-    public Set<String> getSupportedAnnotationTypes() {
-        Set<String> supportedTypes = new LinkedHashSet<String>();
-        supportedTypes.add(Trait.class.getCanonicalName());
-        supportedTypes.add(HasTraits.class.getCanonicalName());
-        return supportedTypes;
-    }
-
-    @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
-        Map<FullyQualifiedName, TraitElement> traitMap = getTraitElements(env);
-        Set<ClassWithTraits> classesWithTraits = getClassesWithTraits(env, traitMap);
+        invocations++;
+        for (TypeElement e : annotations) {
+            messager.printMessage(Kind.NOTE, "This round has: " + e.toString() + ", invocations: " + invocations);
+        }
+        
+        tryToInitTraitElements(env);
+        tryToInitClassesWithTraits(env);
+        
+        if (traitElements != null && elementsWithTraits != null) {
+            Map<FullyQualifiedName, TraitElement> traitMap = getTraitElements();
+            Set<ClassWithTraits> classesWithTraits = getClassesWithTraits(traitMap);
+            generateTraitInterfaces(traitMap);
+            generateTraitDelegates(classesWithTraits, traitMap);
+            generateTraitImplementingSuperclasses(classesWithTraits, traitMap);
+        }
 
-        generateTraitInterfaces(traitMap);
-        generateTraitDelegates(classesWithTraits, traitMap);
-        generateTraitImplementingSuperclasses(classesWithTraits, traitMap);
+        
         return true;
     }
-
-    private Map<FullyQualifiedName, TraitElement> getTraitElements(RoundEnvironment env) {
-        Map<FullyQualifiedName, TraitElement> result = new HashMap<FullyQualifiedName, TraitElement>();
+    
+    private void tryToInitTraitElements(RoundEnvironment env) {
         Set<? extends Element> traitElements = env.getElementsAnnotatedWith(Trait.class);
+        if (traitElements.size() > 0)
+            this.traitElements = traitElements;
+    }
+    
+    private void tryToInitClassesWithTraits(RoundEnvironment env) {
+        Set<? extends Element> elementsWithTraits = env.getElementsAnnotatedWith(HasTraits.class);
+        if (elementsWithTraits.size() > 0)
+            this.elementsWithTraits = elementsWithTraits;
+    }
+
+    private Map<FullyQualifiedName, TraitElement> getTraitElements() {
+        Map<FullyQualifiedName, TraitElement> result = new HashMap<FullyQualifiedName, TraitElement>();
+        
         for (Element e : traitElements) {
             if (e.getKind() != ElementKind.CLASS)
                 messager.printMessage(Kind.ERROR, "Only a class can be annotated with @Trait", e);
@@ -76,8 +97,7 @@ public class TraitProcessor extends AbstractProcessor {
         return result;
     }
 
-    private Set<ClassWithTraits> getClassesWithTraits(RoundEnvironment env, Map<FullyQualifiedName, TraitElement> traitMap) {
-        Set<? extends Element> elementsWithTraits = env.getElementsAnnotatedWith(HasTraits.class);
+    private Set<ClassWithTraits> getClassesWithTraits(Map<FullyQualifiedName, TraitElement> traitMap) {
         Set<ClassWithTraits> result = new HashSet<ClassWithTraits>();
         for (Element e : elementsWithTraits) {
             if (e.getKind() != ElementKind.CLASS)
