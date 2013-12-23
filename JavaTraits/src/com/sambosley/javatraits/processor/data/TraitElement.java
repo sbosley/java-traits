@@ -63,12 +63,12 @@ public class TraitElement extends TypeElementWrapper {
         return abstractMethods;
     }
     
-    public void emitParametrizedInterfaceName(StringBuilder builder) {
+    public void emitParametrizedInterfaceName(StringBuilder builder, boolean appendBounds) {
         builder.append(getSimpleInterfaceName());
         List<? extends TypeParameterElement> typeParams = getTypeParameters();
         if (typeParams.size() > 0) {
             builder.append("<");
-            emitParametrizedTypeList(builder);
+            emitParametrizedTypeList(builder, appendBounds);
             builder.append(">");
         }
     }

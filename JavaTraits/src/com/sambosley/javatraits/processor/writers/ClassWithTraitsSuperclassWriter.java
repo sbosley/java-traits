@@ -95,7 +95,7 @@ public class ClassWithTraitsSuperclassWriter {
                 } else {
                     builder.append(", ");
                 }
-                elem.emitParametrizedTypeList(builder);
+                elem.emitParametrizedTypeList(builder, true);
             }
         }
         if (addedGenericStart)
@@ -107,7 +107,7 @@ public class ClassWithTraitsSuperclassWriter {
             builder.append(" implements ");
             for (int i = 0; i < allTraits.size(); i++) {
                 TraitElement elem = allTraits.get(i);
-                elem.emitParametrizedInterfaceName(builder);
+                elem.emitParametrizedInterfaceName(builder, false);
                 if (i < allTraits.size() - 1)
                     builder.append(", ");
             }
@@ -128,7 +128,7 @@ public class ClassWithTraitsSuperclassWriter {
             builder.append("\tprivate ").append(delegateClass.getSimpleName());
             if (elem.hasTypeParameters()) {
                 builder.append("<");
-                elem.emitParametrizedTypeList(builder);
+                elem.emitParametrizedTypeList(builder, false);
                 builder.append(">");
             }
             builder.append(" ")
@@ -145,7 +145,7 @@ public class ClassWithTraitsSuperclassWriter {
             builder.append(" = new ").append(delegateClass.getSimpleName());
             if (elem.hasTypeParameters()) {
                 builder.append("<");
-                elem.emitParametrizedTypeList(builder);
+                elem.emitParametrizedTypeList(builder, false);
                 builder.append(">");
             }
             builder.append("(this);\n");

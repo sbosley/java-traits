@@ -68,11 +68,11 @@ public class ClassWithTraits extends TypeElementWrapper {
         return new FullyQualifiedName(traitElement.getFullyQualifiedName() + "__" + getSimpleName() + DELEGATE_SUFFIX);
     }
     
-    public void emitParametrizedTypeList(StringBuilder builder) {
-        emitParametrizedTypeList(builder, null);
+    public void emitParametrizedTypeList(StringBuilder builder, boolean appendBounds) {
+        emitParametrizedTypeList(builder, null, appendBounds);
     }
     
-    public void emitParametrizedTypeList(StringBuilder builder, TraitElement onlyForThisElem) {
+    public void emitParametrizedTypeList(StringBuilder builder, TraitElement onlyForThisElem, boolean appendBounds) {
         boolean addedParameterStart = false;
         for (int i = 0; i < traitClasses.size(); i++) {
             TraitElement elem = traitClasses.get(i);
@@ -89,7 +89,7 @@ public class ClassWithTraits extends TypeElementWrapper {
                             builder.append(", ");
                     }
                 } else {
-                    elem.emitParametrizedTypeList(builder);
+                    elem.emitParametrizedTypeList(builder, appendBounds);
                 }
             }
             if (i < traitClasses.size() - 1 && addedParameterStart)

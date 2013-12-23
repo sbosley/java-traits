@@ -97,14 +97,14 @@ public class Utils {
         builder.append("\tpublic ");
         if (isAbstract)
             builder.append("abstract ");
-        builder.append(getSimpleTypeName(exec.getReturnType(), qualifyGenerics))
+        builder.append(getSimpleTypeName(exec.getReturnType(), qualifyGenerics, false))
         .append(" ").append(exec.getSimpleName().toString())
         .append("(");
         List<? extends VariableElement> parameters = exec.getParameters();
         for (int i = 0; i < parameters.size(); i++) {
             VariableElement var = parameters.get(i);
             TypeMirror argType = var.asType();
-            String typeString = getSimpleTypeName(argType, qualifyGenerics);
+            String typeString = getSimpleTypeName(argType, qualifyGenerics, false);
             if (argType.getKind() == TypeKind.ARRAY && exec.isVarArgs())
                 typeString = typeString.replace("[]", "...");
             String argName = var.toString();
@@ -117,17 +117,27 @@ public class Utils {
         return argNames;
     }
     
-    public static String getSimpleTypeName(TypeMirror mirror, String qualifyByIfGeneric) {
+    public static String getSimpleTypeName(TypeMirror mirror, String qualifyByIfGeneric, boolean appendBounds) {
         String simpleName = getSimpleNameFromFullyQualifiedName(mirror.toString());
+        String qualifiedName = qualifyByIfGeneric + "$" + simpleName;
+        TypeVariable typeVariableIfGeneric = null;
+        
         if (mirror instanceof TypeVariable) {
-            return qualifyByIfGeneric + "$" + simpleName;
+            typeVariableIfGeneric = (TypeVariable) mirror;
         } else if (mirror instanceof ArrayType) {
             ArrayType arrType = (ArrayType) mirror;
             if (arrType.getComponentType() instanceof TypeVariable) {
-                return qualifyByIfGeneric + "$" + simpleName;
+                typeVariableIfGeneric = (TypeVariable) arrType.getComponentType();
             }
         }
-        return simpleName;
+        if (typeVariableIfGeneric != null && appendBounds) {
+            TypeMirror upperBound = typeVariableIfGeneric.getUpperBound();
+            if (!Utils.OBJECT_CLASS_NAME.equals(upperBound.toString())) {
+                qualifiedName += " extends " + Utils.getSimpleNameFromFullyQualifiedName(upperBound.toString());
+            }
+        }
+        
+        return typeVariableIfGeneric != null ? qualifiedName : simpleName;
     }
 
 }

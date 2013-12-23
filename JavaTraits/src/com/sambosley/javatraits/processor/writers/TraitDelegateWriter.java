@@ -73,13 +73,13 @@ public class TraitDelegateWriter {
         builder.append("public class ").append(traitDelegateClass.getSimpleName());
         if (traitElement.hasTypeParameters()) {
             builder.append("<");
-            traitElement.emitParametrizedTypeList(builder);
+            traitElement.emitParametrizedTypeList(builder, true);
             builder.append(">");
         }
         builder.append(" extends ").append(traitElement.getSimpleName());
         if (traitElement.hasTypeParameters()) {
             builder.append("<");
-            traitElement.emitParametrizedTypeList(builder);
+            traitElement.emitParametrizedTypeList(builder, false);
             builder.append(">");
         }
         builder.append(" {\n\n");
@@ -93,14 +93,14 @@ public class TraitDelegateWriter {
 
     private void emitDelegateInstance(StringBuilder builder) {
         builder.append("\tprivate ").append(delegateClass.getSimpleName());
-        cls.emitParametrizedTypeList(builder, traitElement);
+        cls.emitParametrizedTypeList(builder, traitElement, false);
         builder.append(" delegate;\n\n");
     }
 
     private void emitConstructor(StringBuilder builder) {
         builder.append("\tpublic ").append(traitDelegateClass.getSimpleName())
         .append("(").append(delegateClass.getSimpleName());
-        cls.emitParametrizedTypeList(builder, traitElement);
+        cls.emitParametrizedTypeList(builder, traitElement, false);
         builder.append(" delegate) {\n")
         .append("\t\tthis.delegate = delegate;\n")
         .append("\t}\n\n");

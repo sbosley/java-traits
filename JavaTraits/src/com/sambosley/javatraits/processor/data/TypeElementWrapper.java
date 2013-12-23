@@ -52,11 +52,11 @@ public abstract class TypeElementWrapper {
         return typeParameters.size() > 0;
     }
     
-    public void emitParametrizedTypeList(StringBuilder builder) {
+    public void emitParametrizedTypeList(StringBuilder builder, boolean appendBounds) {
         List<? extends TypeParameterElement> typeParams = getTypeParameters();
         for (int i = 0; i < typeParams.size(); i++) {
             TypeMirror type = typeParams.get(i).asType();
-            builder.append(Utils.getSimpleTypeName(type, getSimpleName()));
+            builder.append(Utils.getSimpleTypeName(type, getSimpleName(), appendBounds));
             if (i < typeParams.size() - 1)
                 builder.append(", ");
         }

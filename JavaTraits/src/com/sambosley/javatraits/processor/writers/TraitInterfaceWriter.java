@@ -59,7 +59,7 @@ public class TraitInterfaceWriter {
 
     private void emitInterfaceDeclaration(StringBuilder builder) {
         builder.append("public interface ");
-        element.emitParametrizedInterfaceName(builder);
+        element.emitParametrizedInterfaceName(builder, true);
         builder.append(" {\n");
         emitMethodDeclarations(builder);
         builder.append("}");
