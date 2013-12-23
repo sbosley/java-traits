@@ -11,6 +11,7 @@ import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
@@ -19,6 +20,8 @@ import com.sambosley.javatraits.processor.visitors.ImportGatheringTypeVisitor;
 
 public class Utils {
 
+    public static final String OBJECT_CLASS_NAME = "java.lang.Object";
+    
     public static String getPackageFromFullyQualifiedName(String name) {
         int split = getFQNSplitIndex(name);
         if (split < 0)
@@ -118,6 +121,11 @@ public class Utils {
         String simpleName = getSimpleNameFromFullyQualifiedName(mirror.toString());
         if (mirror instanceof TypeVariable) {
             return qualifyByIfGeneric + "$" + simpleName;
+        } else if (mirror instanceof ArrayType) {
+            ArrayType arrType = (ArrayType) mirror;
+            if (arrType.getComponentType() instanceof TypeVariable) {
+                return qualifyByIfGeneric + "$" + simpleName;
+            }
         }
         return simpleName;
     }

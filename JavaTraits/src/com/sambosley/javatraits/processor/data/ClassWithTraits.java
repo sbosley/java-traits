@@ -84,7 +84,9 @@ public class ClassWithTraits extends TypeElementWrapper {
                 if (onlyForThisElem != null && !onlyForThisElem.getFullyQualifiedName().equals(elem.getFullyQualifiedName())) {
                     int paramCount = elem.getTypeParameters().size();
                     for (int p = 0; p < paramCount; p++) {
-                        builder.append("?, ");
+                        builder.append("?");
+                        if (p < paramCount - 1)
+                            builder.append(", ");
                     }
                 } else {
                     elem.emitParametrizedTypeList(builder);

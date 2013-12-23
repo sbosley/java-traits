@@ -17,6 +17,8 @@ import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.type.WildcardType;
 import javax.tools.Diagnostic.Kind;
 
+import com.sambosley.javatraits.utils.Utils;
+
 public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<String>> {
 
     private Element elem;
@@ -48,7 +50,9 @@ public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<String>
 
     @Override
     public Void visitDeclared(DeclaredType t, Set<String> p) {
-        p.add(t.toString());
+        String toAdd = t.toString();
+        if (!Utils.OBJECT_CLASS_NAME.equals(toAdd))
+            p.add(t.toString());
         return null;
     }
 
@@ -81,7 +85,8 @@ public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<String>
 
     @Override
     public Void visitTypeVariable(TypeVariable t, Set<String> p) {
-        messager.printMessage(Kind.WARNING, "Encountered TypeVariable accumulating imports", t.asElement());
+        t.getLowerBound().accept(this, p);
+        t.getUpperBound().accept(this, p);
         return null;
     }
 

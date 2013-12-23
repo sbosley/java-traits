@@ -28,8 +28,6 @@ public class ClassWithTraitsSuperclassWriter {
     private Messager messager;
     private List<TraitElement> allTraits;
 
-    private static final String OBJECT_CLASS_NAME = "java.lang.Object";
-
     public ClassWithTraitsSuperclassWriter(ClassWithTraits cls, Map<FullyQualifiedName, TraitElement> traitElementMap, Messager messager) {
         this.cls = cls;
         this.traitElementMap = traitElementMap;
@@ -76,7 +74,7 @@ public class ClassWithTraitsSuperclassWriter {
             imports.add(cls.getDelegateClassNameForTraitElement(elem).toString());
         }
         String desiredSuperclass = cls.getDesiredSuperclass().toString();
-        if (!OBJECT_CLASS_NAME.equals(desiredSuperclass))
+        if (!Utils.OBJECT_CLASS_NAME.equals(desiredSuperclass))
             imports.add(desiredSuperclass);
 
         for (String s : imports) {
@@ -103,7 +101,7 @@ public class ClassWithTraitsSuperclassWriter {
         if (addedGenericStart)
             builder.append(">");
         String desiredSuperclass = cls.getDesiredSuperclass().toString();
-        if (!OBJECT_CLASS_NAME.equals(desiredSuperclass))
+        if (!Utils.OBJECT_CLASS_NAME.equals(desiredSuperclass))
             builder.append(" extends ").append(cls.getDesiredSuperclass().getSimpleName());
         if (allTraits.size() > 0) {
             builder.append(" implements ");
