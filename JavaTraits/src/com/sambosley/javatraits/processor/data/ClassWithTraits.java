@@ -1,6 +1,7 @@
 package com.sambosley.javatraits.processor.data;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.TypeElement;
@@ -16,18 +17,27 @@ public class ClassWithTraits extends TypeElementWrapper {
     public static final String GEN_SUFFIX = "Gen";
     public static final String DELEGATE_SUFFIX = "Delegate";
 
-    private List<FullyQualifiedName> traitClasses;
+    private List<TraitElement> traitClasses;
     private FullyQualifiedName desiredSuperclass;
     private FullyQualifiedName generatedSuperclass;
 
-    public ClassWithTraits(TypeElement elem, Messager messager) {
+    public ClassWithTraits(TypeElement elem, Messager messager, Map<FullyQualifiedName, TraitElement> traitMap) {
         super(elem, messager);
-        initTraitClasses();
+        initTraitClasses(traitMap);
         initSuperclasses();
     }
 
-    private void initTraitClasses() {
-        traitClasses = Utils.getClassFromAnnotation(HasTraits.class, elem, "traits", messager);
+    private void initTraitClasses(final Map<FullyQualifiedName, TraitElement> traitMap) {
+        List<FullyQualifiedName> traitNames = Utils.getClassFromAnnotation(HasTraits.class, elem, "traits", messager);
+        traitClasses = Utils.map(traitNames, new Utils.MapFunction<FullyQualifiedName, TraitElement>() {
+            @Override
+            public TraitElement map(FullyQualifiedName arg) {
+                TraitElement correspondingTrait = traitMap.get(arg);
+                if (correspondingTrait == null)
+                    messager.printMessage(Kind.ERROR, "Couldn't find TraitElement for name " + arg.toString());
+                return correspondingTrait;
+            }
+        });
     }
 
     private void initSuperclasses() {
@@ -46,7 +56,7 @@ public class ClassWithTraits extends TypeElementWrapper {
         return generatedSuperclass;
     }
 
-    public List<FullyQualifiedName> getTraitClasses() {
+    public List<TraitElement> getTraitClasses() {
         return traitClasses;
     }
 
@@ -56,5 +66,34 @@ public class ClassWithTraits extends TypeElementWrapper {
 
     public FullyQualifiedName getDelegateClassNameForTraitElement(TraitElement traitElement) {
         return new FullyQualifiedName(traitElement.getFullyQualifiedName() + "__" + getSimpleName() + DELEGATE_SUFFIX);
+    }
+    
+    public void emitParametrizedTypeList(StringBuilder builder) {
+        emitParametrizedTypeList(builder, null);
+    }
+    
+    public void emitParametrizedTypeList(StringBuilder builder, TraitElement onlyForThisElem) {
+        boolean addedParameterStart = false;
+        for (int i = 0; i < traitClasses.size(); i++) {
+            TraitElement elem = traitClasses.get(i);
+            if (elem.hasTypeParameters()) {
+                if (!addedParameterStart) {
+                    builder.append("<");
+                    addedParameterStart = true;
+                }
+                if (onlyForThisElem != null && !onlyForThisElem.getFullyQualifiedName().equals(elem.getFullyQualifiedName())) {
+                    int paramCount = elem.getTypeParameters().size();
+                    for (int p = 0; p < paramCount; p++) {
+                        builder.append("?, ");
+                    }
+                } else {
+                    elem.emitParametrizedTypeList(builder);
+                }
+            }
+            if (i < traitClasses.size() - 1 && addedParameterStart)
+                builder.append(", ");
+        }
+        if (addedParameterStart)
+            builder.append(">");
     }
 }

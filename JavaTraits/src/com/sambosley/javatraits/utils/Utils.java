@@ -13,6 +13,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVariable;
 
 import com.sambosley.javatraits.processor.visitors.ImportGatheringTypeVisitor;
 
@@ -88,19 +89,19 @@ public class Utils {
         }
     }
 
-    public static List<String> emitMethodSignature(StringBuilder builder, ExecutableElement exec, boolean isAbstract) {
+    public static List<String> emitMethodSignature(StringBuilder builder, ExecutableElement exec, String qualifyGenerics, boolean isAbstract) {
         List<String> argNames = new ArrayList<String>();
         builder.append("\tpublic ");
         if (isAbstract)
             builder.append("abstract ");
-        builder.append(Utils.getSimpleNameFromFullyQualifiedName(exec.getReturnType().toString()))
+        builder.append(getSimpleTypeName(exec.getReturnType(), qualifyGenerics))
         .append(" ").append(exec.getSimpleName().toString())
         .append("(");
         List<? extends VariableElement> parameters = exec.getParameters();
         for (int i = 0; i < parameters.size(); i++) {
             VariableElement var = parameters.get(i);
             TypeMirror argType = var.asType();
-            String typeString = Utils.getSimpleNameFromFullyQualifiedName(argType.toString());
+            String typeString = getSimpleTypeName(argType, qualifyGenerics);
             if (argType.getKind() == TypeKind.ARRAY && exec.isVarArgs())
                 typeString = typeString.replace("[]", "...");
             String argName = var.toString();
@@ -111,6 +112,14 @@ public class Utils {
         }
         builder.append(")");
         return argNames;
+    }
+    
+    public static String getSimpleTypeName(TypeMirror mirror, String qualifyByIfGeneric) {
+        String simpleName = getSimpleNameFromFullyQualifiedName(mirror.toString());
+        if (mirror instanceof TypeVariable) {
+            return qualifyByIfGeneric + "$" + simpleName;
+        }
+        return simpleName;
     }
 
 }

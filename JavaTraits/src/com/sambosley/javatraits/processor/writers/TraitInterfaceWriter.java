@@ -58,8 +58,9 @@ public class TraitInterfaceWriter {
     }
 
     private void emitInterfaceDeclaration(StringBuilder builder) {
-        builder.append("public interface ")
-        .append(element.getSimpleInterfaceName()).append(" {\n");
+        builder.append("public interface ");
+        element.emitParametrizedInterfaceName(builder);
+        builder.append(" {\n");
         emitMethodDeclarations(builder);
         builder.append("}");
     }
@@ -71,7 +72,7 @@ public class TraitInterfaceWriter {
     }
 
     private void emitMethodDeclarationForExecutableElement(StringBuilder builder, ExecutableElement exec) {
-        Utils.emitMethodSignature(builder, exec, false);
+        Utils.emitMethodSignature(builder, exec, element.getSimpleName(), false);
         builder.append(";\n");
     }
 

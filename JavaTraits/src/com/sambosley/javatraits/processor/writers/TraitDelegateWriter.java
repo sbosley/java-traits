@@ -70,8 +70,19 @@ public class TraitDelegateWriter {
     }
 
     private void emitDelegateDeclaration(StringBuilder builder) {
-        builder.append("public class ").append(traitDelegateClass.getSimpleName())
-        .append(" extends ").append(traitElement.getSimpleName()).append(" {\n\n");
+        builder.append("public class ").append(traitDelegateClass.getSimpleName());
+        if (traitElement.hasTypeParameters()) {
+            builder.append("<");
+            traitElement.emitParametrizedTypeList(builder);
+            builder.append(">");
+        }
+        builder.append(" extends ").append(traitElement.getSimpleName());
+        if (traitElement.hasTypeParameters()) {
+            builder.append("<");
+            traitElement.emitParametrizedTypeList(builder);
+            builder.append(">");
+        }
+        builder.append(" {\n\n");
 
         emitDelegateInstance(builder);
         emitConstructor(builder);
@@ -81,12 +92,16 @@ public class TraitDelegateWriter {
     }
 
     private void emitDelegateInstance(StringBuilder builder) {
-        builder.append("\tprivate ").append(delegateClass.getSimpleName()).append(" delegate;\n\n");
+        builder.append("\tprivate ").append(delegateClass.getSimpleName());
+        cls.emitParametrizedTypeList(builder, traitElement);
+        builder.append(" delegate;\n\n");
     }
 
     private void emitConstructor(StringBuilder builder) {
         builder.append("\tpublic ").append(traitDelegateClass.getSimpleName())
-        .append("(").append(delegateClass.getSimpleName()).append(" delegate) {\n")
+        .append("(").append(delegateClass.getSimpleName());
+        cls.emitParametrizedTypeList(builder, traitElement);
+        builder.append(" delegate) {\n")
         .append("\t\tthis.delegate = delegate;\n")
         .append("\t}\n\n");
     }
@@ -94,7 +109,7 @@ public class TraitDelegateWriter {
     private void emitAbstractMethodImplementations(StringBuilder builder) {
         List<? extends ExecutableElement> abstractMethods = traitElement.getAbstractMethods();
         for (ExecutableElement exec : abstractMethods) {
-            List<String> argNames = Utils.emitMethodSignature(builder, exec, false);
+            List<String> argNames = Utils.emitMethodSignature(builder, exec, traitElement.getSimpleName(), false);
             builder.append(" {\n");
             builder.append("\t\t");
             if (exec.getReturnType().getKind() != TypeKind.VOID)

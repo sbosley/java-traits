@@ -10,6 +10,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
 import javax.tools.Diagnostic.Kind;
 
 public class TraitElement extends TypeElementWrapper {
@@ -60,6 +61,16 @@ public class TraitElement extends TypeElementWrapper {
 
     public List<? extends ExecutableElement> getAbstractMethods() {
         return abstractMethods;
+    }
+    
+    public void emitParametrizedInterfaceName(StringBuilder builder) {
+        builder.append(getSimpleInterfaceName());
+        List<? extends TypeParameterElement> typeParams = getTypeParameters();
+        if (typeParams.size() > 0) {
+            builder.append("<");
+            emitParametrizedTypeList(builder);
+            builder.append(">");
+        }
     }
 
 }

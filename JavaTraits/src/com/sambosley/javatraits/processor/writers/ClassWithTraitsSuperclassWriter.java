@@ -87,6 +87,21 @@ public class ClassWithTraitsSuperclassWriter {
 
     private void emitClassDeclaration(StringBuilder builder) {
         builder.append("public abstract class ").append(cls.getFullyQualifiedGeneratedSuperclassName().getSimpleName());
+        boolean addedGenericStart = false;
+        for (int i = 0; i < allTraits.size(); i++) {
+            TraitElement elem = allTraits.get(i);
+            if (elem.hasTypeParameters()) {
+                if (!addedGenericStart) {
+                    builder.append("<");
+                    addedGenericStart = true;
+                } else {
+                    builder.append(", ");
+                }
+                elem.emitParametrizedTypeList(builder);
+            }
+        }
+        if (addedGenericStart)
+            builder.append(">");
         String desiredSuperclass = cls.getDesiredSuperclass().toString();
         if (!OBJECT_CLASS_NAME.equals(desiredSuperclass))
             builder.append(" extends ").append(cls.getDesiredSuperclass().getSimpleName());
@@ -94,7 +109,7 @@ public class ClassWithTraitsSuperclassWriter {
             builder.append(" implements ");
             for (int i = 0; i < allTraits.size(); i++) {
                 TraitElement elem = allTraits.get(i);
-                builder.append(elem.getSimpleInterfaceName());
+                elem.emitParametrizedInterfaceName(builder);
                 if (i < allTraits.size() - 1)
                     builder.append(", ");
             }
@@ -112,7 +127,13 @@ public class ClassWithTraitsSuperclassWriter {
     private void emitDelegateFields(StringBuilder builder) {
         for (TraitElement elem : allTraits) {
             FullyQualifiedName delegateClass = cls.getDelegateClassNameForTraitElement(elem);
-            builder.append("\tprivate ").append(delegateClass.getSimpleName()).append(" ")
+            builder.append("\tprivate ").append(delegateClass.getSimpleName());
+            if (elem.hasTypeParameters()) {
+                builder.append("<");
+                elem.emitParametrizedTypeList(builder);
+                builder.append(">");
+            }
+            builder.append(" ")
             .append(getDelegateVariableName(elem)).append(";\n");
         }
         builder.append("\n");
@@ -121,9 +142,15 @@ public class ClassWithTraitsSuperclassWriter {
     private void emitInitMethod(StringBuilder builder) {
         builder.append("\tprotected void init() {\n");
         for (TraitElement elem : allTraits) {
-            builder.append("\t\t").append(getDelegateVariableName(elem))
-            .append(" = new ").append(cls.getDelegateClassNameForTraitElement(elem).getSimpleName())
-            .append("(this);\n");
+            FullyQualifiedName delegateClass = cls.getDelegateClassNameForTraitElement(elem);
+            builder.append("\t\t").append(getDelegateVariableName(elem));
+            builder.append(" = new ").append(delegateClass.getSimpleName());
+            if (elem.hasTypeParameters()) {
+                builder.append("<");
+                elem.emitParametrizedTypeList(builder);
+                builder.append(">");
+            }
+            builder.append("(this);\n");
         }
         builder.append("\t}\n\n");
     }
@@ -144,7 +171,7 @@ public class ClassWithTraitsSuperclassWriter {
                 } else {
                     Set<Modifier> modifiers = exec.getModifiers();
                     boolean isAbstract = modifiers.contains(Modifier.ABSTRACT);
-                    List<String> argNames = Utils.emitMethodSignature(builder, exec, isAbstract);
+                    List<String> argNames = Utils.emitMethodSignature(builder, exec, elem.getSimpleName(), isAbstract);
                     if (isAbstract) {
                         builder.append(";\n\n");
                     } else {

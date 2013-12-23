@@ -3,7 +3,7 @@ package com.sambosley.javatraits.test;
 import com.sambosley.javatraits.annotations.Trait;
 
 @Trait
-public abstract class MyTrait {
+public abstract class MyTrait<A, B> {
     public int add(int arg1, int arg2) {
         return arg1 + arg2;
     }
@@ -28,4 +28,6 @@ public abstract class MyTrait {
         }
         return sum;
     }
+    
+    public abstract B transform(A a);
 }

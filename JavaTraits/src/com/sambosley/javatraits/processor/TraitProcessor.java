@@ -52,12 +52,12 @@ public class TraitProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
-        Set<ClassWithTraits> classesWithTraits = getClassesWithTraits(env);
-        Map<FullyQualifiedName, TraitElement> interfaceNames = getTraitElements(env);
+        Map<FullyQualifiedName, TraitElement> traitMap = getTraitElements(env);
+        Set<ClassWithTraits> classesWithTraits = getClassesWithTraits(env, traitMap);
 
-        generateTraitInterfaces(interfaceNames);
-        generateTraitDelegates(classesWithTraits, interfaceNames);
-        generateTraitImplementingSuperclasses(classesWithTraits, interfaceNames);
+        generateTraitInterfaces(traitMap);
+        generateTraitDelegates(classesWithTraits, traitMap);
+        generateTraitImplementingSuperclasses(classesWithTraits, traitMap);
         return true;
     }
 
@@ -76,7 +76,7 @@ public class TraitProcessor extends AbstractProcessor {
         return result;
     }
 
-    private Set<ClassWithTraits> getClassesWithTraits(RoundEnvironment env) {
+    private Set<ClassWithTraits> getClassesWithTraits(RoundEnvironment env, Map<FullyQualifiedName, TraitElement> traitMap) {
         Set<? extends Element> elementsWithTraits = env.getElementsAnnotatedWith(HasTraits.class);
         Set<ClassWithTraits> result = new HashSet<ClassWithTraits>();
         for (Element e : elementsWithTraits) {
@@ -84,7 +84,7 @@ public class TraitProcessor extends AbstractProcessor {
                 messager.printMessage(Kind.ERROR, "Only a class can be annotated with @Trait", e);
             else {
                 TypeElement typeElem = (TypeElement) e;
-                result.add(new ClassWithTraits(typeElem, messager));
+                result.add(new ClassWithTraits(typeElem, messager, traitMap));
             }
         }
         return result;
@@ -98,12 +98,9 @@ public class TraitProcessor extends AbstractProcessor {
 
     private void generateTraitDelegates(Set<ClassWithTraits> classesWithTraits, Map<FullyQualifiedName, TraitElement> traitInterfaceMap) {
         for (ClassWithTraits cls : classesWithTraits) {
-            List<FullyQualifiedName> allTraits = cls.getTraitClasses();
-            for (FullyQualifiedName fqn : allTraits) {
-                TraitElement correspondingTrait = traitInterfaceMap.get(fqn);
-                if (correspondingTrait == null)
-                    messager.printMessage(Kind.ERROR, "Couldn't find TraitElement for name " + fqn.toString());
-                new TraitDelegateWriter(cls, correspondingTrait, messager).writeDelegate(filer);
+            List<TraitElement> allTraits = cls.getTraitClasses();
+            for (TraitElement trait : allTraits) {
+                new TraitDelegateWriter(cls, trait, messager).writeDelegate(filer);
             }
         }
     }
