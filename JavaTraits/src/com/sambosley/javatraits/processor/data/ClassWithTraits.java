@@ -5,7 +5,6 @@ import java.util.Map;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
 
 import com.sambosley.javatraits.annotations.HasTraits;
@@ -44,12 +43,6 @@ public class ClassWithTraits extends TypeElementWrapper {
         List<FullyQualifiedName> desiredSuperclassResult = Utils.getClassFromAnnotation(HasTraits.class, elem, "desiredSuperclass", messager); 
         desiredSuperclass = desiredSuperclassResult.size() > 0 ? desiredSuperclassResult.get(0) : new FullyQualifiedName("java.lang.Object");
         generatedSuperclass = new FullyQualifiedName(fqn.toString() + GEN_SUFFIX);
-
-        TypeMirror superclass = elem.getSuperclass();
-        if (!generatedSuperclass.toString().equals(superclass.toString())) {
-            messager.printMessage(Kind.ERROR, "This class does not have the correct superclass. It should extend " + generatedSuperclass.getSimpleName(), elem);
-        }
-
     }
 
     public FullyQualifiedName getFullyQualifiedGeneratedSuperclassName() {

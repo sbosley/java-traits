@@ -35,10 +35,9 @@ public class TraitProcessor extends AbstractProcessor {
     private Messager messager;
     private Filer filer;
     
-    private int invocations = 0;
-    
     private Set<? extends Element> traitElements = null;
     private Set<? extends Element> elementsWithTraits = null;
+    private boolean finishedGeneratingFiles = false;
 
     @Override
     public synchronized void init(ProcessingEnvironment env) {
@@ -50,20 +49,16 @@ public class TraitProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
-        invocations++;
-        for (TypeElement e : annotations) {
-            messager.printMessage(Kind.NOTE, "This round has: " + e.toString() + ", invocations: " + invocations);
-        }
-        
         tryToInitTraitElements(env);
         tryToInitClassesWithTraits(env);
         
-        if (traitElements != null && elementsWithTraits != null) {
+        if (traitElements != null && elementsWithTraits != null && !finishedGeneratingFiles) {
             Map<FullyQualifiedName, TraitElement> traitMap = getTraitElements();
             Set<ClassWithTraits> classesWithTraits = getClassesWithTraits(traitMap);
             generateTraitInterfaces(traitMap);
             generateTraitDelegates(classesWithTraits, traitMap);
             generateTraitImplementingSuperclasses(classesWithTraits, traitMap);
+            finishedGeneratingFiles = true;
         }
 
         
@@ -71,15 +66,19 @@ public class TraitProcessor extends AbstractProcessor {
     }
     
     private void tryToInitTraitElements(RoundEnvironment env) {
-        Set<? extends Element> traitElements = env.getElementsAnnotatedWith(Trait.class);
-        if (traitElements.size() > 0)
-            this.traitElements = traitElements;
+        if (traitElements == null) {
+            Set<? extends Element> traitElements = env.getElementsAnnotatedWith(Trait.class);
+            if (traitElements.size() > 0)
+                this.traitElements = traitElements;
+        }
     }
     
     private void tryToInitClassesWithTraits(RoundEnvironment env) {
-        Set<? extends Element> elementsWithTraits = env.getElementsAnnotatedWith(HasTraits.class);
-        if (elementsWithTraits.size() > 0)
-            this.elementsWithTraits = elementsWithTraits;
+        if (elementsWithTraits == null) {
+            Set<? extends Element> elementsWithTraits = env.getElementsAnnotatedWith(HasTraits.class);
+            if (elementsWithTraits.size() > 0)
+                this.elementsWithTraits = elementsWithTraits;
+        }
     }
 
     private Map<FullyQualifiedName, TraitElement> getTraitElements() {
