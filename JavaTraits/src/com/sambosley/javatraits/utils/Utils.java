@@ -133,7 +133,10 @@ public class Utils {
         if (typeVariableIfGeneric != null && appendBounds) {
             TypeMirror upperBound = typeVariableIfGeneric.getUpperBound();
             if (!Utils.OBJECT_CLASS_NAME.equals(upperBound.toString())) {
-                qualifiedName += " extends " + Utils.getSimpleNameFromFullyQualifiedName(upperBound.toString());
+                String qualifiedUpperBound = Utils.getSimpleNameFromFullyQualifiedName(upperBound.toString());
+                if (upperBound instanceof TypeVariable)
+                    qualifiedUpperBound = qualifyByIfGeneric + "$" + qualifiedUpperBound;
+                qualifiedName += " extends " + qualifiedUpperBound;
             }
         }
         
