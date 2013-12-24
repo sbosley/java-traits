@@ -3,7 +3,7 @@ package com.sambosley.javatraits.test;
 import com.sambosley.javatraits.annotations.Trait;
 
 @Trait
-public abstract class MyTrait<A extends Number, B extends A> {
+public abstract class MathTrait<A extends Number, B extends A> {
     public int add(int arg1, int arg2) {
         return arg1 + arg2;
     }
@@ -30,4 +30,8 @@ public abstract class MyTrait<A extends Number, B extends A> {
     }
     
     public abstract B transform(A a);
+    
+    public <D extends Number> int numberToInt(D number) {
+        return number.intValue();
+    }
 }

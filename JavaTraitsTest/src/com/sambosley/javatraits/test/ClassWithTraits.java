@@ -2,7 +2,7 @@ package com.sambosley.javatraits.test;
 
 import com.sambosley.javatraits.annotations.HasTraits;
 
-@HasTraits(traits={MyTrait.class, AnotherTrait.class})
+@HasTraits(traits={MathTrait.class, AnotherTrait.class})
 public class ClassWithTraits<A extends Number, B extends A, C, D> extends ClassWithTraitsGen<A, B, C, D> {
 
     @Override

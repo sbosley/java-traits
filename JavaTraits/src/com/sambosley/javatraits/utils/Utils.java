@@ -1,6 +1,7 @@
 package com.sambosley.javatraits.utils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -10,6 +11,7 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.TypeKind;
@@ -97,14 +99,34 @@ public class Utils {
         builder.append("\tpublic ");
         if (isAbstract)
             builder.append("abstract ");
-        builder.append(getSimpleTypeName(exec.getReturnType(), qualifyGenerics, false))
+        Set<String> methodTypeParams = new HashSet<String>();
+        List<? extends TypeParameterElement> typeParameters = exec.getTypeParameters();
+        if (typeParameters.size() > 0) {
+            builder.append("<");
+            for (int i = 0; i < typeParameters.size(); i++) {
+                TypeMirror type = typeParameters.get(i).asType();
+                String typeNameWithBounds = getSimpleTypeName(type, null, true); 
+                String typeNameWithoutBounds = getSimpleTypeName(type, null, false); 
+                builder.append(typeNameWithBounds);
+                if (i < typeParameters.size() - 1)
+                    builder.append(", ");
+                methodTypeParams.add(typeNameWithoutBounds);
+            }
+            builder.append("> ");
+        }
+        
+        String simpleReturnTypeName = getSimpleNameFromFullyQualifiedName(exec.getReturnType().toString());
+        String qualifyReturnType = methodTypeParams.contains(simpleReturnTypeName) ? null : qualifyGenerics;
+        builder.append(getSimpleTypeName(exec.getReturnType(), qualifyReturnType, false))
         .append(" ").append(exec.getSimpleName().toString())
         .append("(");
         List<? extends VariableElement> parameters = exec.getParameters();
         for (int i = 0; i < parameters.size(); i++) {
             VariableElement var = parameters.get(i);
             TypeMirror argType = var.asType();
-            String typeString = getSimpleTypeName(argType, qualifyGenerics, false);
+            String simpleTypeName = getSimpleNameFromFullyQualifiedName(argType.toString());
+            String qualifyArgType = methodTypeParams.contains(simpleTypeName) ? null : qualifyGenerics;
+            String typeString = getSimpleTypeName(argType, qualifyArgType, false);
             if (argType.getKind() == TypeKind.ARRAY && exec.isVarArgs())
                 typeString = typeString.replace("[]", "...");
             String argName = var.toString();
@@ -119,7 +141,7 @@ public class Utils {
     
     public static String getSimpleTypeName(TypeMirror mirror, String qualifyByIfGeneric, boolean appendBounds) {
         String simpleName = getSimpleNameFromFullyQualifiedName(mirror.toString());
-        String qualifiedName = qualifyByIfGeneric + "$" + simpleName;
+        String qualifiedName = qualifyByIfGeneric == null ? simpleName : qualifyByIfGeneric + "$" + simpleName;
         TypeVariable typeVariableIfGeneric = null;
         
         if (mirror instanceof TypeVariable) {
