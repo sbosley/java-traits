@@ -2,6 +2,8 @@ package com.sambosley.javatraits.processor.writers;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +19,10 @@ import javax.tools.JavaFileObject;
 
 import com.sambosley.javatraits.annotations.HasTraits;
 import com.sambosley.javatraits.processor.data.ClassWithTraits;
+import com.sambosley.javatraits.processor.data.PreferValue;
 import com.sambosley.javatraits.processor.data.TraitElement;
 import com.sambosley.javatraits.utils.FullyQualifiedName;
+import com.sambosley.javatraits.utils.Pair;
 import com.sambosley.javatraits.utils.Utils;
 
 public class ClassWithTraitsSuperclassWriter {
@@ -159,38 +163,69 @@ public class ClassWithTraitsSuperclassWriter {
     }
 
     private void emitDelegateMethods(StringBuilder builder) {
-        Set<String> alreadyUsedSignatures = new HashSet<String>();
         Set<String> dupes = new HashSet<String>();
+        Map<String, List<Pair<TraitElement, ExecutableElement>>> methodToExecElements = new HashMap<String, List<Pair<TraitElement, ExecutableElement>>>();
         for (TraitElement elem : allTraits) {
             List<? extends ExecutableElement> execElems = elem.getDeclaredMethods();
             for (ExecutableElement exec : execElems) {
-                if (alreadyUsedSignatures.contains(exec.toString())) {
-                    dupes.add(exec.toString());
+                String signature = exec.toString();
+                List<Pair<TraitElement, ExecutableElement>> elements = methodToExecElements.get(signature);
+                if (elements == null) {
+                    elements = new ArrayList<Pair<TraitElement, ExecutableElement>>();
+                    methodToExecElements.put(signature, elements);
                 } else {
-                    Set<Modifier> modifiers = exec.getModifiers();
-                    boolean isAbstract = modifiers.contains(Modifier.ABSTRACT);
-                    List<String> argNames = Utils.emitMethodSignature(builder, exec, elem.getSimpleName(), isAbstract);
-                    if (isAbstract) {
-                        builder.append(";\n\n");
-                    } else {
-                        builder.append(" {\n")
-                        .append("\t\t");
-                        if (exec.getReturnType().getKind() != TypeKind.VOID)
-                            builder.append("return ");
-                        builder.append(getDelegateVariableName(elem))
-                        .append(".").append(exec.getSimpleName()).append("(");
-                        for (int i = 0; i < argNames.size(); i++) {
-                            builder.append(argNames.get(i));
-                            if (i < argNames.size() - 1)
-                                builder.append(", ");
-                        }
-                        builder.append(");\n");
-                        builder.append("\t}\n\n");
+                    dupes.add(signature);
+                }
+                elements.add(Pair.create(elem, exec));
+            }
+        }
+        
+        if (!dupes.isEmpty()) {
+            Map<String, PreferValue> prefer = cls.getPreferMap();
+            for (String dup : dupes) {
+                String simpleMethodName = Utils.getMethodNameFromSignature(dup);
+                if (prefer.containsKey(simpleMethodName)) {
+                    PreferValue preferValue = prefer.get(simpleMethodName);
+                    List<Pair<TraitElement, ExecutableElement>> allExecElems = methodToExecElements.get(dup);
+                    int index = 0;
+                    for (index = 0; index < allExecElems.size(); index++) {
+                        Pair<TraitElement, ExecutableElement> item = allExecElems.get(index);
+                        if (item.getLeft().getFullyQualifiedName().equals(preferValue.getTarget()))
+                            break;
+                    }
+                    if (index > 0) {
+                        Pair<TraitElement, ExecutableElement> item = allExecElems.remove(index);
+                        allExecElems.add(0, item);
                     }
                 }
             }
         }
-
+        
+        for (List<Pair<TraitElement, ExecutableElement>> executablePairList : methodToExecElements.values()) {
+            Pair<TraitElement, ExecutableElement> executablePair = executablePairList.get(0);
+            TraitElement elem = executablePair.getLeft();
+            ExecutableElement exec = executablePair.getRight();
+            
+            Set<Modifier> modifiers = exec.getModifiers();
+            boolean isAbstract = modifiers.contains(Modifier.ABSTRACT);
+            List<String> argNames = Utils.emitMethodSignature(builder, exec, elem.getSimpleName(), isAbstract);
+            if (isAbstract) {
+                builder.append(";\n\n");
+            } else {
+                builder.append(" {\n")
+                .append("\t\t");
+                if (exec.getReturnType().getKind() != TypeKind.VOID)
+                    builder.append("return ");
+                builder.append(getDelegateVariableName(elem))
+                .append(".").append(exec.getSimpleName()).append("(");
+                for (int i = 0; i < argNames.size(); i++) {
+                    builder.append(argNames.get(i));
+                    if (i < argNames.size() - 1)
+                        builder.append(", ");
+                }
+                builder.append(");\n");
+                builder.append("\t}\n\n");
+            }
+        }
     }
-
 }

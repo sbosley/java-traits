@@ -108,6 +108,13 @@ public class Utils {
             }
         }
     }
+    
+    public static String getMethodNameFromSignature(String methodSignature) {
+        int indexOfParen = methodSignature.indexOf("(");
+        if (indexOfParen > 0)
+            return methodSignature.substring(0, indexOfParen).trim();
+        return methodSignature;
+    }
 
     public static List<String> emitMethodSignature(StringBuilder builder, ExecutableElement exec, String qualifyGenerics, boolean isAbstract) {
         List<String> argNames = new ArrayList<String>();
