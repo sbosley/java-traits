@@ -19,7 +19,6 @@ import javax.tools.JavaFileObject;
 
 import com.sambosley.javatraits.annotations.HasTraits;
 import com.sambosley.javatraits.processor.data.ClassWithTraits;
-import com.sambosley.javatraits.processor.data.PreferValue;
 import com.sambosley.javatraits.processor.data.TraitElement;
 import com.sambosley.javatraits.utils.FullyQualifiedName;
 import com.sambosley.javatraits.utils.Pair;
@@ -181,16 +180,16 @@ public class ClassWithTraitsSuperclassWriter {
         }
         
         if (!dupes.isEmpty()) {
-            Map<String, PreferValue> prefer = cls.getPreferMap();
+            Map<String, FullyQualifiedName> prefer = cls.getPreferMap();
             for (String dup : dupes) {
                 String simpleMethodName = Utils.getMethodNameFromSignature(dup);
                 if (prefer.containsKey(simpleMethodName)) {
-                    PreferValue preferValue = prefer.get(simpleMethodName);
+                    FullyQualifiedName preferTarget = prefer.get(simpleMethodName);
                     List<Pair<TraitElement, ExecutableElement>> allExecElems = methodToExecElements.get(dup);
                     int index = 0;
                     for (index = 0; index < allExecElems.size(); index++) {
                         Pair<TraitElement, ExecutableElement> item = allExecElems.get(index);
-                        if (item.getLeft().getFullyQualifiedName().equals(preferValue.getTarget()))
+                        if (item.getLeft().getFullyQualifiedName().equals(preferTarget))
                             break;
                     }
                     if (index > 0) {

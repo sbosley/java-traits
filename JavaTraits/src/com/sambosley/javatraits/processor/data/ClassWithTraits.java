@@ -22,7 +22,7 @@ public class ClassWithTraits extends TypeElementWrapper {
     private List<TraitElement> traitClasses;
     private FullyQualifiedName desiredSuperclass;
     private FullyQualifiedName generatedSuperclass;
-    private Map<String, PreferValue> prefer;
+    private Map<String, FullyQualifiedName> prefer;
 
     public ClassWithTraits(TypeElement elem, Messager messager, Map<FullyQualifiedName, TraitElement> traitMap) {
         super(elem, messager);
@@ -51,7 +51,7 @@ public class ClassWithTraits extends TypeElementWrapper {
     }
     
     private void initPreferValues() {
-        prefer = new HashMap<String, PreferValue>();
+        prefer = new HashMap<String, FullyQualifiedName>();
         AnnotationMirror hasTraits = Utils.findAnnotationMirror(elem, HasTraits.class);
         AnnotationValue preferValue = Utils.findAnnotationValue(hasTraits, "prefer");
         if (preferValue != null && preferValue instanceof List) {
@@ -66,7 +66,7 @@ public class ClassWithTraits extends TypeElementWrapper {
                     
                     FullyQualifiedName targetName = Utils.getClassValuesFromAnnotationValue(targetValue).get(0);
                     String method = (String) methodValue.getValue();
-                    prefer.put(method, new PreferValue(targetName, method));
+                    prefer.put(method, targetName);
                 }
             }
         }
@@ -84,7 +84,7 @@ public class ClassWithTraits extends TypeElementWrapper {
         return desiredSuperclass;
     }
     
-    public Map<String, PreferValue> getPreferMap() {
+    public Map<String, FullyQualifiedName> getPreferMap() {
         return prefer;
     }
 
