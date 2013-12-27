@@ -32,7 +32,7 @@ public class ClassWithTraitsSuperclassWriter {
         this.cls = cls;
         this.traitElementMap = traitElementMap;
         this.messager = messager;
-        this.allTraits = Utils.map(Utils.getClassFromAnnotation(HasTraits.class, cls.getSourceElement(), "traits", messager),
+        this.allTraits = Utils.map(Utils.getClassValuesFromAnnotation(HasTraits.class, cls.getSourceElement(), "traits", messager),
                 new Utils.MapFunction<FullyQualifiedName, TraitElement>() {
             public TraitElement map(FullyQualifiedName fqn) {
                 return ClassWithTraitsSuperclassWriter.this.traitElementMap.get(fqn);

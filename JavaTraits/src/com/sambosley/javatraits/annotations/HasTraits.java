@@ -7,4 +7,5 @@ import java.lang.annotation.Target;
 public @interface HasTraits {
     Class<?>[] traits();
     Class<?> desiredSuperclass() default Object.class;
+    Prefer[] prefer() default {};
 }

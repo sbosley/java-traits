@@ -53,33 +53,48 @@ public class Utils {
         }
         return result;
     }
-
-    public static List<FullyQualifiedName> getClassFromAnnotation(Class<?> annotationClass, Element elem, String propertyName, Messager messager) {
-        List<FullyQualifiedName> result = new ArrayList<FullyQualifiedName>();
+    
+    public static AnnotationMirror findAnnotationMirror(Element elem, Class<?> annotationClass) {
         List<? extends AnnotationMirror> annotationMirrors = elem.getAnnotationMirrors();
         String annotationClassName = annotationClass.getName();
-        for (AnnotationMirror mirror : annotationMirrors) {
-            if (annotationClassName.equals(mirror.getAnnotationType().toString())) {
-                for(Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : mirror.getElementValues().entrySet()) {
-                    if (propertyName.equals(entry.getKey().getSimpleName().toString())) {
-                        Object value = entry.getValue().getValue();
-                        if (value instanceof TypeMirror) {
-                            result.add(new FullyQualifiedName(value.toString()));
-                        } else if (value instanceof List) {
-                            @SuppressWarnings("unchecked")
-                            List<? extends AnnotationValue> annotationValues = (List<? extends AnnotationValue>) value;
-                            for (AnnotationValue av : annotationValues) {
-                                Object itemValue = av.getValue();
-                                if (itemValue instanceof TypeMirror)
-                                    result.add(new FullyQualifiedName(itemValue.toString()));
-                            }
-                        }
-                        break;
-                    }
-                }
+        for (AnnotationMirror mirror : annotationMirrors)
+            if (annotationClassName.equals(mirror.getAnnotationType().toString()))
+                return mirror;
+        return null;
+    }
+    
+    public static AnnotationValue findAnnotationValue(AnnotationMirror mirror, String propertyName) {
+        for(Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : mirror.getElementValues().entrySet())
+            if (propertyName.equals(entry.getKey().getSimpleName().toString()))
+                return entry.getValue();
+        return null;
+    }
+    
+    public static List<FullyQualifiedName> getClassValuesFromAnnotationValue(AnnotationValue annotationValue) {
+        List<FullyQualifiedName> result = new ArrayList<FullyQualifiedName>();
+        Object value = annotationValue.getValue();
+        if (value instanceof TypeMirror) {
+            result.add(new FullyQualifiedName(value.toString()));
+        } else if (value instanceof List) {
+            @SuppressWarnings("unchecked")
+            List<? extends AnnotationValue> annotationValues = (List<? extends AnnotationValue>) value;
+            for (AnnotationValue av : annotationValues) {
+                Object itemValue = av.getValue();
+                if (itemValue instanceof TypeMirror)
+                    result.add(new FullyQualifiedName(itemValue.toString()));
             }
         }
         return result;
+    }
+
+    public static List<FullyQualifiedName> getClassValuesFromAnnotation(Class<?> annotationClass, Element elem, String propertyName, Messager messager) {
+        AnnotationMirror mirror = findAnnotationMirror(elem, annotationClass);
+        if (mirror != null) {
+            AnnotationValue annotationValue = findAnnotationValue(mirror, propertyName);
+            if (annotationValue != null)
+                return getClassValuesFromAnnotationValue(annotationValue);
+        }
+        return null;
     }
 
     public static void accumulateImportsFromExecutableElements(Set<String> accumulate, List<? extends ExecutableElement> elems, Messager messager) {

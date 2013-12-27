@@ -1,9 +1,12 @@
 package com.sambosley.javatraits.processor.data;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.processing.Messager;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 
@@ -19,15 +22,17 @@ public class ClassWithTraits extends TypeElementWrapper {
     private List<TraitElement> traitClasses;
     private FullyQualifiedName desiredSuperclass;
     private FullyQualifiedName generatedSuperclass;
+    private List<PreferValue> prefer;
 
     public ClassWithTraits(TypeElement elem, Messager messager, Map<FullyQualifiedName, TraitElement> traitMap) {
         super(elem, messager);
         initTraitClasses(traitMap);
         initSuperclasses();
+        initPreferValues();
     }
 
     private void initTraitClasses(final Map<FullyQualifiedName, TraitElement> traitMap) {
-        List<FullyQualifiedName> traitNames = Utils.getClassFromAnnotation(HasTraits.class, elem, "traits", messager);
+        List<FullyQualifiedName> traitNames = Utils.getClassValuesFromAnnotation(HasTraits.class, elem, "traits", messager);
         traitClasses = Utils.map(traitNames, new Utils.MapFunction<FullyQualifiedName, TraitElement>() {
             @Override
             public TraitElement map(FullyQualifiedName arg) {
@@ -40,9 +45,31 @@ public class ClassWithTraits extends TypeElementWrapper {
     }
 
     private void initSuperclasses() {
-        List<FullyQualifiedName> desiredSuperclassResult = Utils.getClassFromAnnotation(HasTraits.class, elem, "desiredSuperclass", messager); 
+        List<FullyQualifiedName> desiredSuperclassResult = Utils.getClassValuesFromAnnotation(HasTraits.class, elem, "desiredSuperclass", messager); 
         desiredSuperclass = desiredSuperclassResult.size() > 0 ? desiredSuperclassResult.get(0) : new FullyQualifiedName("java.lang.Object");
         generatedSuperclass = new FullyQualifiedName(fqn.toString() + GEN_SUFFIX);
+    }
+    
+    private void initPreferValues() {
+        prefer = new ArrayList<PreferValue>();
+        AnnotationMirror hasTraits = Utils.findAnnotationMirror(elem, HasTraits.class);
+        AnnotationValue preferValue = Utils.findAnnotationValue(hasTraits, "prefer");
+        if (preferValue != null && preferValue instanceof List) {
+            @SuppressWarnings("unchecked")
+            List<? extends AnnotationValue> preferList = (List<? extends AnnotationValue>) preferValue;
+            for (AnnotationValue entry : preferList) {
+                Object value = entry.getValue();
+                if (value instanceof AnnotationMirror) {
+                    AnnotationMirror preferMirror = (AnnotationMirror) value;
+                    AnnotationValue targetValue = Utils.findAnnotationValue(preferMirror, "target");
+                    AnnotationValue methodValue = Utils.findAnnotationValue(preferMirror, "method");
+                    
+                    FullyQualifiedName targetName = Utils.getClassValuesFromAnnotationValue(targetValue).get(0);
+                    String method = (String) methodValue.getValue();
+                    prefer.add(new PreferValue(targetName, method));
+                }
+            }
+        }
     }
 
     public FullyQualifiedName getFullyQualifiedGeneratedSuperclassName() {
@@ -55,6 +82,10 @@ public class ClassWithTraits extends TypeElementWrapper {
 
     public FullyQualifiedName getDesiredSuperclass() {
         return desiredSuperclass;
+    }
+    
+    public List<PreferValue> getPreferList() {
+        return prefer;
     }
 
     public FullyQualifiedName getDelegateClassNameForTraitElement(TraitElement traitElement) {
