@@ -167,7 +167,7 @@ public class ClassWithTraitsSuperclassWriter {
         for (TraitElement elem : allTraits) {
             List<? extends ExecutableElement> execElems = elem.getDeclaredMethods();
             for (ExecutableElement exec : execElems) {
-                String signature = exec.toString();
+                String signature = Utils.getMethodSignature(exec);
                 List<Pair<TraitElement, ExecutableElement>> elements = methodToExecElements.get(signature);
                 if (elements == null) {
                     elements = new ArrayList<Pair<TraitElement, ExecutableElement>>();

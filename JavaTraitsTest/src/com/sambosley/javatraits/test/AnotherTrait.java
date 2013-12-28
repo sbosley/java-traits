@@ -21,4 +21,7 @@ public abstract class AnotherTrait<A, B> {
         return 0;
     }
     
+    public int subtract(int arg1, int arg2) {
+        return arg2 - arg1;
+    }
 }

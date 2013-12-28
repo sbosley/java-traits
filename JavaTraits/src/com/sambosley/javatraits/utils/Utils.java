@@ -94,7 +94,7 @@ public class Utils {
             if (annotationValue != null)
                 return getClassValuesFromAnnotationValue(annotationValue);
         }
-        return null;
+        return new ArrayList<FullyQualifiedName>();
     }
 
     public static void accumulateImportsFromExecutableElements(Set<String> accumulate, List<? extends ExecutableElement> elems, Messager messager) {
@@ -110,10 +110,27 @@ public class Utils {
     }
     
     public static String getMethodNameFromSignature(String methodSignature) {
-        int indexOfParen = methodSignature.indexOf("(");
-        if (indexOfParen > 0)
-            return methodSignature.substring(0, indexOfParen).trim();
-        return methodSignature;
+        String toReturn = methodSignature;
+        int indexOfParen = methodSignature.indexOf('(');
+        if (indexOfParen >= 0)
+            toReturn = toReturn.substring(0, indexOfParen).trim();
+        
+        int lastSpace = toReturn.lastIndexOf(' ');
+        if (lastSpace >= 0)
+            toReturn = toReturn.substring(lastSpace + 1); 
+        return toReturn;
+    }
+    
+    public static String getMethodSignature(ExecutableElement exec) {
+        String toReturn = exec.toString();
+        String simpleName = exec.getSimpleName().toString();
+        int simpleStart = toReturn.indexOf(simpleName);
+        if (simpleStart >= 0) {
+            toReturn = toReturn.substring(simpleStart).trim();
+            String returnType = Utils.getSimpleNameFromFullyQualifiedName(exec.getReturnType().toString()); 
+            toReturn = returnType + " " + toReturn;
+        }
+        return toReturn;
     }
 
     public static List<String> emitMethodSignature(StringBuilder builder, ExecutableElement exec, String qualifyGenerics, boolean isAbstract) {

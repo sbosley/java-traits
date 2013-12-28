@@ -54,9 +54,9 @@ public class ClassWithTraits extends TypeElementWrapper {
         prefer = new HashMap<String, FullyQualifiedName>();
         AnnotationMirror hasTraits = Utils.findAnnotationMirror(elem, HasTraits.class);
         AnnotationValue preferValue = Utils.findAnnotationValue(hasTraits, "prefer");
-        if (preferValue != null && preferValue instanceof List) {
+        if (preferValue != null && preferValue.getValue() instanceof List) {
             @SuppressWarnings("unchecked")
-            List<? extends AnnotationValue> preferList = (List<? extends AnnotationValue>) preferValue;
+            List<? extends AnnotationValue> preferList = (List<? extends AnnotationValue>) preferValue.getValue();
             for (AnnotationValue entry : preferList) {
                 Object value = entry.getValue();
                 if (value instanceof AnnotationMirror) {
