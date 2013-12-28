@@ -13,6 +13,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.tools.Diagnostic.Kind;
 
+import com.sambosley.javatraits.utils.Utils;
+
 public class TraitElement extends TypeElementWrapper {
 
     public static final String INTERFACE_SUFFIX = "Interface";
@@ -28,6 +30,9 @@ public class TraitElement extends TypeElementWrapper {
     private void validateElement() {
         declaredMethods = new ArrayList<ExecutableElement>();
         abstractMethods = new ArrayList<ExecutableElement>();
+        if (!Utils.OBJECT_CLASS_NAME.equals(elem.getSuperclass().toString())) {
+            messager.printMessage(Kind.ERROR, "Trait elements must have java.lang.Object as their superclass", elem);
+        }
         List<? extends Element> enclosedElements = elem.getEnclosedElements();
         for (Element e : enclosedElements) {
             if (e.getKind() != ElementKind.METHOD || !(e instanceof ExecutableElement))
