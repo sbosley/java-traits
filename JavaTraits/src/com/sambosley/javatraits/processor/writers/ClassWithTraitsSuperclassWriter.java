@@ -141,7 +141,7 @@ public class ClassWithTraitsSuperclassWriter {
     }
 
     private void emitInitMethod(StringBuilder builder) {
-        builder.append("\tprotected void init() {\n");
+        builder.append("\tprotected final void init() {\n");
         for (TraitElement elem : allTraits) {
             FullyQualifiedName delegateClass = cls.getDelegateClassNameForTraitElement(elem);
             builder.append("\t\t").append(getDelegateVariableName(elem));
@@ -178,7 +178,7 @@ public class ClassWithTraitsSuperclassWriter {
                 elements.add(Pair.create(elem, exec));
             }
         }
-        
+
         if (!dupes.isEmpty()) {
             Map<String, FullyQualifiedName> prefer = cls.getPreferMap();
             for (String dup : dupes) {
@@ -199,23 +199,26 @@ public class ClassWithTraitsSuperclassWriter {
                 }
             }
         }
-        
+
         for (List<Pair<TraitElement, ExecutableElement>> executablePairList : methodToExecElements.values()) {
             Pair<TraitElement, ExecutableElement> executablePair = executablePairList.get(0);
             TraitElement elem = executablePair.getLeft();
             ExecutableElement exec = executablePair.getRight();
-            
+
             Set<Modifier> modifiers = exec.getModifiers();
             boolean isAbstract = modifiers.contains(Modifier.ABSTRACT);
             List<String> argNames = Utils.emitMethodSignature(builder, exec, elem.getSimpleName(), isAbstract);
             if (isAbstract) {
                 builder.append(";\n\n");
             } else {
+                String delegateVariableName = getDelegateVariableName(elem);
                 builder.append(" {\n")
+                .append("\t\tif (").append(delegateVariableName).append(" == null)\n")
+                .append("\t\t\tthrow new IllegalStateException(\"init() not called on instance of class \" + getClass());\n")
                 .append("\t\t");
                 if (exec.getReturnType().getKind() != TypeKind.VOID)
                     builder.append("return ");
-                builder.append(getDelegateVariableName(elem))
+                builder.append(delegateVariableName)
                 .append(".").append(exec.getSimpleName()).append("(");
                 for (int i = 0; i < argNames.size(); i++) {
                     builder.append(argNames.get(i));
