@@ -1,3 +1,8 @@
+/**
+ * Copyright 2014 Sam Bosley
+ * 
+ * See the file "LICENSE" for the full license governing this code.
+ */
 package com.sambosley.javatraits.processor.data;
 
 import java.util.List;
