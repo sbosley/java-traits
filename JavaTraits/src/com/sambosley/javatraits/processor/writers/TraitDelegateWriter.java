@@ -14,6 +14,7 @@ import java.util.Set;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeKind;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
@@ -91,7 +92,8 @@ public class TraitDelegateWriter {
 
         emitDelegateInstance(builder);
         emitConstructor(builder);
-        emitAbstractMethodImplementations(builder);
+        emitDefaultMethodImplementations(builder);
+        emitDelegateMethodImplementations(builder);
 
         builder.append("}");
     }
@@ -110,11 +112,32 @@ public class TraitDelegateWriter {
         .append("\t\tthis.delegate = delegate;\n")
         .append("\t}\n\n");
     }
+    
+    private void emitDefaultMethodImplementations(StringBuilder builder) {
+        List<? extends ExecutableElement> allMethods = traitElement.getDeclaredMethods();
+        for (ExecutableElement exec : allMethods) {
+            if (!exec.getModifiers().contains(Modifier.ABSTRACT)) {
+                List<String> argNames = Utils.emitMethodSignature(builder, exec, "default__", traitElement.getSimpleName(), false);
+                builder.append(" {\n");
+                builder.append("\t\t");
+                if (exec.getReturnType().getKind() != TypeKind.VOID)
+                    builder.append("return ");
+                builder.append("super.").append(exec.getSimpleName().toString()).append("(");
+                for (int i = 0; i < argNames.size(); i++) {
+                    builder.append(argNames.get(i));
+                    if (i < argNames.size() - 1)
+                        builder.append(", ");
+                }
+                builder.append(");\n")
+                .append("\t}\n\n");
+            }
+        }
+    }
 
-    private void emitAbstractMethodImplementations(StringBuilder builder) {
-        List<? extends ExecutableElement> abstractMethods = traitElement.getAbstractMethods();
+    private void emitDelegateMethodImplementations(StringBuilder builder) {
+        List<? extends ExecutableElement> abstractMethods = traitElement.getDeclaredMethods();
         for (ExecutableElement exec : abstractMethods) {
-            List<String> argNames = Utils.emitMethodSignature(builder, exec, traitElement.getSimpleName(), false);
+            List<String> argNames = Utils.emitMethodSignature(builder, exec, null, traitElement.getSimpleName(), false);
             builder.append(" {\n");
             builder.append("\t\t");
             if (exec.getReturnType().getKind() != TypeKind.VOID)

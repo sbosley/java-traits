@@ -212,7 +212,7 @@ public class ClassWithTraitsSuperclassWriter {
 
             Set<Modifier> modifiers = exec.getModifiers();
             boolean isAbstract = modifiers.contains(Modifier.ABSTRACT);
-            List<String> argNames = Utils.emitMethodSignature(builder, exec, elem.getSimpleName(), isAbstract);
+            List<String> argNames = Utils.emitMethodSignature(builder, exec, null, elem.getSimpleName(), isAbstract);
             if (isAbstract) {
                 builder.append(";\n\n");
             } else {
@@ -224,7 +224,7 @@ public class ClassWithTraitsSuperclassWriter {
                 if (exec.getReturnType().getKind() != TypeKind.VOID)
                     builder.append("return ");
                 builder.append(delegateVariableName)
-                .append(".").append(exec.getSimpleName()).append("(");
+                .append(".").append("default__").append(exec.getSimpleName()).append("(");
                 for (int i = 0; i < argNames.size(); i++) {
                     builder.append(argNames.get(i));
                     if (i < argNames.size() - 1)

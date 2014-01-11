@@ -138,7 +138,7 @@ public class Utils {
         return toReturn;
     }
 
-    public static List<String> emitMethodSignature(StringBuilder builder, ExecutableElement exec, String qualifyGenerics, boolean isAbstract) {
+    public static List<String> emitMethodSignature(StringBuilder builder, ExecutableElement exec, String methodNamePrefix, String qualifyGenerics, boolean isAbstract) {
         List<String> argNames = new ArrayList<String>();
         builder.append("\tpublic ");
         if (isAbstract)
@@ -162,7 +162,10 @@ public class Utils {
         String simpleReturnTypeName = getSimpleNameFromFullyQualifiedName(exec.getReturnType().toString());
         String qualifyReturnType = methodTypeParams.contains(simpleReturnTypeName) ? null : qualifyGenerics;
         builder.append(getSimpleTypeName(exec.getReturnType(), qualifyReturnType, false))
-        .append(" ").append(exec.getSimpleName().toString())
+        .append(" ");
+        if (methodNamePrefix != null)
+            builder.append(methodNamePrefix);
+        builder.append(exec.getSimpleName().toString())
         .append("(");
         List<? extends VariableElement> parameters = exec.getParameters();
         for (int i = 0; i < parameters.size(); i++) {
