@@ -77,7 +77,7 @@ public class TraitInterfaceWriter {
     }
 
     private void emitMethodDeclarationForExecutableElement(StringBuilder builder, ExecutableElement exec) {
-        Utils.emitMethodSignature(builder, exec, null, element.getSimpleName(), false);
+        Utils.emitMethodSignature(builder, exec, null, element.getSimpleName(), false, false);
         builder.append(";\n");
     }
 

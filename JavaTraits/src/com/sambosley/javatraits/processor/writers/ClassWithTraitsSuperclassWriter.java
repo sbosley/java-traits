@@ -212,7 +212,7 @@ public class ClassWithTraitsSuperclassWriter {
 
             Set<Modifier> modifiers = exec.getModifiers();
             boolean isAbstract = modifiers.contains(Modifier.ABSTRACT);
-            List<String> argNames = Utils.emitMethodSignature(builder, exec, null, elem.getSimpleName(), isAbstract);
+            List<String> argNames = Utils.emitMethodSignature(builder, exec, null, elem.getSimpleName(), isAbstract, false);
             if (isAbstract) {
                 builder.append(";\n\n");
             } else {

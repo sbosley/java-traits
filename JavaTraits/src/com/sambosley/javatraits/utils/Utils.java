@@ -138,11 +138,13 @@ public class Utils {
         return toReturn;
     }
 
-    public static List<String> emitMethodSignature(StringBuilder builder, ExecutableElement exec, String methodNamePrefix, String qualifyGenerics, boolean isAbstract) {
+    public static List<String> emitMethodSignature(StringBuilder builder, ExecutableElement exec, String methodNamePrefix, String qualifyGenerics, boolean isAbstract, boolean isFinal) {
         List<String> argNames = new ArrayList<String>();
         builder.append("\tpublic ");
         if (isAbstract)
             builder.append("abstract ");
+        if (isFinal)
+            builder.append("final ");
         Set<String> methodTypeParams = new HashSet<String>();
         List<? extends TypeParameterElement> typeParameters = exec.getTypeParameters();
         if (typeParameters.size() > 0) {

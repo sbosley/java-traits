@@ -117,7 +117,7 @@ public class TraitDelegateWriter {
         List<? extends ExecutableElement> allMethods = traitElement.getDeclaredMethods();
         for (ExecutableElement exec : allMethods) {
             if (!exec.getModifiers().contains(Modifier.ABSTRACT)) {
-                List<String> argNames = Utils.emitMethodSignature(builder, exec, "default__", traitElement.getSimpleName(), false);
+                List<String> argNames = Utils.emitMethodSignature(builder, exec, "default__", traitElement.getSimpleName(), false, true);
                 builder.append(" {\n");
                 builder.append("\t\t");
                 if (exec.getReturnType().getKind() != TypeKind.VOID)
@@ -137,7 +137,7 @@ public class TraitDelegateWriter {
     private void emitDelegateMethodImplementations(StringBuilder builder) {
         List<? extends ExecutableElement> abstractMethods = traitElement.getDeclaredMethods();
         for (ExecutableElement exec : abstractMethods) {
-            List<String> argNames = Utils.emitMethodSignature(builder, exec, null, traitElement.getSimpleName(), false);
+            List<String> argNames = Utils.emitMethodSignature(builder, exec, null, traitElement.getSimpleName(), false, false);
             builder.append(" {\n");
             builder.append("\t\t");
             if (exec.getReturnType().getKind() != TypeKind.VOID)
