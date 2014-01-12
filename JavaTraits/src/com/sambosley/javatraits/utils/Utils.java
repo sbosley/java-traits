@@ -29,6 +29,10 @@ public class Utils {
 
     public static final String OBJECT_CLASS_NAME = "java.lang.Object";
     
+    public static boolean isEmpty(String str) {
+        return str == null || str.isEmpty();
+    }
+    
     public static String getPackageFromFullyQualifiedName(String name) {
         int split = getFQNSplitIndex(name);
         if (split < 0)

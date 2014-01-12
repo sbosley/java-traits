@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.lang.model.element.Modifier;
+
 public class JavaFileWriter {
 
     private static final String INDENT = "    ";
@@ -44,5 +46,21 @@ public class JavaFileWriter {
                 allNames.add(item);
             }
         }
+        out.append("\n");
+    }
+    
+    public void beginType(String name, String kind, List<Modifier> modifiers) throws IOException {
+        if (modifiers != null) {
+            for (Modifier mod : modifiers) {
+                out.append(mod.toString()).append(" ");
+            }
+        }
+        out.append(kind).append(" ").append(name);
+        
+        // Append generics
+        // Append extends
+        // Append implements
+        
+        out.append("{\n");
     }
 }
