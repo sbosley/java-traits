@@ -64,17 +64,62 @@ public class JavaFileWriter {
     
     public void beginTypeDeclaration(String name, String kind, List<Modifier> modifiers) throws IOException {
         checkScope(Scope.IMPORTS);
-        if (modifiers != null) {
-            for (Modifier mod : modifiers) {
-                out.append(mod.toString()).append(" ");
-            }
-        }
+        emitModifierList(modifiers);
         out.append(kind).append(" ").append(name);
         moveToScope(Scope.TYPE_DECLARATION);
     }
     
     public void appendGenericDeclaration(List<String> generics, List<FullyQualifiedName> bounds) throws IOException {
         checkScope(Scope.TYPE_DECLARATION);
+        emitGenericsList(generics, bounds);
+    }
+    
+    public void addSuperclassToTypeDeclaration(FullyQualifiedName superclass, List<String> generics) throws IOException {
+        checkScope(Scope.TYPE_DECLARATION);
+        out.append(" extends ").append(shortenName(superclass));
+        emitGenericsList(generics, null);
+    }
+    
+    public void addInterfacesToTypeDeclaration(List<FullyQualifiedName> interfaces, List<List<String>> generics) throws IOException {
+        checkScope(Scope.TYPE_DECLARATION);
+        if (interfaces != null && generics != null && interfaces.size() != generics.size())
+            throw new IllegalArgumentException("When specifying generics for implementing interfaces, lists must be the same size");
+        out.append(" implements ");
+        for (int i = 0; i < interfaces.size(); i++) {
+            out.append(shortenName(interfaces.get(i)));
+            List<String> genericsForInterface = generics.get(i);
+            emitGenericsList(genericsForInterface, null);
+            if (i < interfaces.size() - 1)
+                out.append(", ");
+        }
+    }
+    
+    public void finishTypeDeclaration() throws IOException {
+        checkScope(Scope.TYPE_DECLARATION);        
+        out.append(" {\n\n");
+        moveToScope(Scope.TYPE_DEFINITION);
+    }
+    
+    public void emitFieldDeclaration(FullyQualifiedName type, String name, List<String> generics, List<Modifier> modifiers) throws IOException {
+        checkScope(Scope.TYPE_DEFINITION);
+        indent(1);
+        moveToScope(Scope.FIELD_DECLARATION);
+        emitModifierList(modifiers);
+        out.append(shortenName(type));
+        emitGenericsList(generics, null);
+        out.append(" ").append(name).append(";\n");
+        moveToScope(Scope.TYPE_DEFINITION);
+    }
+    
+    private void emitModifierList(List<Modifier> modifiers) throws IOException {
+        if (modifiers != null) {
+            for (Modifier mod : modifiers) {
+                out.append(mod.toString()).append(" ");
+            }
+        }
+    }
+    
+    private void emitGenericsList(List<String> generics, List<FullyQualifiedName> bounds) throws IOException {
         if (generics == null || generics.size() == 0)
             return;
         out.append("<");
@@ -94,46 +139,9 @@ public class JavaFileWriter {
         out.append(">");
     }
     
-    public void addSuperclassToTypeDeclaration(FullyQualifiedName superclass, List<String> generics) throws IOException {
-        checkScope(Scope.TYPE_DECLARATION);
-        out.append(" extends ").append(shortenName(superclass));
-        if (generics != null && generics.size() > 0) {
-            out.append("<");
-            for (int i = 0; i < generics.size(); i++) {
-                out.append(generics.get(i));
-                if (i < generics.size() - 1)
-                    out.append(", ");
-            }
-            out.append(">");
-        }
-    }
-    
-    public void addInterfacesToTypeDeclaration(List<FullyQualifiedName> interfaces, List<List<String>> generics) throws IOException {
-        checkScope(Scope.TYPE_DECLARATION);
-        if (interfaces != null && generics != null && interfaces.size() != generics.size())
-            throw new IllegalArgumentException("When specifying generics for implementing interfaces, lists must be the same size");
-        out.append(" implements ");
-        for (int i = 0; i < interfaces.size(); i++) {
-            out.append(shortenName(interfaces.get(i)));
-            List<String> genericsForInterface = generics.get(i);
-            if (genericsForInterface != null && generics.size() > 0) {
-                out.append("<");
-                for (int j = 0; j < genericsForInterface.size(); j++) {
-                    out.append(genericsForInterface.get(j));
-                    if (j < genericsForInterface.size() - 1)
-                        out.append(", ");
-                }
-                out.append(">");
-            }
-            if (i < interfaces.size() - 1)
-                out.append(", ");
-        }
-    }
-    
-    public void finishTypeDeclaration() throws IOException {
-        checkScope(Scope.TYPE_DECLARATION);        
-        out.append(" {\n");
-        moveToScope(Scope.TYPE_DEFINITION);
+    private void indent(int times) throws IOException {
+        for (int i = 0; i < times; i++)
+            out.append(INDENT);
     }
     
     private String shortenName(FullyQualifiedName name) {
@@ -144,7 +152,6 @@ public class JavaFileWriter {
         if (allNames.get(0).equals(name))
             return simpleName;
         return name.toString();
-        
     }
     
     private void checkScope(Scope expectedScope) {
