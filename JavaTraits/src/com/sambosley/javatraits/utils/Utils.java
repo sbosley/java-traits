@@ -111,6 +111,10 @@ public class Utils {
             for (VariableElement var : parameters) {
                 var.asType().accept(visitor, accumulate);
             }
+            List<? extends TypeMirror> thrownTypes = exec.getThrownTypes();
+            for (TypeMirror thrown : thrownTypes) {
+                thrown.accept(visitor, accumulate);
+            }
         }
     }
     
@@ -185,6 +189,19 @@ public class Utils {
                 builder.append(", ");
         }
         builder.append(")");
+        List<? extends TypeMirror> thrownTypes = exec.getThrownTypes();
+        if (!thrownTypes.isEmpty()) {
+            builder.append(" throws ");
+            for (int i = 0; i < thrownTypes.size(); i++) {
+                TypeMirror type = thrownTypes.get(i);
+                String simpleTypeName = getSimpleNameFromFullyQualifiedName(type.toString());
+                String qualifyArgType = methodTypeParams.contains(simpleTypeName) ? null : qualifyGenerics;
+                String typeString = getSimpleTypeName(type, qualifyArgType, false);
+                builder.append(typeString);
+                if (i < thrownTypes.size() - 1)
+                    builder.append(", ");
+            }
+        }
         return argNames;
     }
     
