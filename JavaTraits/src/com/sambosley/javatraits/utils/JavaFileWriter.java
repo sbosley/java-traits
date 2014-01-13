@@ -25,7 +25,8 @@ public class JavaFileWriter {
         TYPE_DEFINITION,
         FIELD_DECLARATION,
         METHOD_DECLARATION,
-        METHOD_DEFINITION
+        METHOD_DEFINITION,
+        FINISHED
     }
     
     public JavaFileWriter(Writer out) {
@@ -94,7 +95,7 @@ public class JavaFileWriter {
         }
     }
     
-    public void finishTypeDeclaration() throws IOException {
+    public void finishTypeDeclarationAndBeginTypeDefinition() throws IOException {
         checkScope(Scope.TYPE_DECLARATION);        
         out.append(" {\n\n");
         moveToScope(Scope.TYPE_DEFINITION);
@@ -111,6 +112,54 @@ public class JavaFileWriter {
         moveToScope(Scope.TYPE_DEFINITION);
     }
     
+    public void beginMethodDeclaration(String name, FullyQualifiedName returnType, List<Modifier> modifiers, List<String> generics, List<FullyQualifiedName> bounds) throws IOException {
+        checkScope(Scope.TYPE_DEFINITION);
+        indent(1);
+        moveToScope(Scope.METHOD_DECLARATION);
+        emitModifierList(modifiers);
+        if (emitGenericsList(generics, bounds))
+            out.append(" ");
+        out.append(shortenName(returnType)) // TODO: Handle array types, generic return types, primitive return types
+            .append(" ").append(name).append("("); 
+    }
+    
+    public void addArgumentList(List<FullyQualifiedName> argTypes, List<String> argNames) throws IOException { // TODO: handle array types, generic types, primitive types
+        checkScope(Scope.METHOD_DECLARATION);
+        // TODO: Check for validity of arguments (non-null, length, etc.)
+        for (int i = 0; i < argTypes.size(); i++) {
+            FullyQualifiedName argType = argTypes.get(i);
+            String argName = argNames.get(i);
+            out.append(shortenName(argType)).append(" ").append(argName);
+            if (i < argTypes.size() - 1)
+                out.append(", ");
+        }
+    }
+    
+    public void finishMethodDeclarationAndBeginMethodDefinition(boolean wasAbstract) throws IOException {
+        checkScope(Scope.METHOD_DECLARATION);
+        out.append(")");
+        if (wasAbstract) {
+            out.append(";\n\n");
+            moveToScope(Scope.TYPE_DEFINITION);
+        } else {
+            out.append(" {\n");
+            moveToScope(Scope.METHOD_DEFINITION);
+        }
+    }
+    
+    public void finishMethodDefinition() throws IOException {
+        checkScope(Scope.METHOD_DEFINITION);
+        indent(1);
+        out.append("}\n\n");
+        moveToScope(Scope.TYPE_DEFINITION);
+    }
+    
+    public void finishTypeDefinitionAndCloseType() throws IOException {
+        checkScope(Scope.TYPE_DEFINITION);
+        out.append("}\n");
+        moveToScope(Scope.FINISHED);
+    }
+    
     private void emitModifierList(List<Modifier> modifiers) throws IOException {
         if (modifiers != null) {
             for (Modifier mod : modifiers) {
@@ -119,9 +168,9 @@ public class JavaFileWriter {
         }
     }
     
-    private void emitGenericsList(List<String> generics, List<FullyQualifiedName> bounds) throws IOException {
+    private boolean emitGenericsList(List<String> generics, List<FullyQualifiedName> bounds) throws IOException {
         if (generics == null || generics.size() == 0)
-            return;
+            return false;
         out.append("<");
         if (generics.size() > 0 && bounds != null && generics.size() != bounds.size())
             throw new IllegalArgumentException("Generics and bounds must have the same size");
@@ -137,6 +186,7 @@ public class JavaFileWriter {
                 out.append(", ");
         }
         out.append(">");
+        return true;
     }
     
     private void indent(int times) throws IOException {
