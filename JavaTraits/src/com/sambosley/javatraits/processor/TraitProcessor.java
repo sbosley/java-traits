@@ -31,7 +31,7 @@ import com.sambosley.javatraits.processor.data.TraitElement;
 import com.sambosley.javatraits.processor.writers.ClassWithTraitsSuperclassWriter;
 import com.sambosley.javatraits.processor.writers.TraitDelegateWriter;
 import com.sambosley.javatraits.processor.writers.TraitInterfaceWriter;
-import com.sambosley.javatraits.utils.FullyQualifiedName;
+import com.sambosley.javatraits.utils.ClassName;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 @SupportedAnnotationTypes(value="com.sambosley.javatraits.annotations.*")
@@ -58,7 +58,7 @@ public class TraitProcessor extends AbstractProcessor {
         tryToInitClassesWithTraits(env);
         
         if (traitElements != null && elementsWithTraits != null && !finishedGeneratingFiles) {
-            Map<FullyQualifiedName, TraitElement> traitMap = getTraitElements();
+            Map<ClassName, TraitElement> traitMap = getTraitElements();
             Set<ClassWithTraits> classesWithTraits = getClassesWithTraits(traitMap);
             generateTraitInterfaces(traitMap);
             generateTraitDelegates(classesWithTraits, traitMap);
@@ -86,8 +86,8 @@ public class TraitProcessor extends AbstractProcessor {
         }
     }
 
-    private Map<FullyQualifiedName, TraitElement> getTraitElements() {
-        Map<FullyQualifiedName, TraitElement> result = new HashMap<FullyQualifiedName, TraitElement>();
+    private Map<ClassName, TraitElement> getTraitElements() {
+        Map<ClassName, TraitElement> result = new HashMap<ClassName, TraitElement>();
         
         for (Element e : traitElements) {
             if (e.getKind() != ElementKind.CLASS)
@@ -101,7 +101,7 @@ public class TraitProcessor extends AbstractProcessor {
         return result;
     }
 
-    private Set<ClassWithTraits> getClassesWithTraits(Map<FullyQualifiedName, TraitElement> traitMap) {
+    private Set<ClassWithTraits> getClassesWithTraits(Map<ClassName, TraitElement> traitMap) {
         Set<ClassWithTraits> result = new HashSet<ClassWithTraits>();
         for (Element e : elementsWithTraits) {
             if (e.getKind() != ElementKind.CLASS)
@@ -114,13 +114,13 @@ public class TraitProcessor extends AbstractProcessor {
         return result;
     }
 
-    private void generateTraitInterfaces(Map<FullyQualifiedName, TraitElement> traitElements) {
+    private void generateTraitInterfaces(Map<ClassName, TraitElement> traitElements) {
         for (TraitElement te : traitElements.values()) {
             new TraitInterfaceWriter(te, messager).writeInterface(filer);
         }
     }
 
-    private void generateTraitDelegates(Set<ClassWithTraits> classesWithTraits, Map<FullyQualifiedName, TraitElement> traitInterfaceMap) {
+    private void generateTraitDelegates(Set<ClassWithTraits> classesWithTraits, Map<ClassName, TraitElement> traitInterfaceMap) {
         for (ClassWithTraits cls : classesWithTraits) {
             List<TraitElement> allTraits = cls.getTraitClasses();
             for (TraitElement trait : allTraits) {
@@ -129,7 +129,7 @@ public class TraitProcessor extends AbstractProcessor {
         }
     }
 
-    private void generateTraitImplementingSuperclasses(Set<ClassWithTraits> classesWithTraits, Map<FullyQualifiedName, TraitElement> traitInterfaceMap) {
+    private void generateTraitImplementingSuperclasses(Set<ClassWithTraits> classesWithTraits, Map<ClassName, TraitElement> traitInterfaceMap) {
         for (ClassWithTraits cls : classesWithTraits) {
             new ClassWithTraitsSuperclassWriter(cls, traitInterfaceMap, messager).writeClass(filer);
         }

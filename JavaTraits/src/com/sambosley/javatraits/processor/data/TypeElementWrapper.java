@@ -12,20 +12,20 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.TypeMirror;
 
-import com.sambosley.javatraits.utils.FullyQualifiedName;
+import com.sambosley.javatraits.utils.ClassName;
 import com.sambosley.javatraits.utils.Utils;
 
 public abstract class TypeElementWrapper {
 
     protected TypeElement elem;
     protected Messager messager;
-    protected FullyQualifiedName fqn;
+    protected ClassName fqn;
     protected List<? extends TypeParameterElement> typeParameters;
     
     public TypeElementWrapper(TypeElement elem, Messager messager) {
         this.elem = elem;
         this.messager = messager;
-        this.fqn = new FullyQualifiedName(elem.getQualifiedName().toString());
+        this.fqn = new ClassName(elem.getQualifiedName().toString());
         this.typeParameters = elem.getTypeParameters();
     }
 
@@ -33,7 +33,7 @@ public abstract class TypeElementWrapper {
         return elem;
     }
 
-    public FullyQualifiedName getFullyQualifiedName() {
+    public ClassName getFullyQualifiedName() {
         return fqn;
     }
 

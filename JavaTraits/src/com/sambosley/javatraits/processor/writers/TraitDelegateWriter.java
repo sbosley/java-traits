@@ -21,7 +21,7 @@ import javax.tools.JavaFileObject;
 
 import com.sambosley.javatraits.processor.data.ClassWithTraits;
 import com.sambosley.javatraits.processor.data.TraitElement;
-import com.sambosley.javatraits.utils.FullyQualifiedName;
+import com.sambosley.javatraits.utils.ClassName;
 import com.sambosley.javatraits.utils.Utils;
 
 public class TraitDelegateWriter {
@@ -29,8 +29,8 @@ public class TraitDelegateWriter {
     private ClassWithTraits cls;
     private TraitElement traitElement;
     private Messager messager;
-    private FullyQualifiedName traitDelegateClass;
-    private FullyQualifiedName delegateClass;
+    private ClassName traitDelegateClass;
+    private ClassName delegateClass;
 
     public TraitDelegateWriter(ClassWithTraits cls, TraitElement traitElement, Messager messager) {
         this.cls = cls;

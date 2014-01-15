@@ -17,7 +17,7 @@ public class JavaFileWriter {
     private static final String INDENT = "    ";
     
     private Writer out;
-    private Map<String, List<FullyQualifiedName>> knownNames;
+    private Map<String, List<ClassName>> knownNames;
     private Scope currentScope = Scope.IMPORTS;
     
     private static enum Scope {
@@ -35,7 +35,7 @@ public class JavaFileWriter {
         if (out == null)
             throw new IllegalArgumentException("Writer must be non-null");
         this.out = out;
-        this.knownNames = new HashMap<String, List<FullyQualifiedName>>();
+        this.knownNames = new HashMap<String, List<ClassName>>();
     }
     
     public void close() throws IOException {
@@ -47,13 +47,13 @@ public class JavaFileWriter {
         out.append("package ").append(packageName).append(";\n\n");
     }
     
-    public void writeImports(Collection<FullyQualifiedName> imports) throws IOException {
+    public void writeImports(Collection<ClassName> imports) throws IOException {
         checkScope(Scope.IMPORTS);
-        for (FullyQualifiedName item : imports) {
+        for (ClassName item : imports) {
             String simpleName = item.getSimpleName();
-            List<FullyQualifiedName> allNames = knownNames.get(simpleName);
+            List<ClassName> allNames = knownNames.get(simpleName);
             if (allNames == null) {
-                allNames = new ArrayList<FullyQualifiedName>();
+                allNames = new ArrayList<ClassName>();
                 knownNames.put(simpleName, allNames);
             }
             
@@ -77,13 +77,13 @@ public class JavaFileWriter {
         emitGenericsList(generics, true);
     }
     
-    public void addSuperclassToTypeDeclaration(FullyQualifiedName superclass, List<GenericName> generics) throws IOException {
+    public void addSuperclassToTypeDeclaration(ClassName superclass, List<GenericName> generics) throws IOException {
         checkScope(Scope.TYPE_DECLARATION);
         out.append(" extends ").append(shortenName(superclass));
         emitGenericsList(generics, false);
     }
     
-    public void addInterfacesToTypeDeclaration(List<FullyQualifiedName> interfaces, List<List<GenericName>> generics) throws IOException {
+    public void addInterfacesToTypeDeclaration(List<ClassName> interfaces, List<List<GenericName>> generics) throws IOException {
         checkScope(Scope.TYPE_DECLARATION);
         if (interfaces != null && generics != null && interfaces.size() != generics.size())
             throw new IllegalArgumentException("When specifying generics for implementing interfaces, lists must be the same size");
@@ -208,17 +208,17 @@ public class JavaFileWriter {
             out.append(INDENT);
     }
     
-    private TypeNameVisitor<String, Map<String, List<FullyQualifiedName>>> nameShorteningVisitor = new TypeNameVisitor<String, Map<String,List<FullyQualifiedName>>>() {
+    private TypeNameVisitor<String, Map<String, List<ClassName>>> nameShorteningVisitor = new TypeNameVisitor<String, Map<String,List<ClassName>>>() {
         
         @Override
-        public String visitGenericName(GenericName genericName, Map<String, List<FullyQualifiedName>> param) {
+        public String visitGenericName(GenericName genericName, Map<String, List<ClassName>> param) {
             return genericName.getGenericName();
         }
         
         @Override
-        public String visitClassName(FullyQualifiedName typeName, Map<String, List<FullyQualifiedName>> param) {
+        public String visitClassName(ClassName typeName, Map<String, List<ClassName>> param) {
             String simpleName = typeName.getSimpleName();
-            List<FullyQualifiedName> allNames = param.get(simpleName);
+            List<ClassName> allNames = param.get(simpleName);
             if (allNames == null || allNames.size() == 0)
                 return typeName.toString();
             if (allNames.get(0).equals(typeName))

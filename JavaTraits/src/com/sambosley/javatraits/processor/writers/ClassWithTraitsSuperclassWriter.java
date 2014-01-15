@@ -25,24 +25,24 @@ import javax.tools.JavaFileObject;
 import com.sambosley.javatraits.annotations.HasTraits;
 import com.sambosley.javatraits.processor.data.ClassWithTraits;
 import com.sambosley.javatraits.processor.data.TraitElement;
-import com.sambosley.javatraits.utils.FullyQualifiedName;
+import com.sambosley.javatraits.utils.ClassName;
 import com.sambosley.javatraits.utils.Pair;
 import com.sambosley.javatraits.utils.Utils;
 
 public class ClassWithTraitsSuperclassWriter {
 
     private ClassWithTraits cls;
-    private Map<FullyQualifiedName, TraitElement> traitElementMap;
+    private Map<ClassName, TraitElement> traitElementMap;
     private Messager messager;
     private List<TraitElement> allTraits;
 
-    public ClassWithTraitsSuperclassWriter(ClassWithTraits cls, Map<FullyQualifiedName, TraitElement> traitElementMap, Messager messager) {
+    public ClassWithTraitsSuperclassWriter(ClassWithTraits cls, Map<ClassName, TraitElement> traitElementMap, Messager messager) {
         this.cls = cls;
         this.traitElementMap = traitElementMap;
         this.messager = messager;
         this.allTraits = Utils.map(Utils.getClassValuesFromAnnotation(HasTraits.class, cls.getSourceElement(), "traits", messager),
-                new Utils.MapFunction<FullyQualifiedName, TraitElement>() {
-            public TraitElement map(FullyQualifiedName fqn) {
+                new Utils.MapFunction<ClassName, TraitElement>() {
+            public TraitElement map(ClassName fqn) {
                 return ClassWithTraitsSuperclassWriter.this.traitElementMap.get(fqn);
             };
         });;
@@ -132,7 +132,7 @@ public class ClassWithTraitsSuperclassWriter {
 
     private void emitDelegateFields(StringBuilder builder) {
         for (TraitElement elem : allTraits) {
-            FullyQualifiedName delegateClass = cls.getDelegateClassNameForTraitElement(elem);
+            ClassName delegateClass = cls.getDelegateClassNameForTraitElement(elem);
             builder.append("\tprivate ").append(delegateClass.getSimpleName());
             if (elem.hasTypeParameters()) {
                 builder.append("<");
@@ -148,7 +148,7 @@ public class ClassWithTraitsSuperclassWriter {
     private void emitInitMethod(StringBuilder builder) {
         builder.append("\tprotected final void init() {\n");
         for (TraitElement elem : allTraits) {
-            FullyQualifiedName delegateClass = cls.getDelegateClassNameForTraitElement(elem);
+            ClassName delegateClass = cls.getDelegateClassNameForTraitElement(elem);
             builder.append("\t\t").append(getDelegateVariableName(elem));
             builder.append(" = new ").append(delegateClass.getSimpleName());
             if (elem.hasTypeParameters()) {
@@ -185,11 +185,11 @@ public class ClassWithTraitsSuperclassWriter {
         }
 
         if (!dupes.isEmpty()) {
-            Map<String, FullyQualifiedName> prefer = cls.getPreferMap();
+            Map<String, ClassName> prefer = cls.getPreferMap();
             for (String dup : dupes) {
                 String simpleMethodName = Utils.getMethodNameFromSignature(dup);
                 if (prefer.containsKey(simpleMethodName)) {
-                    FullyQualifiedName preferTarget = prefer.get(simpleMethodName);
+                    ClassName preferTarget = prefer.get(simpleMethodName);
                     List<Pair<TraitElement, ExecutableElement>> allExecElems = methodToExecElements.get(dup);
                     int index = 0;
                     for (index = 0; index < allExecElems.size(); index++) {

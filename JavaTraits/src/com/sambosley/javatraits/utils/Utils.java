@@ -79,31 +79,31 @@ public class Utils {
         return null;
     }
     
-    public static List<FullyQualifiedName> getClassValuesFromAnnotationValue(AnnotationValue annotationValue) {
-        List<FullyQualifiedName> result = new ArrayList<FullyQualifiedName>();
+    public static List<ClassName> getClassValuesFromAnnotationValue(AnnotationValue annotationValue) {
+        List<ClassName> result = new ArrayList<ClassName>();
         Object value = annotationValue.getValue();
         if (value instanceof TypeMirror) {
-            result.add(new FullyQualifiedName(value.toString()));
+            result.add(new ClassName(value.toString()));
         } else if (value instanceof List) {
             @SuppressWarnings("unchecked")
             List<? extends AnnotationValue> annotationValues = (List<? extends AnnotationValue>) value;
             for (AnnotationValue av : annotationValues) {
                 Object itemValue = av.getValue();
                 if (itemValue instanceof TypeMirror)
-                    result.add(new FullyQualifiedName(itemValue.toString()));
+                    result.add(new ClassName(itemValue.toString()));
             }
         }
         return result;
     }
 
-    public static List<FullyQualifiedName> getClassValuesFromAnnotation(Class<?> annotationClass, Element elem, String propertyName, Messager messager) {
+    public static List<ClassName> getClassValuesFromAnnotation(Class<?> annotationClass, Element elem, String propertyName, Messager messager) {
         AnnotationMirror mirror = findAnnotationMirror(elem, annotationClass);
         if (mirror != null) {
             AnnotationValue annotationValue = findAnnotationValue(mirror, propertyName);
             if (annotationValue != null)
                 return getClassValuesFromAnnotationValue(annotationValue);
         }
-        return new ArrayList<FullyQualifiedName>();
+        return new ArrayList<ClassName>();
     }
 
     public static void accumulateImportsFromExecutableElements(Set<String> accumulate, List<? extends ExecutableElement> elems, Messager messager) {

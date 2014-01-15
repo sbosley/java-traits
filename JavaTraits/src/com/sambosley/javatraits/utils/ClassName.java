@@ -5,17 +5,17 @@
  */
 package com.sambosley.javatraits.utils;
 
-public class FullyQualifiedName implements TypeName {
+public class ClassName implements TypeName {
 
     private String packageName;
     private String simpleName;
 
-    public FullyQualifiedName(String packageName, String simpleName) {
+    public ClassName(String packageName, String simpleName) {
         this.packageName = packageName;
         this.simpleName = simpleName;
     }
 
-    public FullyQualifiedName(String fullyQualifiedName) {
+    public ClassName(String fullyQualifiedName) {
         this.packageName = Utils.getPackageFromFullyQualifiedName(fullyQualifiedName);
         this.simpleName = Utils.getSimpleNameFromFullyQualifiedName(fullyQualifiedName);
     }
@@ -51,7 +51,7 @@ public class FullyQualifiedName implements TypeName {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        FullyQualifiedName other = (FullyQualifiedName) obj;
+        ClassName other = (ClassName) obj;
         if (packageName == null) {
             if (other.packageName != null)
                 return false;
