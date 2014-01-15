@@ -5,7 +5,7 @@
  */
 package com.sambosley.javatraits.utils;
 
-public class FullyQualifiedName {
+public class FullyQualifiedName implements TypeName {
 
     private String packageName;
     private String simpleName;
@@ -63,6 +63,12 @@ public class FullyQualifiedName {
         } else if (!simpleName.equals(other.simpleName))
             return false;
         return true;
+    }
+
+    @Override
+    public <RETURN, PARAMETER> RETURN accept(
+            TypeNameVisitor<RETURN, PARAMETER> visitor, PARAMETER data) {
+        return visitor.visitClassName(this, data);
     }
 
 }

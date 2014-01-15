@@ -10,6 +10,8 @@ import java.util.Map;
 
 import javax.lang.model.element.Modifier;
 
+import com.sambosley.javatraits.utils.TypeName.TypeNameVisitor;
+
 public class JavaFileWriter {
 
     private static final String INDENT = "    ";
@@ -70,26 +72,26 @@ public class JavaFileWriter {
         moveToScope(Scope.TYPE_DECLARATION);
     }
     
-    public void appendGenericDeclaration(List<String> generics, List<FullyQualifiedName> bounds) throws IOException {
+    public void appendGenericDeclaration(List<GenericName> generics) throws IOException {
         checkScope(Scope.TYPE_DECLARATION);
-        emitGenericsList(generics, bounds);
+        emitGenericsList(generics, true);
     }
     
-    public void addSuperclassToTypeDeclaration(FullyQualifiedName superclass, List<String> generics) throws IOException {
+    public void addSuperclassToTypeDeclaration(FullyQualifiedName superclass, List<GenericName> generics) throws IOException {
         checkScope(Scope.TYPE_DECLARATION);
         out.append(" extends ").append(shortenName(superclass));
-        emitGenericsList(generics, null);
+        emitGenericsList(generics, false);
     }
     
-    public void addInterfacesToTypeDeclaration(List<FullyQualifiedName> interfaces, List<List<String>> generics) throws IOException {
+    public void addInterfacesToTypeDeclaration(List<FullyQualifiedName> interfaces, List<List<GenericName>> generics) throws IOException {
         checkScope(Scope.TYPE_DECLARATION);
         if (interfaces != null && generics != null && interfaces.size() != generics.size())
             throw new IllegalArgumentException("When specifying generics for implementing interfaces, lists must be the same size");
         out.append(" implements ");
         for (int i = 0; i < interfaces.size(); i++) {
             out.append(shortenName(interfaces.get(i)));
-            List<String> genericsForInterface = generics.get(i);
-            emitGenericsList(genericsForInterface, null);
+            List<GenericName> genericsForInterface = generics.get(i);
+            emitGenericsList(genericsForInterface, false);
             if (i < interfaces.size() - 1)
                 out.append(", ");
         }
@@ -101,33 +103,33 @@ public class JavaFileWriter {
         moveToScope(Scope.TYPE_DEFINITION);
     }
     
-    public void emitFieldDeclaration(FullyQualifiedName type, String name, List<String> generics, List<Modifier> modifiers) throws IOException {
+    public void emitFieldDeclaration(TypeName type, String name, List<GenericName> generics, List<Modifier> modifiers) throws IOException {
         checkScope(Scope.TYPE_DEFINITION);
         indent(1);
         moveToScope(Scope.FIELD_DECLARATION);
         emitModifierList(modifiers);
         out.append(shortenName(type));
-        emitGenericsList(generics, null);
+        emitGenericsList(generics, false);
         out.append(" ").append(name).append(";\n");
         moveToScope(Scope.TYPE_DEFINITION);
     }
     
-    public void beginMethodDeclaration(String name, FullyQualifiedName returnType, List<Modifier> modifiers, List<String> generics, List<FullyQualifiedName> bounds) throws IOException {
+    public void beginMethodDeclaration(String name, TypeName returnType, List<Modifier> modifiers, List<GenericName> generics) throws IOException {
         checkScope(Scope.TYPE_DEFINITION);
         indent(1);
         moveToScope(Scope.METHOD_DECLARATION);
         emitModifierList(modifiers);
-        if (emitGenericsList(generics, bounds))
+        if (emitGenericsList(generics, true))
             out.append(" ");
-        out.append(shortenName(returnType)) // TODO: Handle array types, generic return types, primitive return types
+        out.append(shortenName(returnType))
             .append(" ").append(name).append("("); 
     }
     
-    public void addArgumentList(List<FullyQualifiedName> argTypes, List<String> argNames) throws IOException { // TODO: handle array types, generic types, primitive types
+    public void addArgumentList(List<TypeName> argTypes, List<String> argNames) throws IOException { // TODO: handle array types, generic types, primitive types
         checkScope(Scope.METHOD_DECLARATION);
         // TODO: Check for validity of arguments (non-null, length, etc.)
         for (int i = 0; i < argTypes.size(); i++) {
-            FullyQualifiedName argType = argTypes.get(i);
+            TypeName argType = argTypes.get(i);
             String argName = argNames.get(i);
             out.append(shortenName(argType)).append(" ").append(argName);
             if (i < argTypes.size() - 1)
@@ -135,9 +137,17 @@ public class JavaFileWriter {
         }
     }
     
-    public void finishMethodDeclarationAndBeginMethodDefinition(boolean wasAbstract) throws IOException {
+    public void finishMethodDeclarationAndBeginMethodDefinition(List<TypeName> thrownTypes, boolean wasAbstract) throws IOException {
         checkScope(Scope.METHOD_DECLARATION);
         out.append(")");
+        if (thrownTypes != null && thrownTypes.size() > 0) {
+            out.append("throws ");
+            for (int i = 0; i < thrownTypes.size(); i++) {
+                out.append(shortenName(thrownTypes.get(i)));
+                if (i < thrownTypes.size() - 1)
+                    out.append(", ");
+            }
+        }
         if (wasAbstract) {
             out.append(";\n\n");
             moveToScope(Scope.TYPE_DEFINITION);
@@ -145,6 +155,12 @@ public class JavaFileWriter {
             out.append(" {\n");
             moveToScope(Scope.METHOD_DEFINITION);
         }
+    }
+    
+    public void emitStatement(String statement, int indentLevel) throws IOException { // TODO: Could make this way more powerful (types of statements, e.g. variable declarations, method calls, etc. For now all we need is simple strings)
+        checkScope(Scope.METHOD_DEFINITION);
+        indent(indentLevel);
+        out.append(statement);
     }
     
     public void finishMethodDefinition() throws IOException {
@@ -168,18 +184,16 @@ public class JavaFileWriter {
         }
     }
     
-    private boolean emitGenericsList(List<String> generics, List<FullyQualifiedName> bounds) throws IOException {
+    private boolean emitGenericsList(List<GenericName> generics, boolean includeBounds) throws IOException {
         if (generics == null || generics.size() == 0)
             return false;
         out.append("<");
-        if (generics.size() > 0 && bounds != null && generics.size() != bounds.size())
-            throw new IllegalArgumentException("Generics and bounds must have the same size");
         
         for (int i = 0; i < generics.size(); i++) {
-            String generic = generics.get(i);
-            FullyQualifiedName bound = bounds != null ? bounds.get(i) : null;
+            GenericName generic = generics.get(i);
+            TypeName bound = generic.getUpperBound();
             
-            out.append(generic);
+            out.append(generic.getGenericName());
             if (bound != null)
                 out.append(" extends ").append(shortenName(bound));
             if (i < generics.size() - 1)
@@ -194,14 +208,27 @@ public class JavaFileWriter {
             out.append(INDENT);
     }
     
-    private String shortenName(FullyQualifiedName name) {
-        String simpleName = name.getSimpleName();
-        List<FullyQualifiedName> allNames = knownNames.get(simpleName);
-        if (allNames == null || allNames.size() == 0)
-            return name.toString();
-        if (allNames.get(0).equals(name))
-            return simpleName;
-        return name.toString();
+    private TypeNameVisitor<String, Map<String, List<FullyQualifiedName>>> nameShorteningVisitor = new TypeNameVisitor<String, Map<String,List<FullyQualifiedName>>>() {
+        
+        @Override
+        public String visitGenericName(GenericName genericName, Map<String, List<FullyQualifiedName>> param) {
+            return genericName.getGenericName();
+        }
+        
+        @Override
+        public String visitClassName(FullyQualifiedName typeName, Map<String, List<FullyQualifiedName>> param) {
+            String simpleName = typeName.getSimpleName();
+            List<FullyQualifiedName> allNames = param.get(simpleName);
+            if (allNames == null || allNames.size() == 0)
+                return typeName.toString();
+            if (allNames.get(0).equals(typeName))
+                return simpleName;
+            return typeName.toString();
+        }
+    };
+    
+    private String shortenName(TypeName name) {
+        return name.accept(nameShorteningVisitor, knownNames);
     }
     
     private void checkScope(Scope expectedScope) {
