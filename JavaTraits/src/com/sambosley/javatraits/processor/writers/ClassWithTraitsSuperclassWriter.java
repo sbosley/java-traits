@@ -75,18 +75,18 @@ public class ClassWithTraitsSuperclassWriter {
     }
 
     private void emitImports(StringBuilder builder) {
-        Set<String> imports = new HashSet<String>();
+        Set<ClassName> imports = new HashSet<ClassName>();
         for (TraitElement elem : allTraits) {
             List<? extends ExecutableElement> declaredMethods = elem.getDeclaredMethods();
             Utils.accumulateImportsFromExecutableElements(imports, declaredMethods, messager);
-            imports.add(cls.getDelegateClassNameForTraitElement(elem).toString());
+            imports.add(cls.getDelegateClassNameForTraitElement(elem));
         }
-        String desiredSuperclass = cls.getDesiredSuperclass().toString();
-        if (!Utils.OBJECT_CLASS_NAME.equals(desiredSuperclass))
+        ClassName desiredSuperclass = cls.getDesiredSuperclass();
+        if (!Utils.OBJECT_CLASS_NAME.equals(desiredSuperclass.toString()))
             imports.add(desiredSuperclass);
 
-        for (String s : imports) {
-            builder.append("import ").append(s).append(";\n");
+        for (ClassName cn : imports) {
+            builder.append("import ").append(cn).append(";\n");
         }
         builder.append("\n");
     }

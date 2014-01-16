@@ -5,6 +5,7 @@
  */
 package com.sambosley.javatraits.processor.data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.processing.Messager;
@@ -13,6 +14,7 @@ import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.TypeMirror;
 
 import com.sambosley.javatraits.utils.ClassName;
+import com.sambosley.javatraits.utils.TypeName;
 import com.sambosley.javatraits.utils.Utils;
 
 public abstract class TypeElementWrapper {
@@ -20,13 +22,18 @@ public abstract class TypeElementWrapper {
     protected TypeElement elem;
     protected Messager messager;
     protected ClassName fqn;
-    protected List<? extends TypeParameterElement> typeParameters;
+    protected List<TypeName> typeParameters;
     
     public TypeElementWrapper(TypeElement elem, Messager messager) {
         this.elem = elem;
         this.messager = messager;
         this.fqn = new ClassName(elem.getQualifiedName().toString());
-        this.typeParameters = elem.getTypeParameters();
+        this.typeParameters = initTypeParameters(elem);
+    }
+    
+    private List<TypeName> initTypeParameters(TypeElement elem) {
+        List<? extends TypeParameterElement> typeParams = elem.getTypeParameters();
+        return Utils.mapTypeParameterElementsToTypeName(typeParams, getSimpleName());
     }
 
     public TypeElement getSourceElement() {
@@ -49,7 +56,7 @@ public abstract class TypeElementWrapper {
         return fqn.getSimpleName();
     }
     
-    public List<? extends TypeParameterElement> getTypeParameters() {
+    public List<TypeName> getTypeParameters() {
         return typeParameters;
     }
     
@@ -57,8 +64,9 @@ public abstract class TypeElementWrapper {
         return typeParameters.size() > 0;
     }
     
+    @Deprecated
     public void emitParametrizedTypeList(StringBuilder builder, boolean appendBounds) {
-        List<? extends TypeParameterElement> typeParams = getTypeParameters();
+        List<? extends TypeParameterElement> typeParams = elem.getTypeParameters();
         for (int i = 0; i < typeParams.size(); i++) {
             TypeMirror type = typeParams.get(i).asType();
             builder.append(Utils.getSimpleTypeName(type, getSimpleName(), appendBounds));

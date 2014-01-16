@@ -22,6 +22,7 @@ import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
+import javax.lang.model.type.WildcardType;
 
 import com.sambosley.javatraits.processor.visitors.ImportGatheringTypeVisitor;
 
@@ -55,7 +56,7 @@ public class Utils {
         public B map(A arg);
     }
 
-    public static <A, B> List<B> map(List<A> list, MapFunction<A, B> mapFunction) {
+    public static <A, B> List<B> map(List<? extends A> list, MapFunction<A, B> mapFunction) {
         List<B> result = new ArrayList<B>();
         for (A elem : list) {
             result.add(mapFunction.map(elem));
@@ -106,7 +107,7 @@ public class Utils {
         return new ArrayList<ClassName>();
     }
 
-    public static void accumulateImportsFromExecutableElements(Set<String> accumulate, List<? extends ExecutableElement> elems, Messager messager) {
+    public static void accumulateImportsFromExecutableElements(Set<ClassName> accumulate, List<? extends ExecutableElement> elems, Messager messager) {
         for (ExecutableElement exec : elems) {
             ImportGatheringTypeVisitor visitor = new ImportGatheringTypeVisitor(exec, messager);
             TypeMirror returnType = exec.getReturnType();
@@ -209,6 +210,43 @@ public class Utils {
         return argNames;
     }
     
+    
+    public static <T extends TypeParameterElement> List<TypeName> mapTypeParameterElementsToTypeName(List<T> params, final String genericQualifier) {
+        return map(params, new MapFunction<T, TypeName>() {
+            @Override
+            public TypeName map(TypeParameterElement arg) {
+                return getTypeNameFromTypeMirror(arg.asType(), genericQualifier);
+            }
+        });
+    }
+    
+    public static TypeName getTypeNameFromTypeMirror(TypeMirror mirror, String genericQualifier) {
+        String mirrorString = mirror.toString();
+        TypeKind kind = mirror.getKind();
+        if (kind == TypeKind.TYPEVAR) {
+            TypeVariable typeVariable = (TypeVariable) mirror;
+            String genericName = getSimpleNameFromFullyQualifiedName(mirrorString);
+            if (genericQualifier != null)
+                genericName = genericQualifier + "$" + genericName;
+            TypeMirror upperBoundMirror = typeVariable.getUpperBound();
+            return getGenericName(genericName, genericQualifier, upperBoundMirror);
+        } else if (kind == TypeKind.WILDCARD) {
+            WildcardType wildcardType = (WildcardType) mirror;
+            TypeMirror upperBoundMirror = wildcardType.getExtendsBound();
+            return getGenericName("?", genericQualifier, upperBoundMirror);
+        } else {
+            return new ClassName(mirrorString);
+        }
+    }
+    
+    private static GenericName getGenericName(String genericName, String genericQualifier, TypeMirror upperBoundMirror) {
+        TypeName upperBound = null;
+        if (upperBoundMirror != null && !OBJECT_CLASS_NAME.equals(upperBoundMirror.toString()))
+            upperBound = getTypeNameFromTypeMirror(upperBoundMirror, genericQualifier);
+        return new GenericName(genericName, upperBound);
+    }
+    
+    @Deprecated
     public static String getSimpleTypeName(TypeMirror mirror, String qualifyByIfGeneric, boolean appendBounds) {
         String simpleName = getSimpleNameFromFullyQualifiedName(mirror.toString());
         String qualifiedName = qualifyByIfGeneric == null ? simpleName : qualifyByIfGeneric + "$" + simpleName;

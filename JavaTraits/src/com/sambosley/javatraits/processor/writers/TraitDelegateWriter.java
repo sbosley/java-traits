@@ -66,11 +66,11 @@ public class TraitDelegateWriter {
     }
 
     private void emitImports(StringBuilder builder) {
-        Set<String> imports = new HashSet<String>();
+        Set<ClassName> imports = new HashSet<ClassName>();
         Utils.accumulateImportsFromExecutableElements(imports, traitElement.getAbstractMethods(), messager);
-        imports.add(delegateClass.toString());
-        for (String s : imports) {
-            builder.append("import ").append(s).append(";\n");
+        imports.add(delegateClass);
+        for (ClassName cn : imports) {
+            builder.append("import ").append(cn).append(";\n");
         }
         builder.append("\n");
     }

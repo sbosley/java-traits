@@ -3,6 +3,7 @@ package com.sambosley.javatraits.utils;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -64,6 +65,10 @@ public class JavaFileWriter {
         }
         out.append("\n");
     }
+
+    public void beginTypeDeclaration(String name, String kind, Modifier... modifiers) throws IOException {
+        beginTypeDeclaration(name, kind, Arrays.asList(modifiers));
+    }
     
     public void beginTypeDeclaration(String name, String kind, List<Modifier> modifiers) throws IOException {
         checkScope(Scope.IMPORTS);
@@ -72,25 +77,25 @@ public class JavaFileWriter {
         moveToScope(Scope.TYPE_DECLARATION);
     }
     
-    public void appendGenericDeclaration(List<GenericName> generics) throws IOException {
+    public void appendGenericDeclaration(List<TypeName> generics) throws IOException {
         checkScope(Scope.TYPE_DECLARATION);
         emitGenericsList(generics, true);
     }
     
-    public void addSuperclassToTypeDeclaration(ClassName superclass, List<GenericName> generics) throws IOException {
+    public void addSuperclassToTypeDeclaration(ClassName superclass, List<TypeName> generics) throws IOException {
         checkScope(Scope.TYPE_DECLARATION);
         out.append(" extends ").append(shortenName(superclass));
         emitGenericsList(generics, false);
     }
     
-    public void addInterfacesToTypeDeclaration(List<ClassName> interfaces, List<List<GenericName>> generics) throws IOException {
+    public void addInterfacesToTypeDeclaration(List<ClassName> interfaces, List<List<TypeName>> generics) throws IOException {
         checkScope(Scope.TYPE_DECLARATION);
         if (interfaces != null && generics != null && interfaces.size() != generics.size())
             throw new IllegalArgumentException("When specifying generics for implementing interfaces, lists must be the same size");
         out.append(" implements ");
         for (int i = 0; i < interfaces.size(); i++) {
             out.append(shortenName(interfaces.get(i)));
-            List<GenericName> genericsForInterface = generics.get(i);
+            List<TypeName> genericsForInterface = generics.get(i);
             emitGenericsList(genericsForInterface, false);
             if (i < interfaces.size() - 1)
                 out.append(", ");
@@ -103,7 +108,7 @@ public class JavaFileWriter {
         moveToScope(Scope.TYPE_DEFINITION);
     }
     
-    public void emitFieldDeclaration(TypeName type, String name, List<GenericName> generics, List<Modifier> modifiers) throws IOException {
+    public void emitFieldDeclaration(TypeName type, String name, List<TypeName> generics, List<Modifier> modifiers) throws IOException {
         checkScope(Scope.TYPE_DEFINITION);
         indent(1);
         moveToScope(Scope.FIELD_DECLARATION);
@@ -114,7 +119,7 @@ public class JavaFileWriter {
         moveToScope(Scope.TYPE_DEFINITION);
     }
     
-    public void beginMethodDeclaration(String name, TypeName returnType, List<Modifier> modifiers, List<GenericName> generics) throws IOException {
+    public void beginMethodDeclaration(String name, TypeName returnType, List<Modifier> modifiers, List<TypeName> generics) throws IOException {
         checkScope(Scope.TYPE_DEFINITION);
         indent(1);
         moveToScope(Scope.METHOD_DECLARATION);
@@ -184,18 +189,30 @@ public class JavaFileWriter {
         }
     }
     
-    private boolean emitGenericsList(List<GenericName> generics, boolean includeBounds) throws IOException {
+    private TypeNameVisitor<String, Boolean> genericDeclarationVisitor = new TypeNameVisitor<String, Boolean>() {
+
+        @Override
+        public String visitClassName(ClassName typeName, Boolean param) {
+            return shortenName(typeName);
+        }
+
+        @Override
+        public String visitGenericName(GenericName genericName, Boolean param) {
+            StringBuilder result = new StringBuilder(genericName.getGenericName());
+            if (param)
+                result.append(" extends ").append(shortenName(genericName.getUpperBound()));
+            return result.toString();
+        }
+    };
+    
+    private boolean emitGenericsList(List<TypeName> generics, boolean includeBounds) throws IOException {
         if (generics == null || generics.size() == 0)
             return false;
         out.append("<");
         
         for (int i = 0; i < generics.size(); i++) {
-            GenericName generic = generics.get(i);
-            TypeName bound = generic.getUpperBound();
-            
-            out.append(generic.getGenericName());
-            if (bound != null)
-                out.append(" extends ").append(shortenName(bound));
+            TypeName generic = generics.get(i);
+            out.append(generic.accept(genericDeclarationVisitor, includeBounds));
             if (i < generics.size() - 1)
                 out.append(", ");
         }
