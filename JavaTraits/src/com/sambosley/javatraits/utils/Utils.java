@@ -268,13 +268,14 @@ public class Utils {
         TypeName returnType = Utils.getTypeNameFromTypeMirror(exec.getReturnType(), null);
         if (!methodGenerics.contains(returnType) && returnType instanceof GenericName)
             ((GenericName) returnType).addQualifier(genericQualifier);
-        List<Modifier> modifiers = Arrays.asList(Modifier.PUBLIC);
+        List<Modifier> modifiers = new ArrayList<Modifier>();
+        modifiers.add(Modifier.PUBLIC);
         if (extraModifiers != null)
             modifiers.addAll(Arrays.asList(extraModifiers));
         writer.beginMethodDeclaration(name, returnType, Arrays.asList(Modifier.PUBLIC), methodGenerics);
         List<String> argNames = emitMethodArguments(writer, exec, genericQualifier, methodGenerics);
         List<TypeName> thrownTypes = getThrownTypes(exec, genericQualifier, methodGenerics);
-        writer.finishMethodDeclarationAndBeginMethodDefinition(thrownTypes, true);
+        writer.finishMethodDeclarationAndBeginMethodDefinition(thrownTypes, isAbstract);
         return argNames;
     }
     

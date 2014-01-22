@@ -135,16 +135,16 @@ public class JavaFileWriter {
             .append(" ").append(name).append("("); 
     }
     
-    public void beginConstructorDeclaration(TypeName type, Modifier... modifiers) throws IOException {
+    public void beginConstructorDeclaration(String type, Modifier... modifiers) throws IOException {
         beginConstructorDeclaration(type, Arrays.asList(modifiers));
     }
     
-    public void beginConstructorDeclaration(TypeName type, List<Modifier> modifiers) throws IOException {
+    public void beginConstructorDeclaration(String type, List<Modifier> modifiers) throws IOException {
         checkScope(Scope.TYPE_DEFINITION);
         indent(1);
         moveToScope(Scope.METHOD_DECLARATION);
         emitModifierList(modifiers);
-        out.append(shortenName(type)).append("(");
+        out.append(type).append("(");
     }
     
     public void addArgumentList(List<? extends TypeName> argTypes, List<List<? extends TypeName>> genericsForArgs, List<String> argNames) throws IOException { // TODO: handle array types, generic types, primitive types
@@ -185,7 +185,8 @@ public class JavaFileWriter {
     public void emitStatement(String statement, int indentLevel) throws IOException { // TODO: Could make this way more powerful (types of statements, e.g. variable declarations, method calls, etc. For now all we need is simple strings)
         checkScope(Scope.METHOD_DEFINITION);
         indent(indentLevel);
-        out.append(statement);
+        out.append(statement)
+            .append("\n");
     }
     
     public void finishMethodDefinition() throws IOException {

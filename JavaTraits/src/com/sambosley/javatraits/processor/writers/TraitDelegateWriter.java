@@ -99,15 +99,16 @@ public class TraitDelegateWriter {
     }
 
     private void emitConstructor() throws IOException {
-        writer.beginConstructorDeclaration(traitDelegateClass, Modifier.PUBLIC);
-        List<TypeName> generics = cls.getTypeParameters();
+        writer.beginConstructorDeclaration(traitDelegateClass.getSimpleName(), Modifier.PUBLIC);
+        List<TypeName> generics = cls.getTypeParametersForDelegate(traitElement);
         List<List<? extends TypeName>> genericsForArgs = new ArrayList<List<? extends TypeName>>();
         genericsForArgs.add(generics);
-        writer.addArgumentList(Arrays.asList(traitDelegateClass), 
+        writer.addArgumentList(Arrays.asList(delegateClass), 
                 genericsForArgs,
                 Arrays.asList("delegate"));
         writer.finishMethodDeclarationAndBeginMethodDefinition(null, false);
         writer.emitStatement("this.delegate = delegate;", 2);
+        writer.finishMethodDefinition();
     }
     
     private void emitDefaultMethodImplementations() throws IOException {
