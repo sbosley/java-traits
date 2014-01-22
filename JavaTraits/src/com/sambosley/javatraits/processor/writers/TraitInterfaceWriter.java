@@ -117,6 +117,8 @@ public class TraitInterfaceWriter {
                 return arg.toString();
             }
         });
+        if (exec.isVarArgs())
+            typeNames.get(typeNames.size() - 1).setIsVarArgs(true);
         writer.addArgumentList(typeNames, argNames);
     }
     

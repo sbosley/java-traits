@@ -5,7 +5,7 @@
  */
 package com.sambosley.javatraits.utils;
 
-public class ClassName implements TypeName {
+public class ClassName extends TypeName {
 
     private String packageName;
     private String simpleName;
@@ -21,6 +21,8 @@ public class ClassName implements TypeName {
     }
 
     public String toString() {
+        if (Utils.isEmpty(packageName))
+            return simpleName;
         return packageName + "." + simpleName;
     }
 
@@ -30,6 +32,12 @@ public class ClassName implements TypeName {
 
     public String getSimpleName() {
         return simpleName;
+    }
+    
+    public String getTypeString(boolean simple) {
+        StringBuilder result = new StringBuilder(simple ? getSimpleName() : toString());
+        appendArrayString(result);
+        return result.toString();
     }
 
     @Override

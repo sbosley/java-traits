@@ -19,7 +19,7 @@ public class JavaFileWriter {
     
     private Writer out;
     private Map<String, List<ClassName>> knownNames;
-    private Scope currentScope = Scope.IMPORTS;
+    private Scope currentScope = Scope.PACKAGE;
     
     private static enum Scope {
         PACKAGE,
@@ -46,6 +46,7 @@ public class JavaFileWriter {
     public void writePackage(String packageName) throws IOException {
         checkScope(Scope.PACKAGE);
         out.append("package ").append(packageName).append(";\n\n");
+        moveToScope(Scope.IMPORTS);
     }
     
     public void writeImports(Collection<ClassName> imports) throws IOException {
@@ -199,7 +200,7 @@ public class JavaFileWriter {
         @Override
         public String visitGenericName(GenericName genericName, Boolean param) {
             StringBuilder result = new StringBuilder(genericName.getGenericName());
-            if (param)
+            if (param && genericName.getUpperBound() != null)
                 result.append(" extends ").append(shortenName(genericName.getUpperBound()));
             return result.toString();
         }
@@ -229,18 +230,21 @@ public class JavaFileWriter {
         
         @Override
         public String visitGenericName(GenericName genericName, Map<String, List<ClassName>> param) {
-            return genericName.getGenericName();
+            return genericName.getTypeString(true);
         }
         
         @Override
         public String visitClassName(ClassName typeName, Map<String, List<ClassName>> param) {
             String simpleName = typeName.getSimpleName();
             List<ClassName> allNames = param.get(simpleName);
+            boolean simple;
             if (allNames == null || allNames.size() == 0)
-                return typeName.toString();
-            if (allNames.get(0).equals(typeName))
-                return simpleName;
-            return typeName.toString();
+                simple = false;
+            else if (allNames.get(0).equals(typeName))
+                simple = true;
+            else
+                simple = false;
+            return typeName.getTypeString(simple);
         }
     };
     

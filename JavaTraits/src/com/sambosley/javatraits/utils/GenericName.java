@@ -1,7 +1,8 @@
 package com.sambosley.javatraits.utils;
 
-public class GenericName implements TypeName {
+public class GenericName extends TypeName {
 
+    private String qualifier;
     private String genericName;
     private TypeName upperBound;
     
@@ -11,15 +12,28 @@ public class GenericName implements TypeName {
     }
     
     public String getGenericName() {
-        return genericName;
+        StringBuilder result = new StringBuilder();
+        if (qualifier != null)
+            result.append(qualifier).append("$");
+        result.append(genericName);
+        return result.toString();
     }
     
     public TypeName getUpperBound() {
         return upperBound;
     }
     
+    @Override
+    public String getTypeString(boolean simple) {
+        StringBuilder result = new StringBuilder(getGenericName());
+        appendArrayString(result);
+        return result.toString();
+    }
+    
     public void addQualifier(String qualifier) {
-        this.genericName = qualifier + "$" + genericName;
+        if (this.qualifier != null)
+            throw new IllegalArgumentException("Generic " + genericName + " already has qualifier " + this.qualifier);
+        this.qualifier = qualifier;
     }
 
     @Override

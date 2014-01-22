@@ -221,22 +221,34 @@ public class Utils {
     }
     
     public static TypeName getTypeNameFromTypeMirror(TypeMirror mirror, String genericQualifier) {
-        String mirrorString = mirror.toString();
         TypeKind kind = mirror.getKind();
+        
+        int arrayDepth = 0;
+        while (kind == TypeKind.ARRAY) {
+            ArrayType type = (ArrayType) mirror;
+            arrayDepth++;
+            mirror = type.getComponentType();
+            kind = mirror.getKind();
+        }
+        
+        String mirrorString = mirror.toString();        
+        TypeName toReturn;
         if (kind == TypeKind.TYPEVAR) {
             TypeVariable typeVariable = (TypeVariable) mirror;
             String genericName = getSimpleNameFromFullyQualifiedName(mirrorString);
             if (genericQualifier != null)
                 genericName = genericQualifier + "$" + genericName;
             TypeMirror upperBoundMirror = typeVariable.getUpperBound();
-            return getGenericName(genericName, genericQualifier, upperBoundMirror);
+            toReturn = getGenericName(genericName, genericQualifier, upperBoundMirror);
         } else if (kind == TypeKind.WILDCARD) {
             WildcardType wildcardType = (WildcardType) mirror;
             TypeMirror upperBoundMirror = wildcardType.getExtendsBound();
-            return getGenericName("?", genericQualifier, upperBoundMirror);
+            toReturn = getGenericName("?", genericQualifier, upperBoundMirror);
         } else {
-            return new ClassName(mirrorString);
+            toReturn = new ClassName(mirrorString);
         }
+        toReturn.setArrayDepth(arrayDepth);
+        return toReturn;
     }
     
     private static GenericName getGenericName(String genericName, String genericQualifier, TypeMirror upperBoundMirror) {
