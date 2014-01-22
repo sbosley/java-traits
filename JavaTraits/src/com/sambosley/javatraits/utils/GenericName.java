@@ -13,7 +13,7 @@ public class GenericName extends TypeName {
     
     public String getGenericName() {
         StringBuilder result = new StringBuilder();
-        if (qualifier != null)
+        if (qualifier != null && !"?".equals(genericName))
             result.append(qualifier).append("$");
         result.append(genericName);
         return result.toString();
