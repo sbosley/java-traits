@@ -5,7 +5,9 @@
  */
 package com.sambosley.javatraits.utils;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
@@ -16,6 +18,7 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
@@ -256,6 +259,70 @@ public class Utils {
         if (upperBoundMirror != null && !OBJECT_CLASS_NAME.equals(upperBoundMirror.toString()))
             upperBound = getTypeNameFromTypeMirror(upperBoundMirror, genericQualifier);
         return new GenericName(genericName, upperBound);
+    }
+    
+    public static List<String> beginMethodDeclarationForExecutableElement(JavaFileWriter writer, ExecutableElement exec, String nameOverride, 
+            String genericQualifier, boolean isAbstract, Modifier... extraModifiers) throws IOException {
+        String name = nameOverride != null ? nameOverride : exec.getSimpleName().toString();
+        List<TypeName> methodGenerics = Utils.mapTypeParameterElementsToTypeName(exec.getTypeParameters(), null);
+        TypeName returnType = Utils.getTypeNameFromTypeMirror(exec.getReturnType(), null);
+        if (!methodGenerics.contains(returnType) && returnType instanceof GenericName)
+            ((GenericName) returnType).addQualifier(genericQualifier);
+        List<Modifier> modifiers = Arrays.asList(Modifier.PUBLIC);
+        if (extraModifiers != null)
+            modifiers.addAll(Arrays.asList(extraModifiers));
+        writer.beginMethodDeclaration(name, returnType, Arrays.asList(Modifier.PUBLIC), methodGenerics);
+        List<String> argNames = emitMethodArguments(writer, exec, genericQualifier, methodGenerics);
+        List<TypeName> thrownTypes = getThrownTypes(exec, genericQualifier, methodGenerics);
+        writer.finishMethodDeclarationAndBeginMethodDefinition(thrownTypes, true);
+        return argNames;
+    }
+    
+    private static List<String> emitMethodArguments(JavaFileWriter writer, ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) throws IOException {
+        List<? extends VariableElement> arguments = exec.getParameters();
+        List<TypeName> typeNames = Utils.map(arguments, new Utils.MapFunction<VariableElement, TypeName>() {
+            @Override
+            public TypeName map(VariableElement arg) {
+                return Utils.getTypeNameFromTypeMirror(arg.asType(), null);
+            }
+        });
+        Utils.map(typeNames, new Utils.MapFunction<TypeName, Void>() {
+            @Override
+            public Void map(TypeName arg) {
+                if (!methodGenerics.contains(arg) && arg instanceof GenericName)
+                    ((GenericName) arg).addQualifier(genericQualifier);
+                return null;
+            }
+        });
+        List<String> argNames = Utils.map(arguments, new Utils.MapFunction<VariableElement, String>() {
+            @Override
+            public String map(VariableElement arg) {
+                return arg.toString();
+            }
+        });
+        if (exec.isVarArgs())
+            typeNames.get(typeNames.size() - 1).setIsVarArgs(true);
+        writer.addArgumentList(typeNames, null, argNames);
+        return argNames;
+    }
+    
+    private static List<TypeName> getThrownTypes(ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) {
+        List<? extends TypeMirror> thrownTypeMirrors = exec.getThrownTypes();
+        List<TypeName> thrownTypes = Utils.map(thrownTypeMirrors, new Utils.MapFunction<TypeMirror, TypeName>() {
+            @Override
+            public TypeName map(TypeMirror arg) {
+                return Utils.getTypeNameFromTypeMirror(arg, null);
+            }
+        });
+        Utils.map(thrownTypes, new Utils.MapFunction<TypeName, Void>() {
+            @Override
+            public Void map(TypeName arg) {
+                if (!methodGenerics.contains(arg) && arg instanceof GenericName)
+                    ((GenericName) arg).addQualifier(genericQualifier);
+                return null;
+            }
+        });
+        return thrownTypes;
     }
     
     @Deprecated

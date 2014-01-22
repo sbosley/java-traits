@@ -5,6 +5,7 @@
  */
 package com.sambosley.javatraits.processor.data;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,8 @@ import javax.tools.Diagnostic.Kind;
 
 import com.sambosley.javatraits.annotations.HasTraits;
 import com.sambosley.javatraits.utils.ClassName;
+import com.sambosley.javatraits.utils.GenericName;
+import com.sambosley.javatraits.utils.TypeName;
 import com.sambosley.javatraits.utils.Utils;
 
 public class ClassWithTraits extends TypeElementWrapper {
@@ -97,10 +100,30 @@ public class ClassWithTraits extends TypeElementWrapper {
         return new ClassName(traitElement.getFullyQualifiedName() + "__" + getSimpleName() + DELEGATE_SUFFIX);
     }
     
+    public List<TypeName> getTypeParametersForDelegate(TraitElement onlyForThisElement) {
+        List<TypeName> result = new ArrayList<TypeName>();
+        for (int i = 0; i < traitClasses.size(); i++) {
+            TraitElement elem = traitClasses.get(i);
+            if (elem.hasTypeParameters()) {
+                if (onlyForThisElement != null && !onlyForThisElement.getFullyQualifiedName().equals(elem.getFullyQualifiedName())) {
+                    int paramCount = elem.getTypeParameters().size();
+                    for (int p = 0; p < paramCount; p++) {
+                        result.add(new GenericName("?", null));
+                    }
+                } else {
+                    result.addAll(elem.getTypeParameters());
+                }
+            }
+        }
+        return result;
+    }
+    
+    @Deprecated
     public void emitParametrizedTypeList(StringBuilder builder, boolean appendBounds) {
         emitParametrizedTypeList(builder, null, appendBounds);
     }
     
+    @Deprecated
     public void emitParametrizedTypeList(StringBuilder builder, TraitElement onlyForThisElem, boolean appendBounds) {
         boolean addedParameterStart = false;
         for (int i = 0; i < traitClasses.size(); i++) {

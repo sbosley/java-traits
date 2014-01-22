@@ -78,25 +78,25 @@ public class JavaFileWriter {
         moveToScope(Scope.TYPE_DECLARATION);
     }
     
-    public void appendGenericDeclaration(List<TypeName> generics) throws IOException {
+    public void appendGenericDeclaration(List<? extends TypeName> generics) throws IOException {
         checkScope(Scope.TYPE_DECLARATION);
         emitGenericsList(generics, true);
     }
     
-    public void addSuperclassToTypeDeclaration(ClassName superclass, List<TypeName> generics) throws IOException {
+    public void addSuperclassToTypeDeclaration(ClassName superclass, List<? extends TypeName> generics) throws IOException {
         checkScope(Scope.TYPE_DECLARATION);
         out.append(" extends ").append(shortenName(superclass));
         emitGenericsList(generics, false);
     }
     
-    public void addInterfacesToTypeDeclaration(List<ClassName> interfaces, List<List<TypeName>> generics) throws IOException {
+    public void addInterfacesToTypeDeclaration(List<ClassName> interfaces, List<List<? extends TypeName>> generics) throws IOException {
         checkScope(Scope.TYPE_DECLARATION);
         if (interfaces != null && generics != null && interfaces.size() != generics.size())
             throw new IllegalArgumentException("When specifying generics for implementing interfaces, lists must be the same size");
         out.append(" implements ");
         for (int i = 0; i < interfaces.size(); i++) {
             out.append(shortenName(interfaces.get(i)));
-            List<TypeName> genericsForInterface = generics.get(i);
+            List<? extends TypeName> genericsForInterface = generics.get(i);
             emitGenericsList(genericsForInterface, false);
             if (i < interfaces.size() - 1)
                 out.append(", ");
@@ -108,8 +108,12 @@ public class JavaFileWriter {
         out.append(" {\n\n");
         moveToScope(Scope.TYPE_DEFINITION);
     }
+
+    public void emitFieldDeclaration(TypeName type, String name, List<? extends TypeName> generics, Modifier... modifiers) throws IOException {
+        emitFieldDeclaration(type, name, generics, Arrays.asList(modifiers));
+    }
     
-    public void emitFieldDeclaration(TypeName type, String name, List<TypeName> generics, List<Modifier> modifiers) throws IOException {
+    public void emitFieldDeclaration(TypeName type, String name, List<? extends TypeName> generics, List<Modifier> modifiers) throws IOException {
         checkScope(Scope.TYPE_DEFINITION);
         indent(1);
         moveToScope(Scope.FIELD_DECLARATION);
@@ -120,7 +124,7 @@ public class JavaFileWriter {
         moveToScope(Scope.TYPE_DEFINITION);
     }
     
-    public void beginMethodDeclaration(String name, TypeName returnType, List<Modifier> modifiers, List<TypeName> generics) throws IOException {
+    public void beginMethodDeclaration(String name, TypeName returnType, List<Modifier> modifiers, List<? extends TypeName> generics) throws IOException {
         checkScope(Scope.TYPE_DEFINITION);
         indent(1);
         moveToScope(Scope.METHOD_DECLARATION);
@@ -131,19 +135,34 @@ public class JavaFileWriter {
             .append(" ").append(name).append("("); 
     }
     
-    public void addArgumentList(List<TypeName> argTypes, List<String> argNames) throws IOException { // TODO: handle array types, generic types, primitive types
+    public void beginConstructorDeclaration(TypeName type, Modifier... modifiers) throws IOException {
+        beginConstructorDeclaration(type, Arrays.asList(modifiers));
+    }
+    
+    public void beginConstructorDeclaration(TypeName type, List<Modifier> modifiers) throws IOException {
+        checkScope(Scope.TYPE_DEFINITION);
+        indent(1);
+        moveToScope(Scope.METHOD_DECLARATION);
+        emitModifierList(modifiers);
+        out.append(shortenName(type)).append("(");
+    }
+    
+    public void addArgumentList(List<? extends TypeName> argTypes, List<List<? extends TypeName>> genericsForArgs, List<String> argNames) throws IOException { // TODO: handle array types, generic types, primitive types
         checkScope(Scope.METHOD_DECLARATION);
         // TODO: Check for validity of arguments (non-null, length, etc.)
         for (int i = 0; i < argTypes.size(); i++) {
             TypeName argType = argTypes.get(i);
             String argName = argNames.get(i);
-            out.append(shortenName(argType)).append(" ").append(argName);
+            out.append(shortenName(argType));
+            List<? extends TypeName> generics = genericsForArgs != null ? genericsForArgs.get(i) : null;
+            emitGenericsList(generics, false);
+            out.append(" ").append(argName);
             if (i < argTypes.size() - 1)
                 out.append(", ");
         }
     }
     
-    public void finishMethodDeclarationAndBeginMethodDefinition(List<TypeName> thrownTypes, boolean wasAbstract) throws IOException {
+    public void finishMethodDeclarationAndBeginMethodDefinition(List<? extends TypeName> thrownTypes, boolean wasAbstract) throws IOException {
         checkScope(Scope.METHOD_DECLARATION);
         out.append(")");
         if (thrownTypes != null && thrownTypes.size() > 0) {
@@ -206,7 +225,7 @@ public class JavaFileWriter {
         }
     };
     
-    private boolean emitGenericsList(List<TypeName> generics, boolean includeBounds) throws IOException {
+    private boolean emitGenericsList(List<? extends TypeName> generics, boolean includeBounds) throws IOException {
         if (generics == null || generics.size() == 0)
             return false;
         out.append("<");

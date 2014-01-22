@@ -7,6 +7,8 @@ package com.sambosley.javatraits.processor.writers;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,6 +24,8 @@ import javax.tools.JavaFileObject;
 import com.sambosley.javatraits.processor.data.ClassWithTraits;
 import com.sambosley.javatraits.processor.data.TraitElement;
 import com.sambosley.javatraits.utils.ClassName;
+import com.sambosley.javatraits.utils.JavaFileWriter;
+import com.sambosley.javatraits.utils.TypeName;
 import com.sambosley.javatraits.utils.Utils;
 
 public class TraitDelegateWriter {
@@ -31,6 +35,7 @@ public class TraitDelegateWriter {
     private Messager messager;
     private ClassName traitDelegateClass;
     private ClassName delegateClass;
+    private JavaFileWriter writer;
 
     public TraitDelegateWriter(ClassWithTraits cls, TraitElement traitElement, Messager messager) {
         this.cls = cls;
@@ -42,10 +47,12 @@ public class TraitDelegateWriter {
 
     public void writeDelegate(Filer filer) {
         try {
+            if (writer != null)
+                throw new IllegalStateException("Already created source file for " + traitDelegateClass.toString());
             JavaFileObject jfo = filer.createSourceFile(traitDelegateClass.toString(), cls.getSourceElement());
-            Writer writer = jfo.openWriter();
-            writer.write(emitDelegate());
-            writer.flush();
+            Writer out = jfo.openWriter();
+            writer = new JavaFileWriter(out);
+            emitDelegate();
             writer.close();
         } catch (IOException e) {
             messager.printMessage(Kind.ERROR, "IOException writing delegate class with delegate " + 
@@ -53,104 +60,88 @@ public class TraitDelegateWriter {
         }
     }
 
-    private String emitDelegate() {
-        StringBuilder builder = new StringBuilder();
-        emitPackage(builder);
-        emitImports(builder);
-        emitDelegateDeclaration(builder);
-        return builder.toString();
+    private void emitDelegate() throws IOException {
+        emitPackage();
+        emitImports();
+        emitDelegateDeclaration();
     }
 
-    private void emitPackage(StringBuilder builder) {
-        builder.append("package ").append(traitDelegateClass.getPackageName()).append(";\n\n");
+    private void emitPackage() throws IOException {
+        writer.writePackage(traitDelegateClass.getPackageName());
     }
 
-    private void emitImports(StringBuilder builder) {
+    private void emitImports() throws IOException {
         Set<ClassName> imports = new HashSet<ClassName>();
         Utils.accumulateImportsFromExecutableElements(imports, traitElement.getAbstractMethods(), messager);
         imports.add(delegateClass);
-        for (ClassName cn : imports) {
-            builder.append("import ").append(cn).append(";\n");
-        }
-        builder.append("\n");
+        writer.writeImports(imports);
     }
 
-    private void emitDelegateDeclaration(StringBuilder builder) {
-        builder.append("public class ").append(traitDelegateClass.getSimpleName());
+    private void emitDelegateDeclaration() throws IOException {
+        writer.beginTypeDeclaration(traitDelegateClass.getSimpleName(), "class", Modifier.PUBLIC);
         if (traitElement.hasTypeParameters()) {
-            builder.append("<");
-            traitElement.emitParametrizedTypeList(builder, true);
-            builder.append(">");
+            writer.appendGenericDeclaration(traitElement.getTypeParameters());
         }
-        builder.append(" extends ").append(traitElement.getSimpleName());
-        if (traitElement.hasTypeParameters()) {
-            builder.append("<");
-            traitElement.emitParametrizedTypeList(builder, false);
-            builder.append(">");
-        }
-        builder.append(" {\n\n");
+        writer.addSuperclassToTypeDeclaration(traitElement.getFullyQualifiedName(), traitElement.getTypeParameters());
+        writer.finishTypeDeclarationAndBeginTypeDefinition();
 
-        emitDelegateInstance(builder);
-        emitConstructor(builder);
-        emitDefaultMethodImplementations(builder);
-        emitDelegateMethodImplementations(builder);
+        emitDelegateInstance();
+        emitConstructor();
+        emitDefaultMethodImplementations();
+        emitDelegateMethodImplementations();
 
-        builder.append("}");
+        writer.finishTypeDefinitionAndCloseType();
     }
 
-    private void emitDelegateInstance(StringBuilder builder) {
-        builder.append("\tprivate ").append(delegateClass.getSimpleName());
-        cls.emitParametrizedTypeList(builder, traitElement, false);
-        builder.append(" delegate;\n\n");
+    private void emitDelegateInstance() throws IOException {
+        List<TypeName> generics = cls.getTypeParametersForDelegate(traitElement);
+        writer.emitFieldDeclaration(delegateClass, "delegate", generics, Modifier.PRIVATE);
     }
 
-    private void emitConstructor(StringBuilder builder) {
-        builder.append("\tpublic ").append(traitDelegateClass.getSimpleName())
-        .append("(").append(delegateClass.getSimpleName());
-        cls.emitParametrizedTypeList(builder, traitElement, false);
-        builder.append(" delegate) {\n")
-        .append("\t\tthis.delegate = delegate;\n")
-        .append("\t}\n\n");
+    private void emitConstructor() throws IOException {
+        writer.beginConstructorDeclaration(traitDelegateClass, Modifier.PUBLIC);
+        List<TypeName> generics = cls.getTypeParameters();
+        List<List<? extends TypeName>> genericsForArgs = new ArrayList<List<? extends TypeName>>();
+        genericsForArgs.add(generics);
+        writer.addArgumentList(Arrays.asList(traitDelegateClass), 
+                genericsForArgs,
+                Arrays.asList("delegate"));
+        writer.finishMethodDeclarationAndBeginMethodDefinition(null, false);
+        writer.emitStatement("this.delegate = delegate;", 2);
     }
     
-    private void emitDefaultMethodImplementations(StringBuilder builder) {
+    private void emitDefaultMethodImplementations() throws IOException {
         List<? extends ExecutableElement> allMethods = traitElement.getDeclaredMethods();
         for (ExecutableElement exec : allMethods) {
             if (!exec.getModifiers().contains(Modifier.ABSTRACT)) {
-                List<String> argNames = Utils.emitMethodSignature(builder, exec, "default__", traitElement.getSimpleName(), false, true);
-                builder.append(" {\n");
-                builder.append("\t\t");
-                if (exec.getReturnType().getKind() != TypeKind.VOID)
-                    builder.append("return ");
-                builder.append("super.").append(exec.getSimpleName().toString()).append("(");
-                for (int i = 0; i < argNames.size(); i++) {
-                    builder.append(argNames.get(i));
-                    if (i < argNames.size() - 1)
-                        builder.append(", ");
-                }
-                builder.append(");\n")
-                .append("\t}\n\n");
+                emitMethodDeclaration(exec, true, Modifier.FINAL);
             }
         }
     }
 
-    private void emitDelegateMethodImplementations(StringBuilder builder) {
+    private void emitDelegateMethodImplementations() throws IOException {
         List<? extends ExecutableElement> abstractMethods = traitElement.getDeclaredMethods();
         for (ExecutableElement exec : abstractMethods) {
-            List<String> argNames = Utils.emitMethodSignature(builder, exec, null, traitElement.getSimpleName(), false, false);
-            builder.append(" {\n");
-            builder.append("\t\t");
-            if (exec.getReturnType().getKind() != TypeKind.VOID)
-                builder.append("return ");
-            builder.append("delegate.").append(exec.getSimpleName().toString()).append("(");
-            for (int i = 0; i < argNames.size(); i++) {
-                builder.append(argNames.get(i));
-                if (i < argNames.size() - 1)
-                    builder.append(", ");
-            }
-            builder.append(");\n")
-            .append("\t}\n\n");
+            emitMethodDeclaration(exec, false);
         }
+    }
+    
+    private void emitMethodDeclaration(ExecutableElement exec, boolean isDefault, Modifier... extraModifiers) throws IOException {
+        String name = isDefault ? "default__" + exec.getSimpleName().toString() : null;
+        List<String> argNames = Utils.beginMethodDeclarationForExecutableElement(writer, exec, name, traitElement.getSimpleName(), false, extraModifiers);
+        StringBuilder statement = new StringBuilder(); 
+        if (exec.getReturnType().getKind() != TypeKind.VOID)
+            statement.append("return ");
+        String callTo = isDefault ? "super" : "delegate";
+        statement.append(callTo).append(".").append(exec.getSimpleName().toString()).append("(");
+        for (int i = 0; i < argNames.size(); i++) {
+            statement.append(argNames.get(i));
+            if (i < argNames.size() - 1)
+                statement.append(", ");
+        }
+        statement.append(");");
+        writer.emitStatement(statement.toString(), 2);
+        writer.finishMethodDefinition();
     }
 
 }
