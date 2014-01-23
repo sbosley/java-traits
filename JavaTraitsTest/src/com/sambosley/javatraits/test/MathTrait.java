@@ -39,4 +39,8 @@ public abstract class MathTrait<A extends Number, B extends A> {
     public <D extends Number> int numberToInt(D number) {
         return number.intValue();
     }
+    
+    public String duplicateMethod(int someArg) {
+        return Integer.toHexString(someArg);
+    }
 }

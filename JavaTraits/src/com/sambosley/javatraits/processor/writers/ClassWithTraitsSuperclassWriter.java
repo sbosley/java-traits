@@ -28,6 +28,7 @@ import com.sambosley.javatraits.processor.data.ClassWithTraits;
 import com.sambosley.javatraits.processor.data.TraitElement;
 import com.sambosley.javatraits.utils.ClassName;
 import com.sambosley.javatraits.utils.JavaFileWriter;
+import com.sambosley.javatraits.utils.MethodSignature;
 import com.sambosley.javatraits.utils.Pair;
 import com.sambosley.javatraits.utils.TypeName;
 import com.sambosley.javatraits.utils.Utils;
@@ -157,12 +158,12 @@ public class ClassWithTraitsSuperclassWriter {
     }
 
     private void emitDelegateMethods() throws IOException {
-        Set<String> dupes = new HashSet<String>();
-        Map<String, List<Pair<TraitElement, ExecutableElement>>> methodToExecElements = new HashMap<String, List<Pair<TraitElement, ExecutableElement>>>();
+        Set<MethodSignature> dupes = new HashSet<MethodSignature>();
+        Map<MethodSignature, List<Pair<TraitElement, ExecutableElement>>> methodToExecElements = new HashMap<MethodSignature, List<Pair<TraitElement, ExecutableElement>>>();
         for (TraitElement elem : allTraits) {
             List<? extends ExecutableElement> execElems = elem.getDeclaredMethods();
             for (ExecutableElement exec : execElems) {
-                String signature = Utils.getMethodSignature(exec);
+                MethodSignature signature = Utils.getMethodSignature(exec, elem.getSimpleName());
                 List<Pair<TraitElement, ExecutableElement>> elements = methodToExecElements.get(signature);
                 if (elements == null) {
                     elements = new ArrayList<Pair<TraitElement, ExecutableElement>>();
@@ -176,8 +177,8 @@ public class ClassWithTraitsSuperclassWriter {
 
         if (!dupes.isEmpty()) {
             Map<String, ClassName> prefer = cls.getPreferMap();
-            for (String dup : dupes) {
-                String simpleMethodName = Utils.getMethodNameFromSignature(dup);
+            for (MethodSignature dup : dupes) {
+                String simpleMethodName = dup.getMethodName();
                 if (prefer.containsKey(simpleMethodName)) {
                     ClassName preferTarget = prefer.get(simpleMethodName);
                     List<Pair<TraitElement, ExecutableElement>> allExecElems = methodToExecElements.get(dup);

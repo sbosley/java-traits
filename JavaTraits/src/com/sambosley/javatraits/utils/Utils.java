@@ -125,28 +125,19 @@ public class Utils {
         }
     }
     
-    public static String getMethodNameFromSignature(String methodSignature) {
-        String toReturn = methodSignature;
-        int indexOfParen = methodSignature.indexOf('(');
-        if (indexOfParen >= 0)
-            toReturn = toReturn.substring(0, indexOfParen).trim();
+    public static MethodSignature getMethodSignature(ExecutableElement exec, String genericQualifier) {
+        String name = exec.getSimpleName().toString();
+        MethodSignature result = new MethodSignature(name);
         
-        int lastSpace = toReturn.lastIndexOf(' ');
-        if (lastSpace >= 0)
-            toReturn = toReturn.substring(lastSpace + 1); 
-        return toReturn;
-    }
-    
-    public static String getMethodSignature(ExecutableElement exec) {
-        String toReturn = exec.toString();
-        String simpleName = exec.getSimpleName().toString();
-        int simpleStart = toReturn.indexOf(simpleName);
-        if (simpleStart >= 0) {
-            toReturn = toReturn.substring(simpleStart).trim();
-            String returnType = Utils.getSimpleNameFromFullyQualifiedName(exec.getReturnType().toString()); 
-            toReturn = returnType + " " + toReturn;
-        }
-        return toReturn;
+        List<TypeName> methodGenerics = Utils.mapTypeParameterElementsToTypeName(exec.getTypeParameters(), null);
+        TypeName returnType = Utils.getTypeNameFromTypeMirror(exec.getReturnType(), null);
+        if (!methodGenerics.contains(returnType) && returnType instanceof GenericName)
+            ((GenericName) returnType).addQualifier(genericQualifier);
+        result.setReturnType(returnType);
+        
+        List<TypeName> argTypeNames = getArgumentTypeNames(exec, genericQualifier, methodGenerics);
+        result.addArgType(argTypeNames.toArray(new TypeName[argTypeNames.size()]));
+        return result;
     }
     
     public static <T extends TypeParameterElement> List<TypeName> mapTypeParameterElementsToTypeName(List<T> params, final String genericQualifier) {
@@ -211,9 +202,8 @@ public class Utils {
         return argNames;
     }
     
-    private static List<String> emitMethodArguments(JavaFileWriter writer, ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) throws IOException {
-        List<? extends VariableElement> arguments = exec.getParameters();
-        List<TypeName> typeNames = Utils.map(arguments, new Utils.MapFunction<VariableElement, TypeName>() {
+    private static List<TypeName> getArgumentTypeNames(ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) {
+        List<TypeName> typeNames = Utils.map(exec.getParameters(), new Utils.MapFunction<VariableElement, TypeName>() {
             @Override
             public TypeName map(VariableElement arg) {
                 return Utils.getTypeNameFromTypeMirror(arg.asType(), null);
@@ -227,6 +217,12 @@ public class Utils {
                 return null;
             }
         });
+        return typeNames;
+    }
+    
+    private static List<String> emitMethodArguments(JavaFileWriter writer, ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) throws IOException {
+        List<? extends VariableElement> arguments = exec.getParameters();
+        List<TypeName> typeNames = getArgumentTypeNames(exec, genericQualifier, methodGenerics);
         List<String> argNames = Utils.map(arguments, new Utils.MapFunction<VariableElement, String>() {
             @Override
             public String map(VariableElement arg) {

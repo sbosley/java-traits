@@ -9,7 +9,7 @@ import com.sambosley.javatraits.annotations.HasTraits;
 import com.sambosley.javatraits.annotations.Prefer;
 
 @HasTraits(traits={MathTrait.class, AnotherTrait.class}, 
-           prefer=@Prefer(target=AnotherTrait.class, method="subtract"))
+           prefer=@Prefer(target=AnotherTrait.class, method="duplicateMethod"))
 public class ClassWithTraits<A extends Number, B extends A, C, D> extends ClassWithTraitsGen<A, B, C, D> {
 
     @Override

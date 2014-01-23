@@ -29,4 +29,8 @@ public abstract class AnotherTrait<A, B> {
     public int subtract(int arg1, int arg2) {
         return arg2 - arg1;
     }
+    
+    public String duplicateMethod(int someArg) {
+        return Integer.toBinaryString(someArg);
+    }
 }
