@@ -15,7 +15,6 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.TypeParameterElement;
 import javax.tools.Diagnostic.Kind;
 
 import com.sambosley.javatraits.utils.ClassName;
@@ -71,16 +70,4 @@ public class TraitElement extends TypeElementWrapper {
     public List<? extends ExecutableElement> getAbstractMethods() {
         return abstractMethods;
     }
-    
-    @Deprecated
-    public void emitParametrizedInterfaceName(StringBuilder builder, boolean appendBounds) {
-        builder.append(getInterfaceName().getSimpleName());
-        List<? extends TypeParameterElement> typeParams = elem.getTypeParameters();
-        if (typeParams.size() > 0) {
-            builder.append("<");
-            emitParametrizedTypeList(builder, appendBounds);
-            builder.append(">");
-        }
-    }
-
 }

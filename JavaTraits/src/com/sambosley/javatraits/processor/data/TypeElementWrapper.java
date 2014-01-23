@@ -10,7 +10,6 @@ import java.util.List;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
-import javax.lang.model.type.TypeMirror;
 
 import com.sambosley.javatraits.utils.ClassName;
 import com.sambosley.javatraits.utils.TypeName;
@@ -61,16 +60,5 @@ public abstract class TypeElementWrapper {
     
     public boolean hasTypeParameters() {
         return typeParameters.size() > 0;
-    }
-    
-    @Deprecated
-    public void emitParametrizedTypeList(StringBuilder builder, boolean appendBounds) {
-        List<? extends TypeParameterElement> typeParams = elem.getTypeParameters();
-        for (int i = 0; i < typeParams.size(); i++) {
-            TypeMirror type = typeParams.get(i).asType();
-            builder.append(Utils.getSimpleTypeName(type, getSimpleName(), appendBounds));
-            if (i < typeParams.size() - 1)
-                builder.append(", ");
-        }
     }
 }

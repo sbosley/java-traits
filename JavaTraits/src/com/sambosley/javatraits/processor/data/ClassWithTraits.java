@@ -117,37 +117,4 @@ public class ClassWithTraits extends TypeElementWrapper {
         }
         return result;
     }
-    
-    @Deprecated
-    public void emitParametrizedTypeList(StringBuilder builder, boolean appendBounds) {
-        emitParametrizedTypeList(builder, null, appendBounds);
-    }
-    
-    @Deprecated
-    public void emitParametrizedTypeList(StringBuilder builder, TraitElement onlyForThisElem, boolean appendBounds) {
-        boolean addedParameterStart = false;
-        for (int i = 0; i < traitClasses.size(); i++) {
-            TraitElement elem = traitClasses.get(i);
-            if (elem.hasTypeParameters()) {
-                if (!addedParameterStart) {
-                    builder.append("<");
-                    addedParameterStart = true;
-                }
-                if (onlyForThisElem != null && !onlyForThisElem.getFullyQualifiedName().equals(elem.getFullyQualifiedName())) {
-                    int paramCount = elem.getTypeParameters().size();
-                    for (int p = 0; p < paramCount; p++) {
-                        builder.append("?");
-                        if (p < paramCount - 1)
-                            builder.append(", ");
-                    }
-                } else {
-                    elem.emitParametrizedTypeList(builder, appendBounds);
-                }
-            }
-            if (i < traitClasses.size() - 1 && addedParameterStart)
-                builder.append(", ");
-        }
-        if (addedParameterStart)
-            builder.append(">");
-    }
 }

@@ -8,7 +8,6 @@ package com.sambosley.javatraits.utils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -149,70 +148,6 @@ public class Utils {
         }
         return toReturn;
     }
-
-    public static List<String> emitMethodSignature(StringBuilder builder, ExecutableElement exec, String methodNamePrefix, String qualifyGenerics, boolean isAbstract, boolean isFinal) {
-        List<String> argNames = new ArrayList<String>();
-        builder.append("\tpublic ");
-        if (isAbstract)
-            builder.append("abstract ");
-        if (isFinal)
-            builder.append("final ");
-        Set<String> methodTypeParams = new HashSet<String>();
-        List<? extends TypeParameterElement> typeParameters = exec.getTypeParameters();
-        if (typeParameters.size() > 0) {
-            builder.append("<");
-            for (int i = 0; i < typeParameters.size(); i++) {
-                TypeMirror type = typeParameters.get(i).asType();
-                String typeNameWithBounds = getSimpleTypeName(type, null, true); 
-                String typeNameWithoutBounds = getSimpleTypeName(type, null, false); 
-                builder.append(typeNameWithBounds);
-                if (i < typeParameters.size() - 1)
-                    builder.append(", ");
-                methodTypeParams.add(typeNameWithoutBounds);
-            }
-            builder.append("> ");
-        }
-        
-        String simpleReturnTypeName = getSimpleNameFromFullyQualifiedName(exec.getReturnType().toString());
-        String qualifyReturnType = methodTypeParams.contains(simpleReturnTypeName) ? null : qualifyGenerics;
-        builder.append(getSimpleTypeName(exec.getReturnType(), qualifyReturnType, false))
-        .append(" ");
-        if (methodNamePrefix != null)
-            builder.append(methodNamePrefix);
-        builder.append(exec.getSimpleName().toString())
-        .append("(");
-        List<? extends VariableElement> parameters = exec.getParameters();
-        for (int i = 0; i < parameters.size(); i++) {
-            VariableElement var = parameters.get(i);
-            TypeMirror argType = var.asType();
-            String simpleTypeName = getSimpleNameFromFullyQualifiedName(argType.toString());
-            String qualifyArgType = methodTypeParams.contains(simpleTypeName) ? null : qualifyGenerics;
-            String typeString = getSimpleTypeName(argType, qualifyArgType, false);
-            if (argType.getKind() == TypeKind.ARRAY && exec.isVarArgs())
-                typeString = typeString.replace("[]", "...");
-            String argName = var.toString();
-            argNames.add(argName);
-            builder.append(typeString).append(" ").append(argName);
-            if (i < parameters.size() - 1)
-                builder.append(", ");
-        }
-        builder.append(")");
-        List<? extends TypeMirror> thrownTypes = exec.getThrownTypes();
-        if (!thrownTypes.isEmpty()) {
-            builder.append(" throws ");
-            for (int i = 0; i < thrownTypes.size(); i++) {
-                TypeMirror type = thrownTypes.get(i);
-                String simpleTypeName = getSimpleNameFromFullyQualifiedName(type.toString());
-                String qualifyArgType = methodTypeParams.contains(simpleTypeName) ? null : qualifyGenerics;
-                String typeString = getSimpleTypeName(type, qualifyArgType, false);
-                builder.append(typeString);
-                if (i < thrownTypes.size() - 1)
-                    builder.append(", ");
-            }
-        }
-        return argNames;
-    }
-    
     
     public static <T extends TypeParameterElement> List<TypeName> mapTypeParameterElementsToTypeName(List<T> params, final String genericQualifier) {
         return map(params, new MapFunction<T, TypeName>() {
@@ -321,33 +256,6 @@ public class Utils {
             }
         });
         return thrownTypes;
-    }
-    
-    @Deprecated
-    public static String getSimpleTypeName(TypeMirror mirror, String qualifyByIfGeneric, boolean appendBounds) {
-        String simpleName = getSimpleNameFromFullyQualifiedName(mirror.toString());
-        String qualifiedName = qualifyByIfGeneric == null ? simpleName : qualifyByIfGeneric + "$" + simpleName;
-        TypeVariable typeVariableIfGeneric = null;
-        
-        if (mirror instanceof TypeVariable) {
-            typeVariableIfGeneric = (TypeVariable) mirror;
-        } else if (mirror instanceof ArrayType) {
-            ArrayType arrType = (ArrayType) mirror;
-            if (arrType.getComponentType() instanceof TypeVariable) {
-                typeVariableIfGeneric = (TypeVariable) arrType.getComponentType();
-            }
-        }
-        if (typeVariableIfGeneric != null && appendBounds) {
-            TypeMirror upperBound = typeVariableIfGeneric.getUpperBound();
-            if (!Utils.OBJECT_CLASS_NAME.equals(upperBound.toString())) {
-                String qualifiedUpperBound = Utils.getSimpleNameFromFullyQualifiedName(upperBound.toString());
-                if (upperBound instanceof TypeVariable)
-                    qualifiedUpperBound = qualifyByIfGeneric + "$" + qualifiedUpperBound;
-                qualifiedName += " extends " + qualifiedUpperBound;
-            }
-        }
-        
-        return typeVariableIfGeneric != null ? qualifiedName : simpleName;
     }
 
 }

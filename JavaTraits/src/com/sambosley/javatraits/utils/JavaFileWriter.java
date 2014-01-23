@@ -150,18 +150,21 @@ public class JavaFileWriter {
         out.append(type).append("(");
     }
     
-    public void addArgumentList(List<? extends TypeName> argTypes, List<List<? extends TypeName>> genericsForArgs, List<String> argNames) throws IOException { // TODO: handle array types, generic types, primitive types
+    public void addArgumentList(List<? extends TypeName> argTypes, List<List<? extends TypeName>> genericsForArgs, List<String> argNames) throws IOException {
         checkScope(Scope.METHOD_DECLARATION);
-        // TODO: Check for validity of arguments (non-null, length, etc.)
-        for (int i = 0; i < argTypes.size(); i++) {
-            TypeName argType = argTypes.get(i);
-            String argName = argNames.get(i);
-            out.append(shortenName(argType));
-            List<? extends TypeName> generics = genericsForArgs != null ? genericsForArgs.get(i) : null;
-            emitGenericsList(generics, false);
-            out.append(" ").append(argName);
-            if (i < argTypes.size() - 1)
-                out.append(", ");
+        if (argTypes != null) {
+            if (genericsForArgs != null && argTypes.size() != genericsForArgs.size())
+                throw new IllegalArgumentException("argTypes.size() != genericsForArgs.size(). When supplying generics for arguments, lists must be the same type.");
+            for (int i = 0; i < argTypes.size(); i++) {
+                TypeName argType = argTypes.get(i);
+                String argName = argNames.get(i);
+                out.append(shortenName(argType));
+                List<? extends TypeName> generics = genericsForArgs != null ? genericsForArgs.get(i) : null;
+                emitGenericsList(generics, false);
+                out.append(" ").append(argName);
+                if (i < argTypes.size() - 1)
+                    out.append(", ");
+            }
         }
     }
     
@@ -185,7 +188,7 @@ public class JavaFileWriter {
         }
     }
     
-    public void emitStatement(String statement, int indentLevel) throws IOException { // TODO: Could make this way more powerful (types of statements, e.g. variable declarations, method calls, etc. For now all we need is simple strings)
+    public void emitStatement(String statement, int indentLevel) throws IOException {
         checkScope(Scope.METHOD_DEFINITION);
         indent(indentLevel);
         out.append(statement);
