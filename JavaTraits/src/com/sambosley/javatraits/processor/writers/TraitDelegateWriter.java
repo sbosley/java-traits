@@ -107,7 +107,7 @@ public class TraitDelegateWriter {
                 genericsForArgs,
                 Arrays.asList("delegate"));
         writer.finishMethodDeclarationAndBeginMethodDefinition(null, false);
-        writer.emitStatement("this.delegate = delegate;", 2);
+        writer.emitStatement("this.delegate = delegate;\n", 2);
         writer.finishMethodDefinition();
     }
     
@@ -115,7 +115,7 @@ public class TraitDelegateWriter {
         List<? extends ExecutableElement> allMethods = traitElement.getDeclaredMethods();
         for (ExecutableElement exec : allMethods) {
             if (!exec.getModifiers().contains(Modifier.ABSTRACT)) {
-                emitMethodDeclaration(exec, true, Modifier.FINAL);
+                emitMethodDeclaration(exec, true, Modifier.PUBLIC, Modifier.FINAL);
             }
         }
     }
@@ -123,13 +123,13 @@ public class TraitDelegateWriter {
     private void emitDelegateMethodImplementations() throws IOException {
         List<? extends ExecutableElement> abstractMethods = traitElement.getDeclaredMethods();
         for (ExecutableElement exec : abstractMethods) {
-            emitMethodDeclaration(exec, false);
+            emitMethodDeclaration(exec, false, Modifier.PUBLIC);
         }
     }
     
-    private void emitMethodDeclaration(ExecutableElement exec, boolean isDefault, Modifier... extraModifiers) throws IOException {
+    private void emitMethodDeclaration(ExecutableElement exec, boolean isDefault, Modifier... modifiers) throws IOException {
         String name = isDefault ? "default__" + exec.getSimpleName().toString() : null;
-        List<String> argNames = Utils.beginMethodDeclarationForExecutableElement(writer, exec, name, traitElement.getSimpleName(), false, extraModifiers);
+        List<String> argNames = Utils.beginMethodDeclarationForExecutableElement(writer, exec, name, traitElement.getSimpleName(), false, modifiers);
         StringBuilder statement = new StringBuilder(); 
         if (exec.getReturnType().getKind() != TypeKind.VOID)
             statement.append("return ");
@@ -140,7 +140,7 @@ public class TraitDelegateWriter {
             if (i < argNames.size() - 1)
                 statement.append(", ");
         }
-        statement.append(");");
+        statement.append(");\n");
         writer.emitStatement(statement.toString(), 2);
         writer.finishMethodDefinition();
     }

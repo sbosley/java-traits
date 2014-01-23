@@ -18,6 +18,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.tools.Diagnostic.Kind;
 
+import com.sambosley.javatraits.utils.ClassName;
 import com.sambosley.javatraits.utils.Utils;
 
 public class TraitElement extends TypeElementWrapper {
@@ -26,6 +27,7 @@ public class TraitElement extends TypeElementWrapper {
 
     private List<ExecutableElement> declaredMethods;
     private List<ExecutableElement> abstractMethods;
+    private ClassName interfaceName;
 
     public TraitElement(TypeElement elem, Messager messager) {
         super(elem, messager);
@@ -55,14 +57,11 @@ public class TraitElement extends TypeElementWrapper {
                     abstractMethods.add(exec);
             }
         }
+        interfaceName = new ClassName(fqn.getPackageName(), fqn.getSimpleName() + INTERFACE_SUFFIX);
     }
 
-    public String getFullyQualifiedInterfaceName() {
-        return fqn.toString() + INTERFACE_SUFFIX;
-    }
-
-    public String getSimpleInterfaceName() {
-        return getSimpleName() + INTERFACE_SUFFIX;
+    public ClassName getInterfaceName() {
+        return interfaceName;
     }
 
     public List<? extends ExecutableElement> getDeclaredMethods() {
@@ -75,7 +74,7 @@ public class TraitElement extends TypeElementWrapper {
     
     @Deprecated
     public void emitParametrizedInterfaceName(StringBuilder builder, boolean appendBounds) {
-        builder.append(getSimpleInterfaceName());
+        builder.append(getInterfaceName().getSimpleName());
         List<? extends TypeParameterElement> typeParams = elem.getTypeParameters();
         if (typeParams.size() > 0) {
             builder.append("<");

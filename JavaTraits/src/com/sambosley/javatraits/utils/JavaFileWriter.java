@@ -131,8 +131,11 @@ public class JavaFileWriter {
         emitModifierList(modifiers);
         if (emitGenericsList(generics, true))
             out.append(" ");
-        out.append(shortenName(returnType))
-            .append(" ").append(name).append("("); 
+        if (returnType == null)
+            out.append("void");
+        else
+            out.append(shortenName(returnType));
+        out.append(" ").append(name).append("("); 
     }
     
     public void beginConstructorDeclaration(String type, Modifier... modifiers) throws IOException {
@@ -166,7 +169,7 @@ public class JavaFileWriter {
         checkScope(Scope.METHOD_DECLARATION);
         out.append(")");
         if (thrownTypes != null && thrownTypes.size() > 0) {
-            out.append("throws ");
+            out.append(" throws ");
             for (int i = 0; i < thrownTypes.size(); i++) {
                 out.append(shortenName(thrownTypes.get(i)));
                 if (i < thrownTypes.size() - 1)
@@ -185,8 +188,11 @@ public class JavaFileWriter {
     public void emitStatement(String statement, int indentLevel) throws IOException { // TODO: Could make this way more powerful (types of statements, e.g. variable declarations, method calls, etc. For now all we need is simple strings)
         checkScope(Scope.METHOD_DEFINITION);
         indent(indentLevel);
-        out.append(statement)
-            .append("\n");
+        out.append(statement);
+    }
+    
+    public void emitNewline() throws IOException {
+        out.append("\n");
     }
     
     public void finishMethodDefinition() throws IOException {
@@ -226,7 +232,7 @@ public class JavaFileWriter {
         }
     };
     
-    private boolean emitGenericsList(List<? extends TypeName> generics, boolean includeBounds) throws IOException {
+    public boolean emitGenericsList(List<? extends TypeName> generics, boolean includeBounds) throws IOException {
         if (generics == null || generics.size() == 0)
             return false;
         out.append("<");
@@ -268,7 +274,7 @@ public class JavaFileWriter {
         }
     };
     
-    private String shortenName(TypeName name) {
+    public String shortenName(TypeName name) {
         return name.accept(nameShorteningVisitor, knownNames);
     }
     

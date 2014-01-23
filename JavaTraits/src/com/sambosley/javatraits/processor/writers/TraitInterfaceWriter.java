@@ -36,8 +36,8 @@ public class TraitInterfaceWriter {
     public void writeInterface(Filer filer) {
         try {
             if (writer != null)
-                throw new IllegalStateException("Already created source file for " + element.getFullyQualifiedInterfaceName());
-            JavaFileObject jfo = filer.createSourceFile(element.getFullyQualifiedInterfaceName(), element.getSourceElement());
+                throw new IllegalStateException("Already created source file for " + element.getInterfaceName());
+            JavaFileObject jfo = filer.createSourceFile(element.getInterfaceName().toString(), element.getSourceElement());
             Writer out = jfo.openWriter();
             writer = new JavaFileWriter(out);
             emitInterface();
@@ -64,7 +64,7 @@ public class TraitInterfaceWriter {
     }
 
     private void emitInterfaceDeclaration() throws IOException {
-        writer.beginTypeDeclaration(element.getSimpleInterfaceName(), "interface", Modifier.PUBLIC);
+        writer.beginTypeDeclaration(element.getInterfaceName().getSimpleName(), "interface", Modifier.PUBLIC);
         writer.appendGenericDeclaration(element.getTypeParameters()); 
         writer.finishTypeDeclarationAndBeginTypeDefinition();
         emitMethodDeclarations();
@@ -78,7 +78,7 @@ public class TraitInterfaceWriter {
     }
 
     private void emitMethodDeclarationForExecutableElement(ExecutableElement exec) throws IOException {
-        Utils.beginMethodDeclarationForExecutableElement(writer, exec, null, element.getSimpleName(), true);
+        Utils.beginMethodDeclarationForExecutableElement(writer, exec, null, element.getSimpleName(), true, Modifier.PUBLIC);
     }
     
 }

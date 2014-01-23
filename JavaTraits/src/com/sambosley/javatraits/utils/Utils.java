@@ -262,17 +262,14 @@ public class Utils {
     }
     
     public static List<String> beginMethodDeclarationForExecutableElement(JavaFileWriter writer, ExecutableElement exec, String nameOverride, 
-            String genericQualifier, boolean isAbstract, Modifier... extraModifiers) throws IOException {
+            String genericQualifier, boolean isAbstract, Modifier... modifiers) throws IOException {
         String name = nameOverride != null ? nameOverride : exec.getSimpleName().toString();
         List<TypeName> methodGenerics = Utils.mapTypeParameterElementsToTypeName(exec.getTypeParameters(), null);
         TypeName returnType = Utils.getTypeNameFromTypeMirror(exec.getReturnType(), null);
         if (!methodGenerics.contains(returnType) && returnType instanceof GenericName)
             ((GenericName) returnType).addQualifier(genericQualifier);
-        List<Modifier> modifiers = new ArrayList<Modifier>();
-        modifiers.add(Modifier.PUBLIC);
-        if (extraModifiers != null)
-            modifiers.addAll(Arrays.asList(extraModifiers));
-        writer.beginMethodDeclaration(name, returnType, Arrays.asList(Modifier.PUBLIC), methodGenerics);
+        
+        writer.beginMethodDeclaration(name, returnType, Arrays.asList(modifiers), methodGenerics);
         List<String> argNames = emitMethodArguments(writer, exec, genericQualifier, methodGenerics);
         List<TypeName> thrownTypes = getThrownTypes(exec, genericQualifier, methodGenerics);
         writer.finishMethodDeclarationAndBeginMethodDefinition(thrownTypes, isAbstract);
