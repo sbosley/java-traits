@@ -34,7 +34,7 @@ import com.yahoo.javatraits.processor.writers.TraitInterfaceWriter;
 import com.yahoo.javatraits.utils.ClassName;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
-@SupportedAnnotationTypes(value="com.sambosley.javatraits.annotations.*")
+@SupportedAnnotationTypes(value="com.yahoo.javatraits.annotations.*")
 public class TraitProcessor extends AbstractProcessor {
 
     private Messager messager;
