@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Sam Bosley
+ * Copyright 2014 Yahoo Inc.
  * 
  * See the file "LICENSE" for the full license governing this code.
  */

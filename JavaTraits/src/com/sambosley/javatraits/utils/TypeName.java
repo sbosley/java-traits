@@ -1,3 +1,8 @@
+/**
+ * Copyright 2014 Yahoo Inc.
+ * 
+ * See the file "LICENSE" for the full license governing this code.
+ */
 package com.sambosley.javatraits.utils;
 
 public abstract class TypeName {
