@@ -3,10 +3,10 @@
  * 
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.sambosley.javatraits.test;
+package com.yahoo.javatraits.test;
 
-import com.sambosley.javatraits.annotations.HasTraits;
-import com.sambosley.javatraits.annotations.Prefer;
+import com.yahoo.javatraits.annotations.HasTraits;
+import com.yahoo.javatraits.annotations.Prefer;
 
 @HasTraits(traits={MathTrait.class, AnotherTrait.class}, 
            prefer=@Prefer(target=AnotherTrait.class, method="duplicateMethod"))

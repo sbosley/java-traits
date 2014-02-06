@@ -3,9 +3,9 @@
  * 
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.sambosley.javatraits.test;
+package com.yahoo.javatraits.test;
 
-import com.sambosley.javatraits.annotations.Trait;
+import com.yahoo.javatraits.annotations.Trait;
 
 @Trait
 public abstract class MathTrait<A extends Number, B extends A> {
