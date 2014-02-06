@@ -3,7 +3,7 @@
  * 
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.yahoo.javatraits.processor.visitors;
+package com.yahoo.annotations;
 
 import java.util.Set;
 
@@ -21,9 +21,6 @@ import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.type.WildcardType;
 import javax.tools.Diagnostic.Kind;
-
-import com.yahoo.javatraits.utils.ClassName;
-import com.yahoo.javatraits.utils.Utils;
 
 public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<ClassName>> {
 

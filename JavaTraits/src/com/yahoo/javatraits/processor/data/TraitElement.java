@@ -17,8 +17,8 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 
-import com.yahoo.javatraits.utils.ClassName;
-import com.yahoo.javatraits.utils.Utils;
+import com.yahoo.annotations.ClassName;
+import com.yahoo.annotations.Utils;
 
 public class TraitElement extends TypeElementWrapper {
 

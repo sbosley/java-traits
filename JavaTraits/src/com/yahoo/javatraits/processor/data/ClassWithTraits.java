@@ -16,11 +16,11 @@ import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 
+import com.yahoo.annotations.ClassName;
+import com.yahoo.annotations.GenericName;
+import com.yahoo.annotations.TypeName;
+import com.yahoo.annotations.Utils;
 import com.yahoo.javatraits.annotations.HasTraits;
-import com.yahoo.javatraits.utils.ClassName;
-import com.yahoo.javatraits.utils.GenericName;
-import com.yahoo.javatraits.utils.TypeName;
-import com.yahoo.javatraits.utils.Utils;
 
 public class ClassWithTraits extends TypeElementWrapper {
 

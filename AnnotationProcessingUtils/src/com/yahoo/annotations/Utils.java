@@ -3,7 +3,7 @@
  * 
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.yahoo.javatraits.utils;
+package com.yahoo.annotations;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,8 +25,6 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.WildcardType;
-
-import com.yahoo.javatraits.processor.visitors.ImportGatheringTypeVisitor;
 
 public class Utils {
 

@@ -17,10 +17,10 @@ import javax.lang.model.element.Modifier;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
+import com.yahoo.annotations.ClassName;
+import com.yahoo.annotations.JavaFileWriter;
+import com.yahoo.annotations.Utils;
 import com.yahoo.javatraits.processor.data.TraitElement;
-import com.yahoo.javatraits.utils.ClassName;
-import com.yahoo.javatraits.utils.JavaFileWriter;
-import com.yahoo.javatraits.utils.Utils;
 
 public class TraitInterfaceWriter {
 

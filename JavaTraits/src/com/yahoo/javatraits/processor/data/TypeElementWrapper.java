@@ -11,9 +11,9 @@ import javax.annotation.processing.Messager;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 
-import com.yahoo.javatraits.utils.ClassName;
-import com.yahoo.javatraits.utils.TypeName;
-import com.yahoo.javatraits.utils.Utils;
+import com.yahoo.annotations.ClassName;
+import com.yahoo.annotations.TypeName;
+import com.yahoo.annotations.Utils;
 
 public abstract class TypeElementWrapper {
 

@@ -21,12 +21,12 @@ import javax.lang.model.type.TypeKind;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
+import com.yahoo.annotations.ClassName;
+import com.yahoo.annotations.JavaFileWriter;
+import com.yahoo.annotations.TypeName;
+import com.yahoo.annotations.Utils;
 import com.yahoo.javatraits.processor.data.ClassWithTraits;
 import com.yahoo.javatraits.processor.data.TraitElement;
-import com.yahoo.javatraits.utils.ClassName;
-import com.yahoo.javatraits.utils.JavaFileWriter;
-import com.yahoo.javatraits.utils.TypeName;
-import com.yahoo.javatraits.utils.Utils;
 
 public class TraitDelegateWriter {
 
