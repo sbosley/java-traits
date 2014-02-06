@@ -3,7 +3,7 @@
  * 
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.sambosley.javatraits.processor.writers;
+package com.yahoo.javatraits.processor.writers;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -17,10 +17,10 @@ import javax.lang.model.element.Modifier;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
-import com.sambosley.javatraits.processor.data.TraitElement;
-import com.sambosley.javatraits.utils.ClassName;
-import com.sambosley.javatraits.utils.JavaFileWriter;
-import com.sambosley.javatraits.utils.Utils;
+import com.yahoo.javatraits.processor.data.TraitElement;
+import com.yahoo.javatraits.utils.ClassName;
+import com.yahoo.javatraits.utils.JavaFileWriter;
+import com.yahoo.javatraits.utils.Utils;
 
 public class TraitInterfaceWriter {
 

@@ -3,7 +3,7 @@
  * 
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.sambosley.javatraits.utils;
+package com.yahoo.javatraits.utils;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -16,7 +16,7 @@ import java.util.Map;
 
 import javax.lang.model.element.Modifier;
 
-import com.sambosley.javatraits.utils.TypeName.TypeNameVisitor;
+import com.yahoo.javatraits.utils.TypeName.TypeNameVisitor;
 
 public class JavaFileWriter {
 

@@ -3,7 +3,7 @@
  * 
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.sambosley.javatraits.processor.data;
+package com.yahoo.javatraits.processor.data;
 
 import java.util.List;
 
@@ -11,9 +11,9 @@ import javax.annotation.processing.Messager;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 
-import com.sambosley.javatraits.utils.ClassName;
-import com.sambosley.javatraits.utils.TypeName;
-import com.sambosley.javatraits.utils.Utils;
+import com.yahoo.javatraits.utils.ClassName;
+import com.yahoo.javatraits.utils.TypeName;
+import com.yahoo.javatraits.utils.Utils;
 
 public abstract class TypeElementWrapper {
 

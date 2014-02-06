@@ -3,7 +3,7 @@
  * 
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.sambosley.javatraits.annotations;
+package com.yahoo.javatraits.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;

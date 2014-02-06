@@ -3,7 +3,7 @@
  * 
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.sambosley.javatraits.processor;
+package com.yahoo.javatraits.processor;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,14 +24,14 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 
-import com.sambosley.javatraits.annotations.HasTraits;
-import com.sambosley.javatraits.annotations.Trait;
-import com.sambosley.javatraits.processor.data.ClassWithTraits;
-import com.sambosley.javatraits.processor.data.TraitElement;
-import com.sambosley.javatraits.processor.writers.ClassWithTraitsSuperclassWriter;
-import com.sambosley.javatraits.processor.writers.TraitDelegateWriter;
-import com.sambosley.javatraits.processor.writers.TraitInterfaceWriter;
-import com.sambosley.javatraits.utils.ClassName;
+import com.yahoo.javatraits.annotations.HasTraits;
+import com.yahoo.javatraits.annotations.Trait;
+import com.yahoo.javatraits.processor.data.ClassWithTraits;
+import com.yahoo.javatraits.processor.data.TraitElement;
+import com.yahoo.javatraits.processor.writers.ClassWithTraitsSuperclassWriter;
+import com.yahoo.javatraits.processor.writers.TraitDelegateWriter;
+import com.yahoo.javatraits.processor.writers.TraitInterfaceWriter;
+import com.yahoo.javatraits.utils.ClassName;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 @SupportedAnnotationTypes(value="com.sambosley.javatraits.annotations.*")

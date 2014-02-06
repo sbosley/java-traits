@@ -3,7 +3,7 @@
  * 
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.sambosley.javatraits.utils;
+package com.yahoo.javatraits.utils;
 
 public class GenericName extends TypeName {
 

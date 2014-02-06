@@ -3,7 +3,7 @@
  * 
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.sambosley.javatraits.utils;
+package com.yahoo.javatraits.utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;

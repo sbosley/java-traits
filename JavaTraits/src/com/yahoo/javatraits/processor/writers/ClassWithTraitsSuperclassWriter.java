@@ -3,7 +3,7 @@
  * 
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.sambosley.javatraits.processor.writers;
+package com.yahoo.javatraits.processor.writers;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -23,15 +23,15 @@ import javax.lang.model.type.TypeKind;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
-import com.sambosley.javatraits.annotations.HasTraits;
-import com.sambosley.javatraits.processor.data.ClassWithTraits;
-import com.sambosley.javatraits.processor.data.TraitElement;
-import com.sambosley.javatraits.utils.ClassName;
-import com.sambosley.javatraits.utils.JavaFileWriter;
-import com.sambosley.javatraits.utils.MethodSignature;
-import com.sambosley.javatraits.utils.Pair;
-import com.sambosley.javatraits.utils.TypeName;
-import com.sambosley.javatraits.utils.Utils;
+import com.yahoo.javatraits.annotations.HasTraits;
+import com.yahoo.javatraits.processor.data.ClassWithTraits;
+import com.yahoo.javatraits.processor.data.TraitElement;
+import com.yahoo.javatraits.utils.ClassName;
+import com.yahoo.javatraits.utils.JavaFileWriter;
+import com.yahoo.javatraits.utils.MethodSignature;
+import com.yahoo.javatraits.utils.Pair;
+import com.yahoo.javatraits.utils.TypeName;
+import com.yahoo.javatraits.utils.Utils;
 
 public class ClassWithTraitsSuperclassWriter {
 

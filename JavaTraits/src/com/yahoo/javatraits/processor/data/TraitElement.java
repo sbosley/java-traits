@@ -3,7 +3,7 @@
  * 
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.sambosley.javatraits.processor.data;
+package com.yahoo.javatraits.processor.data;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +17,8 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 
-import com.sambosley.javatraits.utils.ClassName;
-import com.sambosley.javatraits.utils.Utils;
+import com.yahoo.javatraits.utils.ClassName;
+import com.yahoo.javatraits.utils.Utils;
 
 public class TraitElement extends TypeElementWrapper {
 
