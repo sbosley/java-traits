@@ -110,16 +110,7 @@ public class Utils {
     public static void accumulateImportsFromExecutableElements(Set<ClassName> accumulate, List<? extends ExecutableElement> elems, Messager messager) {
         for (ExecutableElement exec : elems) {
             ImportGatheringTypeVisitor visitor = new ImportGatheringTypeVisitor(exec, messager);
-            TypeMirror returnType = exec.getReturnType();
-            returnType.accept(visitor, accumulate);
-            List<? extends VariableElement> parameters = exec.getParameters();
-            for (VariableElement var : parameters) {
-                var.asType().accept(visitor, accumulate);
-            }
-            List<? extends TypeMirror> thrownTypes = exec.getThrownTypes();
-            for (TypeMirror thrown : thrownTypes) {
-                thrown.accept(visitor, accumulate);
-            }
+            exec.asType().accept(visitor, accumulate);
         }
     }
     

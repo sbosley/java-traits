@@ -5,6 +5,7 @@
  */
 package com.yahoo.annotations;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.processing.Messager;
@@ -56,6 +57,10 @@ public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<ClassNa
         String toAdd = t.toString();
         if (!Utils.OBJECT_CLASS_NAME.equals(toAdd))
             p.add(new ClassName(t.toString()));
+        List<? extends TypeMirror> typeArgs = t.getTypeArguments();
+        for (TypeMirror m : typeArgs) {
+            m.accept(this, p);
+        }
         return null;
     }
 
@@ -67,6 +72,16 @@ public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<ClassNa
 
     @Override
     public Void visitExecutable(ExecutableType t, Set<ClassName> p) {
+        TypeMirror returnType = t.getReturnType();
+        returnType.accept(this, p);
+        List<? extends TypeMirror> parameters = t.getParameterTypes();
+        for (TypeMirror var : parameters) {
+            var.accept(this, p);
+        }
+        List<? extends TypeMirror> thrownTypes = t.getThrownTypes();
+        for (TypeMirror thrown : thrownTypes) {
+            thrown.accept(this, p);
+        }
         messager.printMessage(Kind.ERROR, "Encountered ExecutableType accumulating imports", elem);
         return null;
     }
