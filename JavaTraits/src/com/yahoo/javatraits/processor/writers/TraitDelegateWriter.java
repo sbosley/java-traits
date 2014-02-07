@@ -7,7 +7,6 @@ package com.yahoo.javatraits.processor.writers;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -23,7 +22,6 @@ import javax.tools.JavaFileObject;
 
 import com.yahoo.annotations.ClassName;
 import com.yahoo.annotations.JavaFileWriter;
-import com.yahoo.annotations.TypeName;
 import com.yahoo.annotations.Utils;
 import com.yahoo.javatraits.processor.data.ClassWithTraits;
 import com.yahoo.javatraits.processor.data.TraitElement;
@@ -42,7 +40,9 @@ public class TraitDelegateWriter {
         this.traitElement = traitElement;
         this.messager = messager;
         this.traitDelegateClass = cls.getDelegateClassNameForTraitElement(traitElement);
+        this.traitDelegateClass.setTypeArgs(traitElement.getTypeParameters());
         this.delegateClass = cls.getFullyQualifiedGeneratedSuperclassName();
+        this.delegateClass.setTypeArgs(cls.getTypeParametersForDelegate(traitElement));
     }
 
     public void writeDelegate(Filer filer) {
@@ -74,15 +74,16 @@ public class TraitDelegateWriter {
         Set<ClassName> imports = new HashSet<ClassName>();
         Utils.accumulateImportsFromExecutableElements(imports, traitElement.getDeclaredMethods(), messager);
         imports.add(delegateClass);
+        imports.add(traitElement.getFullyQualifiedName());
         writer.writeImports(imports);
     }
 
     private void emitDelegateDeclaration() throws IOException {
-        writer.beginTypeDeclaration(traitDelegateClass.getSimpleName(), "class", Modifier.PUBLIC);
-        if (traitElement.hasTypeParameters()) {
-            writer.appendGenericDeclaration(traitElement.getTypeParameters());
-        }
-        writer.addSuperclassToTypeDeclaration(traitElement.getFullyQualifiedName(), traitElement.getTypeParameters());
+        writer.beginTypeDeclaration(traitDelegateClass, "class", Modifier.PUBLIC);
+
+        ClassName superclass = traitElement.getFullyQualifiedName().clone();
+        superclass.setTypeArgs(traitElement.getTypeParameters());
+        writer.addSuperclassToTypeDeclaration(superclass);
         writer.finishTypeDeclarationAndBeginTypeDefinition();
 
         emitDelegateInstance();
@@ -94,17 +95,12 @@ public class TraitDelegateWriter {
     }
 
     private void emitDelegateInstance() throws IOException {
-        List<TypeName> generics = cls.getTypeParametersForDelegate(traitElement);
-        writer.emitFieldDeclaration(delegateClass, "delegate", generics, Modifier.PRIVATE);
+        writer.emitFieldDeclaration(delegateClass, "delegate", Modifier.PRIVATE);
     }
 
     private void emitConstructor() throws IOException {
         writer.beginConstructorDeclaration(traitDelegateClass.getSimpleName(), Modifier.PUBLIC);
-        List<TypeName> generics = cls.getTypeParametersForDelegate(traitElement);
-        List<List<? extends TypeName>> genericsForArgs = new ArrayList<List<? extends TypeName>>();
-        genericsForArgs.add(generics);
         writer.addArgumentList(Arrays.asList(delegateClass),
-                genericsForArgs,
                 Arrays.asList("delegate"));
         writer.finishMethodDeclarationAndBeginMethodDefinition(null, false);
         writer.emitStatement("this.delegate = delegate;\n", 2);

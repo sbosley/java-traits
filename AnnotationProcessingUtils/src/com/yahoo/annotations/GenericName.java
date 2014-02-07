@@ -1,6 +1,6 @@
 /**
  * Copyright 2014 Yahoo Inc.
- * 
+ *
  * See the file "LICENSE" for the full license governing this code.
  */
 package com.yahoo.annotations;
@@ -10,12 +10,21 @@ public class GenericName extends TypeName {
     private String qualifier;
     private String genericName;
     private TypeName upperBound;
-    
+
     public GenericName(String genericName, TypeName upperBound) {
         this.genericName = genericName;
         this.upperBound = upperBound;
     }
-    
+
+    @Override
+    public GenericName clone() {
+        GenericName clone = (GenericName) super.clone();
+        clone.qualifier = this.qualifier;
+        clone.genericName = this.genericName;
+        clone.upperBound = (TypeName) upperBound.clone();
+        return clone;
+    }
+
     public String getGenericName() {
         StringBuilder result = new StringBuilder();
         if (qualifier != null && !"?".equals(genericName))
@@ -23,18 +32,18 @@ public class GenericName extends TypeName {
         result.append(genericName);
         return result.toString();
     }
-    
+
     public TypeName getUpperBound() {
         return upperBound;
     }
-    
+
     @Override
     public String getTypeString(boolean simple) {
         StringBuilder result = new StringBuilder(getGenericName());
         appendArrayString(result);
         return result.toString();
     }
-    
+
     public void addQualifier(String qualifier) {
         if (this.qualifier != null)
             throw new IllegalArgumentException("Generic " + genericName + " already has qualifier " + this.qualifier);
@@ -79,5 +88,5 @@ public class GenericName extends TypeName {
             return false;
         return true;
     }
-    
+
 }

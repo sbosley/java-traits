@@ -50,6 +50,7 @@ public class TraitElement extends TypeElementWrapper {
             }
         }
         interfaceName = new ClassName(fqn.getPackageName(), fqn.getSimpleName() + INTERFACE_SUFFIX);
+        interfaceName.setTypeArgs(getTypeParameters());
     }
 
     public ClassName getInterfaceName() {

@@ -1,6 +1,6 @@
 /**
  * Copyright 2014 Yahoo Inc.
- * 
+ *
  * See the file "LICENSE" for the full license governing this code.
  */
 package com.yahoo.annotations;
@@ -8,6 +8,7 @@ package com.yahoo.annotations;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -21,6 +22,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
@@ -29,11 +31,11 @@ import javax.lang.model.type.WildcardType;
 public class Utils {
 
     public static final String OBJECT_CLASS_NAME = "java.lang.Object";
-    
+
     public static boolean isEmpty(String str) {
         return str == null || str.isEmpty();
     }
-    
+
     public static String getPackageFromFullyQualifiedName(String name) {
         int split = getFQNSplitIndex(name);
         if (split < 0)
@@ -63,7 +65,7 @@ public class Utils {
         }
         return result;
     }
-    
+
     public static AnnotationMirror findAnnotationMirror(Element elem, Class<?> annotationClass) {
         List<? extends AnnotationMirror> annotationMirrors = elem.getAnnotationMirrors();
         String annotationClassName = annotationClass.getName();
@@ -72,14 +74,14 @@ public class Utils {
                 return mirror;
         return null;
     }
-    
+
     public static AnnotationValue findAnnotationValue(AnnotationMirror mirror, String propertyName) {
         for(Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : mirror.getElementValues().entrySet())
             if (propertyName.equals(entry.getKey().getSimpleName().toString()))
                 return entry.getValue();
         return null;
     }
-    
+
     public static List<ClassName> getClassValuesFromAnnotationValue(AnnotationValue annotationValue) {
         List<ClassName> result = new ArrayList<ClassName>();
         Object value = annotationValue.getValue();
@@ -113,22 +115,22 @@ public class Utils {
             exec.asType().accept(visitor, accumulate);
         }
     }
-    
+
     public static MethodSignature getMethodSignature(ExecutableElement exec, String genericQualifier) {
         String name = exec.getSimpleName().toString();
         MethodSignature result = new MethodSignature(name);
-        
+
         List<TypeName> methodGenerics = Utils.mapTypeParameterElementsToTypeName(exec.getTypeParameters(), null);
         TypeName returnType = Utils.getTypeNameFromTypeMirror(exec.getReturnType(), null);
         if (!methodGenerics.contains(returnType) && returnType instanceof GenericName)
             ((GenericName) returnType).addQualifier(genericQualifier);
         result.setReturnType(returnType);
-        
+
         List<TypeName> argTypeNames = getArgumentTypeNames(exec, genericQualifier, methodGenerics);
         result.addArgType(argTypeNames.toArray(new TypeName[argTypeNames.size()]));
         return result;
     }
-    
+
     public static <T extends TypeParameterElement> List<TypeName> mapTypeParameterElementsToTypeName(List<T> params, final String genericQualifier) {
         return map(params, new MapFunction<T, TypeName>() {
             @Override
@@ -137,10 +139,10 @@ public class Utils {
             }
         });
     }
-    
-    public static TypeName getTypeNameFromTypeMirror(TypeMirror mirror, String genericQualifier) {
+
+    public static TypeName getTypeNameFromTypeMirror(TypeMirror mirror, final String genericQualifier) {
         TypeKind kind = mirror.getKind();
-        
+
         int arrayDepth = 0;
         while (kind == TypeKind.ARRAY) {
             ArrayType type = (ArrayType) mirror;
@@ -148,8 +150,8 @@ public class Utils {
             mirror = type.getComponentType();
             kind = mirror.getKind();
         }
-        
-        String mirrorString = mirror.toString();        
+
+        String mirrorString = mirror.toString();
         TypeName toReturn;
         if (kind == TypeKind.TYPEVAR) {
             TypeVariable typeVariable = (TypeVariable) mirror;
@@ -163,34 +165,58 @@ public class Utils {
             TypeMirror upperBoundMirror = wildcardType.getExtendsBound();
             toReturn = getGenericName("?", genericQualifier, upperBoundMirror);
         } else {
+            List<TypeName> typeArgs = Collections.emptyList();
+            if (mirror instanceof DeclaredType) {
+                DeclaredType declaredMirror = (DeclaredType) mirror;
+                List<? extends TypeMirror> declaredTypeArgs = declaredMirror.getTypeArguments();
+                if (declaredTypeArgs.size() > 0) {
+                    mirrorString = mirrorString.replaceAll("<.*>", "");
+                    typeArgs = map(declaredTypeArgs, new MapFunction<TypeMirror, TypeName>() {
+                        @Override
+                        public TypeName map(TypeMirror arg) {
+                            return getTypeNameFromTypeMirror(arg, genericQualifier);
+                        }
+                    });
+                }
+            }
             toReturn = new ClassName(mirrorString);
+            ((ClassName) toReturn).setTypeArgs(typeArgs);
         }
         toReturn.setArrayDepth(arrayDepth);
         return toReturn;
     }
-    
+
     private static GenericName getGenericName(String genericName, String genericQualifier, TypeMirror upperBoundMirror) {
         TypeName upperBound = null;
         if (upperBoundMirror != null && !OBJECT_CLASS_NAME.equals(upperBoundMirror.toString()))
             upperBound = getTypeNameFromTypeMirror(upperBoundMirror, genericQualifier);
         return new GenericName(genericName, upperBound);
     }
-    
-    public static List<String> beginMethodDeclarationForExecutableElement(JavaFileWriter writer, ExecutableElement exec, String nameOverride, 
+
+    public static List<String> beginMethodDeclarationForExecutableElement(JavaFileWriter writer, ExecutableElement exec, String nameOverride,
             String genericQualifier, boolean isAbstract, Modifier... modifiers) throws IOException {
         String name = nameOverride != null ? nameOverride : exec.getSimpleName().toString();
         List<TypeName> methodGenerics = Utils.mapTypeParameterElementsToTypeName(exec.getTypeParameters(), null);
         TypeName returnType = Utils.getTypeNameFromTypeMirror(exec.getReturnType(), null);
-        if (!methodGenerics.contains(returnType) && returnType instanceof GenericName)
-            ((GenericName) returnType).addQualifier(genericQualifier);
-        
+        qualifyReturnTypeGenerics(methodGenerics, returnType, genericQualifier);
+
         writer.beginMethodDeclaration(name, returnType, Arrays.asList(modifiers), methodGenerics);
         List<String> argNames = emitMethodArguments(writer, exec, genericQualifier, methodGenerics);
         List<TypeName> thrownTypes = getThrownTypes(exec, genericQualifier, methodGenerics);
         writer.finishMethodDeclarationAndBeginMethodDefinition(thrownTypes, isAbstract);
         return argNames;
     }
-    
+
+    private static void qualifyReturnTypeGenerics(List<TypeName> methodGenerics, TypeName returnType, String genericQualifier) {
+        if (!methodGenerics.contains(returnType) && returnType instanceof GenericName)
+            ((GenericName) returnType).addQualifier(genericQualifier);
+        if (returnType instanceof ClassName) {
+            ClassName returnClass = (ClassName) returnType;
+            for (TypeName nestedType : returnClass.getTypeArgs())
+                qualifyReturnTypeGenerics(methodGenerics, nestedType, genericQualifier);
+        }
+    }
+
     private static List<TypeName> getArgumentTypeNames(ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) {
         List<TypeName> typeNames = Utils.map(exec.getParameters(), new Utils.MapFunction<VariableElement, TypeName>() {
             @Override
@@ -208,7 +234,7 @@ public class Utils {
         });
         return typeNames;
     }
-    
+
     private static List<String> emitMethodArguments(JavaFileWriter writer, ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) throws IOException {
         List<? extends VariableElement> arguments = exec.getParameters();
         List<TypeName> typeNames = getArgumentTypeNames(exec, genericQualifier, methodGenerics);
@@ -220,10 +246,10 @@ public class Utils {
         });
         if (exec.isVarArgs())
             typeNames.get(typeNames.size() - 1).setIsVarArgs(true);
-        writer.addArgumentList(typeNames, null, argNames);
+        writer.addArgumentList(typeNames, argNames);
         return argNames;
     }
-    
+
     private static List<TypeName> getThrownTypes(ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) {
         List<? extends TypeMirror> thrownTypeMirrors = exec.getThrownTypes();
         List<TypeName> thrownTypes = Utils.map(thrownTypeMirrors, new Utils.MapFunction<TypeMirror, TypeName>() {

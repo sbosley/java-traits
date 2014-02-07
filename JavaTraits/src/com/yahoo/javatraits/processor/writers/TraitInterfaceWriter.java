@@ -1,6 +1,6 @@
 /**
  * Copyright 2014 Yahoo Inc.
- * 
+ *
  * See the file "LICENSE" for the full license governing this code.
  */
 package com.yahoo.javatraits.processor.writers;
@@ -64,8 +64,7 @@ public class TraitInterfaceWriter {
     }
 
     private void emitInterfaceDeclaration() throws IOException {
-        writer.beginTypeDeclaration(element.getInterfaceName().getSimpleName(), "interface", Modifier.PUBLIC);
-        writer.appendGenericDeclaration(element.getTypeParameters()); 
+        writer.beginTypeDeclaration(element.getInterfaceName(), "interface", Modifier.PUBLIC);
         writer.finishTypeDeclarationAndBeginTypeDefinition();
         emitMethodDeclarations();
         writer.finishTypeDefinitionAndCloseType();
@@ -80,5 +79,5 @@ public class TraitInterfaceWriter {
     private void emitMethodDeclarationForExecutableElement(ExecutableElement exec) throws IOException {
         Utils.beginMethodDeclarationForExecutableElement(writer, exec, null, element.getSimpleName(), true, Modifier.PUBLIC);
     }
-    
+
 }

@@ -1,6 +1,6 @@
 /**
  * Copyright 2014 Yahoo Inc.
- * 
+ *
  * See the file "LICENSE" for the full license governing this code.
  */
 package com.yahoo.javatraits.processor.writers;
@@ -64,7 +64,7 @@ public class ClassWithTraitsSuperclassWriter {
             emitClassDefinition();
             writer.close();
         } catch (IOException e) {
-            messager.printMessage(Kind.ERROR, "IOException writing delegate class with delegate " + 
+            messager.printMessage(Kind.ERROR, "IOException writing delegate class with delegate " +
                     cls.getSimpleName() + " for trait", cls.getSourceElement());
         }
     }
@@ -95,7 +95,6 @@ public class ClassWithTraitsSuperclassWriter {
     }
 
     private void emitClassDeclaration() throws IOException {
-        writer.beginTypeDeclaration(cls.getFullyQualifiedGeneratedSuperclassName().getSimpleName(), "class", Modifier.PUBLIC, Modifier.ABSTRACT);
         List<TypeName> generics = new ArrayList<TypeName>();
         for (int i = 0; i < allTraits.size(); i++) {
             TraitElement elem = allTraits.get(i);
@@ -103,22 +102,21 @@ public class ClassWithTraitsSuperclassWriter {
                 generics.addAll(elem.getTypeParameters());
             }
         }
-        writer.appendGenericDeclaration(generics);
+        ClassName superclassName = cls.getFullyQualifiedGeneratedSuperclassName().clone();
+        superclassName.setTypeArgs(generics);
+        writer.beginTypeDeclaration(superclassName, "class", Modifier.PUBLIC, Modifier.ABSTRACT);
 
-        String desiredSuperclass = cls.getDesiredSuperclass().toString();
-        if (!Utils.OBJECT_CLASS_NAME.equals(desiredSuperclass))
-            writer.addSuperclassToTypeDeclaration(cls.getDesiredSuperclass(), null);
-        
+        ClassName desiredSuperclass = cls.getDesiredSuperclass().clone();
+        if (!Utils.OBJECT_CLASS_NAME.equals(desiredSuperclass.toString()))
+            writer.addSuperclassToTypeDeclaration(desiredSuperclass);
+
         if (allTraits.size() > 0) {
             List<ClassName> interfaces = new ArrayList<ClassName>();
-            List<List<? extends TypeName>> interfaceGenerics = new ArrayList<List<? extends TypeName>>();
-            
             for (int i = 0; i < allTraits.size(); i++) {
                 TraitElement elem = allTraits.get(i);
                 interfaces.add(elem.getInterfaceName());
-                interfaceGenerics.add(elem.getTypeParameters());
             }
-            writer.addInterfacesToTypeDeclaration(interfaces, interfaceGenerics);
+            writer.addInterfacesToTypeDeclaration(interfaces);
         }
 
         writer.finishTypeDeclarationAndBeginTypeDefinition();
@@ -132,8 +130,9 @@ public class ClassWithTraitsSuperclassWriter {
 
     private void emitDelegateFields() throws IOException {
         for (TraitElement elem : allTraits) {
-            ClassName delegateClass = cls.getDelegateClassNameForTraitElement(elem);
-            writer.emitFieldDeclaration(delegateClass, getDelegateVariableName(elem), elem.getTypeParameters(), Modifier.PRIVATE);
+            ClassName delegateClass = cls.getDelegateClassNameForTraitElement(elem).clone();
+            delegateClass.setTypeArgs(elem.getTypeParameters());
+            writer.emitFieldDeclaration(delegateClass, getDelegateVariableName(elem), Modifier.PRIVATE);
         }
         writer.emitNewline();
     }
@@ -141,7 +140,7 @@ public class ClassWithTraitsSuperclassWriter {
     private void emitInitMethod() throws IOException {
         writer.beginMethodDeclaration("init", null, Arrays.asList(Modifier.PROTECTED, Modifier.FINAL), null);
         writer.finishMethodDeclarationAndBeginMethodDefinition(null, false);
-        
+
         for (TraitElement elem : allTraits) {
             ClassName delegateClass = cls.getDelegateClassNameForTraitElement(elem);
             writer.emitStatement(getDelegateVariableName(elem) + " = new ", 2);
@@ -204,14 +203,14 @@ public class ClassWithTraitsSuperclassWriter {
             Set<Modifier> modifiers = exec.getModifiers();
             boolean isAbstract = modifiers.contains(Modifier.ABSTRACT);
             List<String> argNames = Utils.beginMethodDeclarationForExecutableElement(writer, exec, null, elem.getSimpleName(), isAbstract, modifiers.toArray(new Modifier[modifiers.size()]));
-            
+
             if (!isAbstract) {
                 StringBuilder nullCheck = new StringBuilder();
                 String delegateVariableName = getDelegateVariableName(elem);
                 nullCheck.append("if (").append(delegateVariableName).append(" == null)");
                 writer.emitStatement("if (" + delegateVariableName + " == null)\n", 2);
                 writer.emitStatement("throw new IllegalStateException(\"init() not called on instance of class \" + getClass());\n", 3);
-                
+
                 StringBuilder statement = new StringBuilder();
                 if (exec.getReturnType().getKind() != TypeKind.VOID)
                     statement.append("return ");

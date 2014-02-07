@@ -1,14 +1,20 @@
 /**
  * Copyright 2014 Yahoo Inc.
- * 
+ *
  * See the file "LICENSE" for the full license governing this code.
  */
 package com.yahoo.javatraits.test;
+
+import java.util.ArrayList;
+import java.util.Map;
 
 import com.yahoo.javatraits.annotations.Trait;
 
 @Trait
 public abstract class MathTrait<A extends Number, B extends A> {
+
+    public abstract Map<String, ArrayList<B>> getParametrizedArg();
+
     public int add(int arg1, int arg2) {
         return arg1 + arg2;
     }
@@ -33,13 +39,13 @@ public abstract class MathTrait<A extends Number, B extends A> {
         }
         return sum;
     }
-    
+
     public abstract B transform(A a);
-    
+
     public <D extends Number> int numberToInt(D number) {
         return number.intValue();
     }
-    
+
     public String duplicateMethod(int someArg) {
         return Integer.toHexString(someArg);
     }

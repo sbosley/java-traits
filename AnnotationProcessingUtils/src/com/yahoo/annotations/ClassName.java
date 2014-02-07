@@ -1,15 +1,18 @@
 /**
  * Copyright 2014 Yahoo Inc.
- * 
+ *
  * See the file "LICENSE" for the full license governing this code.
  */
 package com.yahoo.annotations;
+
+import java.util.List;
 
 
 public class ClassName extends TypeName {
 
     private String packageName;
     private String simpleName;
+    private List<TypeName> typeArgs = null;
 
     public ClassName(String packageName, String simpleName) {
         this.packageName = packageName;
@@ -19,6 +22,23 @@ public class ClassName extends TypeName {
     public ClassName(String fullyQualifiedName) {
         this.packageName = Utils.getPackageFromFullyQualifiedName(fullyQualifiedName);
         this.simpleName = Utils.getSimpleNameFromFullyQualifiedName(fullyQualifiedName);
+    }
+
+    @Override
+    public ClassName clone() {
+        ClassName clone = (ClassName) super.clone();
+        clone.packageName = this.packageName;
+        clone.simpleName = this.simpleName;
+        clone.typeArgs = this.typeArgs;
+        return clone;
+    }
+
+    public List<TypeName> getTypeArgs() {
+        return typeArgs;
+    }
+
+    public void setTypeArgs(List<TypeName> typeArgs) {
+        this.typeArgs = typeArgs;
     }
 
     public String toString() {
@@ -34,7 +54,7 @@ public class ClassName extends TypeName {
     public String getSimpleName() {
         return simpleName;
     }
-    
+
     public String getTypeString(boolean simple) {
         StringBuilder result = new StringBuilder(simple ? getSimpleName() : toString());
         appendArrayString(result);

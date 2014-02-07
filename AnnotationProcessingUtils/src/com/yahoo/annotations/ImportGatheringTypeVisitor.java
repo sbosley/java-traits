@@ -1,6 +1,6 @@
 /**
  * Copyright 2014 Yahoo Inc.
- * 
+ *
  * See the file "LICENSE" for the full license governing this code.
  */
 package com.yahoo.annotations;
@@ -55,8 +55,10 @@ public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<ClassNa
     @Override
     public Void visitDeclared(DeclaredType t, Set<ClassName> p) {
         String toAdd = t.toString();
-        if (!Utils.OBJECT_CLASS_NAME.equals(toAdd))
-            p.add(new ClassName(t.toString()));
+        if (!Utils.OBJECT_CLASS_NAME.equals(toAdd)) {
+            String mirrorString = t.toString().replaceAll("<.*>", "");
+            p.add(new ClassName(mirrorString));
+        }
         List<? extends TypeMirror> typeArgs = t.getTypeArguments();
         for (TypeMirror m : typeArgs) {
             m.accept(this, p);
