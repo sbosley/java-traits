@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 import javax.lang.model.element.Modifier;
 
@@ -56,6 +57,7 @@ public class JavaFileWriter {
 
     public void writeImports(Collection<ClassName> imports) throws IOException {
         checkScope(Scope.IMPORTS);
+        TreeSet<String> sortedImports = new TreeSet<String>();
         for (ClassName item : imports) {
             String simpleName = item.getSimpleName();
             List<ClassName> allNames = knownNames.get(simpleName);
@@ -65,10 +67,16 @@ public class JavaFileWriter {
             }
 
             if (!allNames.contains(item)) {
-                out.append("import ").append(item.toString()).append(";\n");
-                allNames.add(item);
+                if (item.isJavaLangPackage()) {
+                    allNames.add(0, item);
+                } else {
+                    allNames.add(item);
+                    sortedImports.add(item.toString());
+                }
             }
         }
+        for (String item : sortedImports)
+            out.append("import ").append(item).append(";\n");
         out.append("\n");
     }
 
@@ -78,9 +86,9 @@ public class JavaFileWriter {
 
     public void beginTypeDeclaration(ClassName name, String kind, List<Modifier> modifiers) throws IOException {
         checkScope(Scope.IMPORTS);
-        emitModifierList(modifiers);
+        writeModifierList(modifiers);
         out.append(kind).append(" ").append(name.getSimpleName());
-        emitGenericsList(name.getTypeArgs(), true);
+        writeGenericsList(name.getTypeArgs(), true);
         moveToScope(Scope.TYPE_DECLARATION);
     }
 
@@ -105,15 +113,15 @@ public class JavaFileWriter {
         moveToScope(Scope.TYPE_DEFINITION);
     }
 
-    public void emitFieldDeclaration(TypeName type, String name, Modifier... modifiers) throws IOException {
-        emitFieldDeclaration(type, name, Arrays.asList(modifiers));
+    public void writeFieldDeclaration(TypeName type, String name, Modifier... modifiers) throws IOException {
+        writeFieldDeclaration(type, name, Arrays.asList(modifiers));
     }
 
-    public void emitFieldDeclaration(TypeName type, String name, List<Modifier> modifiers) throws IOException {
+    public void writeFieldDeclaration(TypeName type, String name, List<Modifier> modifiers) throws IOException {
         checkScope(Scope.TYPE_DEFINITION);
         indent(1);
         moveToScope(Scope.FIELD_DECLARATION);
-        emitModifierList(modifiers);
+        writeModifierList(modifiers);
         out.append(shortenName(type, false));
         out.append(" ").append(name).append(";\n");
         moveToScope(Scope.TYPE_DEFINITION);
@@ -123,8 +131,8 @@ public class JavaFileWriter {
         checkScope(Scope.TYPE_DEFINITION);
         indent(1);
         moveToScope(Scope.METHOD_DECLARATION);
-        emitModifierList(modifiers);
-        if (emitGenericsList(methodGenerics, true))
+        writeModifierList(modifiers);
+        if (writeGenericsList(methodGenerics, true))
             out.append(" ");
         if (returnType == null)
             out.append("void");
@@ -142,7 +150,7 @@ public class JavaFileWriter {
         checkScope(Scope.TYPE_DEFINITION);
         indent(1);
         moveToScope(Scope.METHOD_DECLARATION);
-        emitModifierList(modifiers);
+        writeModifierList(modifiers);
         out.append(type).append("(");
     }
 
@@ -180,13 +188,13 @@ public class JavaFileWriter {
         }
     }
 
-    public void emitStatement(String statement, int indentLevel) throws IOException {
+    public void writeStatement(String statement, int indentLevel) throws IOException {
         checkScope(Scope.METHOD_DEFINITION);
         indent(indentLevel);
         out.append(statement);
     }
 
-    public void emitNewline() throws IOException {
+    public void writeNewline() throws IOException {
         out.append("\n");
     }
 
@@ -203,7 +211,7 @@ public class JavaFileWriter {
         moveToScope(Scope.FINISHED);
     }
 
-    private void emitModifierList(List<Modifier> modifiers) throws IOException {
+    private void writeModifierList(List<Modifier> modifiers) throws IOException {
         if (modifiers != null) {
             for (Modifier mod : modifiers) {
                 out.append(mod.toString()).append(" ");
@@ -227,7 +235,7 @@ public class JavaFileWriter {
         }
     };
 
-    public boolean emitGenericsList(List<? extends TypeName> generics, boolean includeBounds) throws IOException {
+    public boolean writeGenericsList(List<? extends TypeName> generics, boolean includeBounds) throws IOException {
         String genericsList = getGenericsListString(generics, includeBounds);
         if (!genericsList.isEmpty())
             out.append(genericsList);

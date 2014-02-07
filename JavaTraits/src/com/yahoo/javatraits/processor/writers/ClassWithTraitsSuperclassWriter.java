@@ -132,9 +132,9 @@ public class ClassWithTraitsSuperclassWriter {
     private void emitDelegateFields() throws IOException {
         for (TraitElement elem : allTraits) {
             ClassName delegateClass = cls.getDelegateClassNameForTraitElement(elem);
-            writer.emitFieldDeclaration(delegateClass, getDelegateVariableName(elem), Modifier.PRIVATE);
+            writer.writeFieldDeclaration(delegateClass, getDelegateVariableName(elem), Modifier.PRIVATE);
         }
-        writer.emitNewline();
+        writer.writeNewline();
     }
 
     private void emitInitMethod() throws IOException {
@@ -143,9 +143,9 @@ public class ClassWithTraitsSuperclassWriter {
 
         for (TraitElement elem : allTraits) {
             ClassName delegateClass = cls.getDelegateClassNameForTraitElement(elem);
-            writer.emitStatement(getDelegateVariableName(elem) + " = new ", 2);
-            writer.emitStatement(writer.shortenName(delegateClass, false), 0);
-            writer.emitStatement("(this);\n", 0);
+            writer.writeStatement(getDelegateVariableName(elem) + " = new ", 2);
+            writer.writeStatement(writer.shortenName(delegateClass, false), 0);
+            writer.writeStatement("(this);\n", 0);
         }
         writer.finishMethodDefinition();
     }
@@ -209,8 +209,8 @@ public class ClassWithTraitsSuperclassWriter {
                 StringBuilder nullCheck = new StringBuilder();
                 String delegateVariableName = getDelegateVariableName(elem);
                 nullCheck.append("if (").append(delegateVariableName).append(" == null)");
-                writer.emitStatement("if (" + delegateVariableName + " == null)\n", 2);
-                writer.emitStatement("throw new IllegalStateException(\"init() not called on instance of class \" + getClass());\n", 3);
+                writer.writeStatement("if (" + delegateVariableName + " == null)\n", 2);
+                writer.writeStatement("throw new IllegalStateException(\"init() not called on instance of class \" + getClass());\n", 3);
 
                 StringBuilder statement = new StringBuilder();
                 if (exec.getReturnType().getKind() != TypeKind.VOID)
@@ -223,7 +223,7 @@ public class ClassWithTraitsSuperclassWriter {
                         statement.append(", ");
                 }
                 statement.append(");\n");
-                writer.emitStatement(statement.toString(), 2);
+                writer.writeStatement(statement.toString(), 2);
                 writer.finishMethodDefinition();
             }
         }

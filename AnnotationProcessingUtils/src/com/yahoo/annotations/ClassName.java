@@ -33,6 +33,10 @@ public class ClassName extends TypeName {
         return clone;
     }
 
+    public boolean isJavaLangPackage() {
+        return "java.lang".equals(packageName);
+    }
+
     public List<TypeName> getTypeArgs() {
         return typeArgs;
     }

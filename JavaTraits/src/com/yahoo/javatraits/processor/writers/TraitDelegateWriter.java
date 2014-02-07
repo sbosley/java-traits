@@ -96,7 +96,7 @@ public class TraitDelegateWriter {
     }
 
     private void emitDelegateInstance() throws IOException {
-        writer.emitFieldDeclaration(delegateClass, "delegate", Modifier.PRIVATE);
+        writer.writeFieldDeclaration(delegateClass, "delegate", Modifier.PRIVATE);
     }
 
     private void emitConstructor() throws IOException {
@@ -104,7 +104,7 @@ public class TraitDelegateWriter {
         writer.addArgumentList(Arrays.asList(delegateClass),
                 Arrays.asList("delegate"));
         writer.finishMethodDeclarationAndBeginMethodDefinition(null, false);
-        writer.emitStatement("this.delegate = delegate;\n", 2);
+        writer.writeStatement("this.delegate = delegate;\n", 2);
         writer.finishMethodDefinition();
     }
 
@@ -130,7 +130,7 @@ public class TraitDelegateWriter {
     private void emitGetThis() throws IOException {
         writer.beginMethodDeclaration(TraitProcessorUtils.GET_THIS, traitElement.getInterfaceName(), Arrays.asList(Modifier.PUBLIC), null);
         writer.finishMethodDeclarationAndBeginMethodDefinition(null, false);
-        writer.emitStatement("return delegate;\n", 2);
+        writer.writeStatement("return delegate;\n", 2);
         writer.finishMethodDefinition();
     }
 
@@ -148,7 +148,7 @@ public class TraitDelegateWriter {
                 statement.append(", ");
         }
         statement.append(");\n");
-        writer.emitStatement(statement.toString(), 2);
+        writer.writeStatement(statement.toString(), 2);
         writer.finishMethodDefinition();
     }
 

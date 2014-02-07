@@ -201,7 +201,7 @@ public class Utils {
         qualifyReturnTypeGenerics(methodGenerics, returnType, genericQualifier);
 
         writer.beginMethodDeclaration(name, returnType, Arrays.asList(modifiers), methodGenerics);
-        List<String> argNames = emitMethodArguments(writer, exec, genericQualifier, methodGenerics);
+        List<String> argNames = writeMethodArguments(writer, exec, genericQualifier, methodGenerics);
         List<TypeName> thrownTypes = getThrownTypes(exec, genericQualifier, methodGenerics);
         writer.finishMethodDeclarationAndBeginMethodDefinition(thrownTypes, isAbstract);
         return argNames;
@@ -235,7 +235,7 @@ public class Utils {
         return typeNames;
     }
 
-    private static List<String> emitMethodArguments(JavaFileWriter writer, ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) throws IOException {
+    private static List<String> writeMethodArguments(JavaFileWriter writer, ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) throws IOException {
         List<? extends VariableElement> arguments = exec.getParameters();
         List<TypeName> typeNames = getArgumentTypeNames(exec, genericQualifier, methodGenerics);
         List<String> argNames = Utils.map(arguments, new Utils.MapFunction<VariableElement, String>() {
