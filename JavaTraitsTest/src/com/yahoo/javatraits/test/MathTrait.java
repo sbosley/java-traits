@@ -15,6 +15,8 @@ public abstract class MathTrait<A extends Number, B extends A> {
 
     public abstract Map<String, ArrayList<B>> getParametrizedArg();
 
+    public abstract MathTraitInterface<A, B> getThis();
+
     public int add(int arg1, int arg2) {
         return arg1 + arg2;
     }

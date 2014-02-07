@@ -25,6 +25,7 @@ import com.yahoo.annotations.JavaFileWriter;
 import com.yahoo.annotations.Utils;
 import com.yahoo.javatraits.processor.data.ClassWithTraits;
 import com.yahoo.javatraits.processor.data.TraitElement;
+import com.yahoo.javatraits.utils.TraitProcessorUtils;
 
 public class TraitDelegateWriter {
 
@@ -119,8 +120,18 @@ public class TraitDelegateWriter {
     private void emitDelegateMethodImplementations() throws IOException {
         List<? extends ExecutableElement> allMethods = traitElement.getDeclaredMethods();
         for (ExecutableElement exec : allMethods) {
-            emitMethodDeclaration(exec, false, Modifier.PUBLIC);
+            if (TraitProcessorUtils.isGetThis(exec))
+                emitGetThis();
+            else
+                emitMethodDeclaration(exec, false, Modifier.PUBLIC);
         }
+    }
+
+    private void emitGetThis() throws IOException {
+        writer.beginMethodDeclaration(TraitProcessorUtils.GET_THIS, traitElement.getInterfaceName(), Arrays.asList(Modifier.PUBLIC), null);
+        writer.finishMethodDeclarationAndBeginMethodDefinition(null, false);
+        writer.emitStatement("return delegate;\n", 2);
+        writer.finishMethodDefinition();
     }
 
     private void emitMethodDeclaration(ExecutableElement exec, boolean isDefault, Modifier... modifiers) throws IOException {

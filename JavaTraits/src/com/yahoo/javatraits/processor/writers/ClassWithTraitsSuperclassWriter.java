@@ -32,6 +32,7 @@ import com.yahoo.javatraits.annotations.HasTraits;
 import com.yahoo.javatraits.processor.data.ClassWithTraits;
 import com.yahoo.javatraits.processor.data.TraitElement;
 import com.yahoo.javatraits.utils.Pair;
+import com.yahoo.javatraits.utils.TraitProcessorUtils;
 
 public class ClassWithTraitsSuperclassWriter {
 
@@ -199,6 +200,8 @@ public class ClassWithTraitsSuperclassWriter {
             Pair<TraitElement, ExecutableElement> executablePair = executablePairList.get(0);
             TraitElement elem = executablePair.getLeft();
             ExecutableElement exec = executablePair.getRight();
+            if (TraitProcessorUtils.isGetThis(exec))
+                continue;
 
             Set<Modifier> modifiers = exec.getModifiers();
             boolean isAbstract = modifiers.contains(Modifier.ABSTRACT);

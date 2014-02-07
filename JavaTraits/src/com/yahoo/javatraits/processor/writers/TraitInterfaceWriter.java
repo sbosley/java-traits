@@ -21,6 +21,7 @@ import com.yahoo.annotations.ClassName;
 import com.yahoo.annotations.JavaFileWriter;
 import com.yahoo.annotations.Utils;
 import com.yahoo.javatraits.processor.data.TraitElement;
+import com.yahoo.javatraits.utils.TraitProcessorUtils;
 
 public class TraitInterfaceWriter {
 
@@ -72,7 +73,10 @@ public class TraitInterfaceWriter {
 
     private void emitMethodDeclarations() throws IOException {
         for (ExecutableElement exec : element.getDeclaredMethods()) {
-            emitMethodDeclarationForExecutableElement(exec);
+            if (TraitProcessorUtils.isGetThis(exec))
+                continue;
+            else
+                emitMethodDeclarationForExecutableElement(exec);
         }
     }
 
