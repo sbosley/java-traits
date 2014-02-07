@@ -37,13 +37,6 @@ public class GenericName extends TypeName {
         return upperBound;
     }
 
-    @Override
-    public String getTypeString(boolean simple) {
-        StringBuilder result = new StringBuilder(getGenericName());
-        appendArrayString(result);
-        return result.toString();
-    }
-
     public void addQualifier(String qualifier) {
         if (this.qualifier != null)
             throw new IllegalArgumentException("Generic " + genericName + " already has qualifier " + this.qualifier);

@@ -55,12 +55,6 @@ public class ClassName extends TypeName {
         return simpleName;
     }
 
-    public String getTypeString(boolean simple) {
-        StringBuilder result = new StringBuilder(simple ? getSimpleName() : toString());
-        appendArrayString(result);
-        return result.toString();
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;

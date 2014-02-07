@@ -86,17 +86,14 @@ public class JavaFileWriter {
 
     public void addSuperclassToTypeDeclaration(ClassName superclass) throws IOException {
         checkScope(Scope.TYPE_DECLARATION);
-        out.append(" extends ").append(shortenName(superclass));
-        emitGenericsList(superclass.getTypeArgs(), false);
+        out.append(" extends ").append(shortenName(superclass, false));
     }
 
     public void addInterfacesToTypeDeclaration(List<ClassName> interfaces) throws IOException {
         checkScope(Scope.TYPE_DECLARATION);
         out.append(" implements ");
         for (int i = 0; i < interfaces.size(); i++) {
-            out.append(shortenName(interfaces.get(i)));
-            List<? extends TypeName> genericsForInterface = interfaces.get(i).getTypeArgs();
-            emitGenericsList(genericsForInterface, false);
+            out.append(shortenName(interfaces.get(i), false));
             if (i < interfaces.size() - 1)
                 out.append(", ");
         }
@@ -117,9 +114,7 @@ public class JavaFileWriter {
         indent(1);
         moveToScope(Scope.FIELD_DECLARATION);
         emitModifierList(modifiers);
-        out.append(shortenName(type));
-        if (type instanceof ClassName)
-            emitGenericsList(((ClassName) type).getTypeArgs(), false);
+        out.append(shortenName(type, false));
         out.append(" ").append(name).append(";\n");
         moveToScope(Scope.TYPE_DEFINITION);
     }
@@ -134,9 +129,7 @@ public class JavaFileWriter {
         if (returnType == null)
             out.append("void");
         else {
-            out.append(shortenName(returnType));
-            if (returnType instanceof ClassName)
-                emitGenericsList(((ClassName) returnType).getTypeArgs(), false);
+            out.append(shortenName(returnType, false));
         }
         out.append(" ").append(name).append("(");
     }
@@ -159,10 +152,7 @@ public class JavaFileWriter {
             for (int i = 0; i < argTypes.size(); i++) {
                 TypeName argType = argTypes.get(i);
                 String argName = argNames.get(i);
-                out.append(shortenName(argType));
-                if (argType instanceof ClassName) {
-                    emitGenericsList(((ClassName) argType).getTypeArgs(), false);
-                }
+                out.append(shortenName(argType, false));
                 out.append(" ").append(argName);
                 if (i < argTypes.size() - 1)
                     out.append(", ");
@@ -176,7 +166,7 @@ public class JavaFileWriter {
         if (thrownTypes != null && thrownTypes.size() > 0) {
             out.append(" throws ");
             for (int i = 0; i < thrownTypes.size(); i++) {
-                out.append(shortenName(thrownTypes.get(i)));
+                out.append(shortenName(thrownTypes.get(i), false));
                 if (i < thrownTypes.size() - 1)
                     out.append(", ");
             }
@@ -225,33 +215,39 @@ public class JavaFileWriter {
 
         @Override
         public String visitClassName(ClassName typeName, Boolean param) {
-            return shortenName(typeName);
+            return shortenName(typeName, param);
         }
 
         @Override
         public String visitGenericName(GenericName genericName, Boolean param) {
-            StringBuilder result = new StringBuilder(genericName.getGenericName());
+            StringBuilder result = new StringBuilder(shortenName(genericName, param));
             if (param && genericName.getUpperBound() != null)
-                result.append(" extends ").append(shortenName(genericName.getUpperBound()));
+                result.append(" extends ").append(shortenName(genericName.getUpperBound(), param));
             return result.toString();
         }
     };
 
     public boolean emitGenericsList(List<? extends TypeName> generics, boolean includeBounds) throws IOException {
+        String genericsList = getGenericsListString(generics, includeBounds);
+        if (!genericsList.isEmpty())
+            out.append(genericsList);
+        return !genericsList.isEmpty();
+    }
+
+    public String getGenericsListString(List<? extends TypeName> generics, boolean includeBounds) {
         if (generics == null || generics.size() == 0)
-            return false;
-        out.append("<");
+            return "";
+        StringBuilder builder = new StringBuilder();
+        builder.append("<");
 
         for (int i = 0; i < generics.size(); i++) {
             TypeName generic = generics.get(i);
-            out.append(generic.accept(genericDeclarationVisitor, includeBounds));
-            if (generic instanceof ClassName)
-                emitGenericsList(((ClassName) generic).getTypeArgs(), includeBounds);
+            builder.append(generic.accept(genericDeclarationVisitor, includeBounds));
             if (i < generics.size() - 1)
-                out.append(", ");
+                builder.append(", ");
         }
-        out.append(">");
-        return true;
+        builder.append(">");
+        return builder.toString();
     }
 
     private void indent(int times) throws IOException {
@@ -259,17 +255,17 @@ public class JavaFileWriter {
             out.append(INDENT);
     }
 
-    private TypeNameVisitor<String, Map<String, List<ClassName>>> nameShorteningVisitor = new TypeNameVisitor<String, Map<String,List<ClassName>>>() {
+    private TypeNameVisitor<String, Boolean> nameShorteningVisitor = new TypeNameVisitor<String, Boolean>() {
 
         @Override
-        public String visitGenericName(GenericName genericName, Map<String, List<ClassName>> param) {
-            return genericName.getTypeString(true);
+        public String visitGenericName(GenericName genericName, Boolean includeGenericBounds) {
+            return genericName.getGenericName() + genericName.getArrayStringSuffix();
         }
 
         @Override
-        public String visitClassName(ClassName typeName, Map<String, List<ClassName>> param) {
+        public String visitClassName(ClassName typeName, Boolean includeGenericBounds) {
             String simpleName = typeName.getSimpleName();
-            List<ClassName> allNames = param.get(simpleName);
+            List<ClassName> allNames = knownNames.get(simpleName);
             boolean simple;
             if (allNames == null || allNames.size() == 0)
                 simple = false;
@@ -277,12 +273,17 @@ public class JavaFileWriter {
                 simple = true;
             else
                 simple = false;
-            return typeName.getTypeString(simple);
+            StringBuilder nameBuilder = new StringBuilder();
+            String nameBase = simple ? typeName.getSimpleName() : typeName.toString();
+            nameBuilder.append(nameBase);
+            nameBuilder.append(getGenericsListString(typeName.getTypeArgs(), includeGenericBounds));
+            nameBuilder.append(typeName.getArrayStringSuffix());
+            return nameBuilder.toString();
         }
     };
 
-    public String shortenName(TypeName name) {
-        return name.accept(nameShorteningVisitor, knownNames);
+    public String shortenName(TypeName name, boolean includeGenericBounds) {
+        return name.accept(nameShorteningVisitor, includeGenericBounds);
     }
 
     private void checkScope(Scope expectedScope) {

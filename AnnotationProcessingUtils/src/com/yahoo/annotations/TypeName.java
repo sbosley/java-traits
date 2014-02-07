@@ -39,15 +39,15 @@ public abstract class TypeName implements Cloneable {
         return clone;
     }
 
-    public abstract String getTypeString(boolean simple);
-
-    protected void appendArrayString(StringBuilder builder) {
+    public String getArrayStringSuffix() {
+        StringBuilder builder = new StringBuilder();
         for (int i = 0; i < arrayDepth; i++) {
             if (i == arrayDepth - 1 && isVarArgs)
                 builder.append("...");
             else
                 builder.append("[]");
         }
+        return builder.toString();
     }
 
     public static interface TypeNameVisitor<RET, PARAM> {

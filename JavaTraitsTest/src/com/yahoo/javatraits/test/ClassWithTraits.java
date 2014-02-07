@@ -36,7 +36,7 @@ public class ClassWithTraits<A extends Number, B extends A, C, D> extends ClassW
     }
 
     @Override
-    public Map<String, ArrayList<B>> getParametrizedArg() {
+    public Map<String, ArrayList<B[]>>[][] getParametrizedArg() {
         return null;
     }
 

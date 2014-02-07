@@ -144,8 +144,7 @@ public class ClassWithTraitsSuperclassWriter {
         for (TraitElement elem : allTraits) {
             ClassName delegateClass = cls.getDelegateClassNameForTraitElement(elem);
             writer.emitStatement(getDelegateVariableName(elem) + " = new ", 2);
-            writer.emitStatement(writer.shortenName(delegateClass), 0);
-            writer.emitGenericsList(elem.getTypeParameters(), false);
+            writer.emitStatement(writer.shortenName(delegateClass, false), 0);
             writer.emitStatement("(this);\n", 0);
         }
         writer.finishMethodDefinition();

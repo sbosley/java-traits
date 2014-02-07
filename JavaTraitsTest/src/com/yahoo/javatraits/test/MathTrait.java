@@ -13,7 +13,7 @@ import com.yahoo.javatraits.annotations.Trait;
 @Trait
 public abstract class MathTrait<A extends Number, B extends A> {
 
-    public abstract Map<String, ArrayList<B>> getParametrizedArg();
+    public abstract Map<String, ArrayList<B[]>>[][] getParametrizedArg();
 
     public abstract MathTraitInterface<A, B> getThis();
 
