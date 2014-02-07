@@ -1,6 +1,6 @@
 /**
  * Copyright 2014 Yahoo Inc.
- * 
+ *
  * See the file "LICENSE" for the full license governing this code.
  */
 package com.yahoo.javatraits.processor.writers;
@@ -55,7 +55,7 @@ public class TraitDelegateWriter {
             emitDelegate();
             writer.close();
         } catch (IOException e) {
-            messager.printMessage(Kind.ERROR, "IOException writing delegate class with delegate " + 
+            messager.printMessage(Kind.ERROR, "IOException writing delegate class with delegate " +
                     cls.getSimpleName() + " for trait", cls.getSourceElement());
         }
     }
@@ -72,7 +72,7 @@ public class TraitDelegateWriter {
 
     private void emitImports() throws IOException {
         Set<ClassName> imports = new HashSet<ClassName>();
-        Utils.accumulateImportsFromExecutableElements(imports, traitElement.getAbstractMethods(), messager);
+        Utils.accumulateImportsFromExecutableElements(imports, traitElement.getDeclaredMethods(), messager);
         imports.add(delegateClass);
         writer.writeImports(imports);
     }
@@ -103,14 +103,14 @@ public class TraitDelegateWriter {
         List<TypeName> generics = cls.getTypeParametersForDelegate(traitElement);
         List<List<? extends TypeName>> genericsForArgs = new ArrayList<List<? extends TypeName>>();
         genericsForArgs.add(generics);
-        writer.addArgumentList(Arrays.asList(delegateClass), 
+        writer.addArgumentList(Arrays.asList(delegateClass),
                 genericsForArgs,
                 Arrays.asList("delegate"));
         writer.finishMethodDeclarationAndBeginMethodDefinition(null, false);
         writer.emitStatement("this.delegate = delegate;\n", 2);
         writer.finishMethodDefinition();
     }
-    
+
     private void emitDefaultMethodImplementations() throws IOException {
         List<? extends ExecutableElement> allMethods = traitElement.getDeclaredMethods();
         for (ExecutableElement exec : allMethods) {
@@ -121,16 +121,16 @@ public class TraitDelegateWriter {
     }
 
     private void emitDelegateMethodImplementations() throws IOException {
-        List<? extends ExecutableElement> abstractMethods = traitElement.getDeclaredMethods();
-        for (ExecutableElement exec : abstractMethods) {
+        List<? extends ExecutableElement> allMethods = traitElement.getDeclaredMethods();
+        for (ExecutableElement exec : allMethods) {
             emitMethodDeclaration(exec, false, Modifier.PUBLIC);
         }
     }
-    
+
     private void emitMethodDeclaration(ExecutableElement exec, boolean isDefault, Modifier... modifiers) throws IOException {
         String name = isDefault ? "default__" + exec.getSimpleName().toString() : null;
         List<String> argNames = Utils.beginMethodDeclarationForExecutableElement(writer, exec, name, traitElement.getSimpleName(), false, modifiers);
-        StringBuilder statement = new StringBuilder(); 
+        StringBuilder statement = new StringBuilder();
         if (exec.getReturnType().getKind() != TypeKind.VOID)
             statement.append("return ");
         String callTo = isDefault ? "super" : "delegate";
