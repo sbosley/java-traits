@@ -107,7 +107,7 @@ public class ClassWithTraitsSuperclassWriter {
         superclassName.setTypeArgs(generics);
         writer.beginTypeDeclaration(superclassName, "class", Modifier.PUBLIC, Modifier.ABSTRACT);
 
-        ClassName desiredSuperclass = cls.getDesiredSuperclass().clone();
+        ClassName desiredSuperclass = cls.getDesiredSuperclass();
         if (!Utils.OBJECT_CLASS_NAME.equals(desiredSuperclass.toString()))
             writer.addSuperclassToTypeDeclaration(desiredSuperclass);
 
@@ -131,8 +131,7 @@ public class ClassWithTraitsSuperclassWriter {
 
     private void emitDelegateFields() throws IOException {
         for (TraitElement elem : allTraits) {
-            ClassName delegateClass = cls.getDelegateClassNameForTraitElement(elem).clone();
-            delegateClass.setTypeArgs(elem.getTypeParameters());
+            ClassName delegateClass = cls.getDelegateClassNameForTraitElement(elem);
             writer.emitFieldDeclaration(delegateClass, getDelegateVariableName(elem), Modifier.PRIVATE);
         }
         writer.emitNewline();

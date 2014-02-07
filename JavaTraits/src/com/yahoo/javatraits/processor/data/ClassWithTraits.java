@@ -1,6 +1,6 @@
 /**
  * Copyright 2014 Yahoo Inc.
- * 
+ *
  * See the file "LICENSE" for the full license governing this code.
  */
 package com.yahoo.javatraits.processor.data;
@@ -53,11 +53,11 @@ public class ClassWithTraits extends TypeElementWrapper {
     }
 
     private void initSuperclasses() {
-        List<ClassName> desiredSuperclassResult = Utils.getClassValuesFromAnnotation(HasTraits.class, elem, "desiredSuperclass", messager); 
+        List<ClassName> desiredSuperclassResult = Utils.getClassValuesFromAnnotation(HasTraits.class, elem, "desiredSuperclass", messager);
         desiredSuperclass = desiredSuperclassResult.size() > 0 ? desiredSuperclassResult.get(0) : new ClassName("java.lang.Object");
         generatedSuperclass = new ClassName(fqn.toString() + GEN_SUFFIX);
     }
-    
+
     private void initPreferValues() {
         prefer = new HashMap<String, ClassName>();
         AnnotationMirror hasTraits = Utils.findAnnotationMirror(elem, HasTraits.class);
@@ -71,7 +71,7 @@ public class ClassWithTraits extends TypeElementWrapper {
                     AnnotationMirror preferMirror = (AnnotationMirror) value;
                     AnnotationValue targetValue = Utils.findAnnotationValue(preferMirror, "target");
                     AnnotationValue methodValue = Utils.findAnnotationValue(preferMirror, "method");
-                    
+
                     ClassName targetName = Utils.getClassValuesFromAnnotationValue(targetValue).get(0);
                     String method = (String) methodValue.getValue();
                     prefer.put(method, targetName);
@@ -91,15 +91,17 @@ public class ClassWithTraits extends TypeElementWrapper {
     public ClassName getDesiredSuperclass() {
         return desiredSuperclass;
     }
-    
+
     public Map<String, ClassName> getPreferMap() {
         return prefer;
     }
 
     public ClassName getDelegateClassNameForTraitElement(TraitElement traitElement) {
-        return new ClassName(traitElement.getFullyQualifiedName() + "__" + getSimpleName() + DELEGATE_SUFFIX);
+        ClassName delegate = new ClassName(traitElement.getFullyQualifiedName() + "__" + getSimpleName() + DELEGATE_SUFFIX);
+        delegate.setTypeArgs(traitElement.getTypeParameters());
+        return delegate;
     }
-    
+
     public List<TypeName> getTypeParametersForDelegate(TraitElement onlyForThisElement) {
         List<TypeName> result = new ArrayList<TypeName>();
         for (int i = 0; i < traitClasses.size(); i++) {
