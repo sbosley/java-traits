@@ -3,7 +3,7 @@
  * 
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.yahoo.javatraits.utils;
+package com.yahoo.javatraits.processor.utils;
 
 public class Pair<L, R> {
 

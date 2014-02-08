@@ -1,6 +1,6 @@
 /**
  * Copyright 2014 Yahoo Inc.
- * 
+ *
  * See the file "LICENSE" for the full license governing this code.
  */
 package com.yahoo.annotations;
@@ -14,19 +14,19 @@ public class MethodSignature {
     private String methodName;
     private TypeName returnType;
     private List<TypeName> argTypes = new ArrayList<TypeName>();
-    
+
     public MethodSignature(String methodName) {
         this.methodName = methodName;
     }
-    
+
     public String getMethodName() {
         return methodName;
     }
-    
+
     public void setMethodName(String methodName) {
         this.methodName = methodName;
     }
-    
+
     public TypeName getReturnType() {
         return returnType;
     }
@@ -34,11 +34,11 @@ public class MethodSignature {
     public void setReturnType(TypeName returnType) {
         this.returnType = returnType;
     }
-    
+
     public List<TypeName> getArgTypes() {
         return argTypes;
     }
-    
+
     public void addArgType(TypeName... types) {
         argTypes.addAll(Arrays.asList(types));
     }
@@ -82,7 +82,7 @@ public class MethodSignature {
             return false;
         return true;
     }
-    
+
     private boolean compareTypeList(List<TypeName> l1, List<TypeName> l2) {
         if (l1.size() != l2.size())
             return false;
@@ -92,12 +92,16 @@ public class MethodSignature {
         }
         return true;
     }
-    
+
     private boolean compareTypes(TypeName t1, TypeName t2) {
         if (!t1.equals(t2))
             return false;
-        return t1.getArrayDepth() == t2.getArrayDepth() && t1.isVarArgs() == t2.isVarArgs();
+        if (!(t1.getArrayDepth() == t2.getArrayDepth() && t1.isVarArgs() == t2.isVarArgs()))
+            return false;
+        if (t1 instanceof ClassName && t2 instanceof ClassName)
+            return compareTypeList(((ClassName) t1).getTypeArgs(), ((ClassName) t2).getTypeArgs());
+        return true;
     }
-    
-    
+
+
 }

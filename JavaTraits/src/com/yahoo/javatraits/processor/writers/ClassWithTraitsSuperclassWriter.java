@@ -31,8 +31,8 @@ import com.yahoo.annotations.Utils;
 import com.yahoo.javatraits.annotations.HasTraits;
 import com.yahoo.javatraits.processor.data.ClassWithTraits;
 import com.yahoo.javatraits.processor.data.TraitElement;
-import com.yahoo.javatraits.utils.Pair;
-import com.yahoo.javatraits.utils.TraitProcessorUtils;
+import com.yahoo.javatraits.processor.utils.Pair;
+import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
 
 public class ClassWithTraitsSuperclassWriter {
 

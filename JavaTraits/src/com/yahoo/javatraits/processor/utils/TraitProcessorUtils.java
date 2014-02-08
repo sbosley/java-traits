@@ -1,4 +1,4 @@
-package com.yahoo.javatraits.utils;
+package com.yahoo.javatraits.processor.utils;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;

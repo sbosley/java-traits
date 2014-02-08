@@ -21,7 +21,7 @@ import com.yahoo.annotations.ClassName;
 import com.yahoo.annotations.JavaFileWriter;
 import com.yahoo.annotations.Utils;
 import com.yahoo.javatraits.processor.data.TraitElement;
-import com.yahoo.javatraits.utils.TraitProcessorUtils;
+import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
 
 public class TraitInterfaceWriter {
 
