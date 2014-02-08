@@ -6,6 +6,7 @@
 package com.yahoo.javatraits.test;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import com.yahoo.javatraits.annotations.Trait;
@@ -16,6 +17,10 @@ public abstract class MathTrait<A extends Number, B extends A> {
     public abstract Map<String, ArrayList<B[]>>[][] getParametrizedArg();
 
     public abstract MathTraitInterface<A, B> getThis();
+
+    public void doSomeListThing(List<? extends ArrayList<? extends CharSequence>> strings) {
+        //
+    }
 
     public int add(int arg1, int arg2) {
         return arg1 + arg2;

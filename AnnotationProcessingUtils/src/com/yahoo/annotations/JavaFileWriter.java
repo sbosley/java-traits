@@ -267,7 +267,10 @@ public class JavaFileWriter {
 
         @Override
         public String visitGenericName(GenericName genericName, Boolean includeGenericBounds) {
-            return genericName.getGenericName() + genericName.getArrayStringSuffix();
+            String base = genericName.getGenericName();
+            if (genericName.isWildcard() && genericName.hasUpperBound())
+                base += " extends " + shortenName(genericName.getUpperBound(), includeGenericBounds);
+            return base + genericName.getArrayStringSuffix();
         }
 
         @Override

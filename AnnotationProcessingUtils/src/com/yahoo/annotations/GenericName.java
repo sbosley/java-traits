@@ -33,6 +33,14 @@ public class GenericName extends TypeName {
         return result.toString();
     }
 
+    public boolean isWildcard() {
+        return "?".equals(genericName);
+    }
+
+    public boolean hasUpperBound() {
+        return upperBound != null;
+    }
+
     public TypeName getUpperBound() {
         return upperBound;
     }
