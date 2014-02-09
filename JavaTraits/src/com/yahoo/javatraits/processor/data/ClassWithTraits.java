@@ -110,7 +110,7 @@ public class ClassWithTraits extends TypeElementWrapper {
                 if (onlyForThisElement != null && !onlyForThisElement.getFullyQualifiedName().equals(elem.getFullyQualifiedName())) {
                     int paramCount = elem.getTypeParameters().size();
                     for (int p = 0; p < paramCount; p++) {
-                        result.add(new GenericName("?", null));
+                        result.add(new GenericName("?", null, null));
                     }
                 } else {
                     result.addAll(elem.getTypeParameters());

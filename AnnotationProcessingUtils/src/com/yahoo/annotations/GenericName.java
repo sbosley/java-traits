@@ -9,11 +9,13 @@ public class GenericName extends TypeName {
 
     private String qualifier;
     private String genericName;
-    private TypeName upperBound;
+    private TypeName extendsBound;
+    private TypeName superBound;
 
-    public GenericName(String genericName, TypeName upperBound) {
+    public GenericName(String genericName, TypeName upperBound, TypeName superBound) {
         this.genericName = genericName;
-        this.upperBound = upperBound;
+        this.extendsBound = upperBound;
+        this.superBound = superBound;
     }
 
     @Override
@@ -21,7 +23,8 @@ public class GenericName extends TypeName {
         GenericName clone = (GenericName) super.clone();
         clone.qualifier = this.qualifier;
         clone.genericName = this.genericName;
-        clone.upperBound = (TypeName) upperBound.clone();
+        clone.extendsBound = (TypeName) extendsBound.clone();
+        clone.superBound = (TypeName) superBound.clone();
         return clone;
     }
 
@@ -37,12 +40,20 @@ public class GenericName extends TypeName {
         return "?".equals(genericName);
     }
 
-    public boolean hasUpperBound() {
-        return upperBound != null;
+    public boolean hasExtendsBound() {
+        return extendsBound != null;
     }
 
-    public TypeName getUpperBound() {
-        return upperBound;
+    public TypeName getExtendsBound() {
+        return extendsBound;
+    }
+
+    public boolean hasSuperBound() {
+        return superBound != null;
+    }
+
+    public TypeName getSuperBound() {
+        return superBound;
     }
 
     public void addQualifier(String qualifier) {
@@ -64,7 +75,9 @@ public class GenericName extends TypeName {
         result = prime * result
                 + ((genericName == null) ? 0 : genericName.hashCode());
         result = prime * result
-                + ((upperBound == null) ? 0 : upperBound.hashCode());
+                + ((extendsBound == null) ? 0 : extendsBound.hashCode());
+        result = prime * result
+                + ((superBound == null) ? 0 : superBound.hashCode());
         return result;
     }
 
@@ -82,10 +95,15 @@ public class GenericName extends TypeName {
                 return false;
         } else if (!genericName.equals(other.genericName))
             return false;
-        if (upperBound == null) {
-            if (other.upperBound != null)
+        if (extendsBound == null) {
+            if (other.extendsBound != null)
                 return false;
-        } else if (!upperBound.equals(other.upperBound))
+        } else if (!extendsBound.equals(other.extendsBound))
+            return false;
+        if (superBound == null) {
+            if (other.superBound != null)
+                return false;
+        } else if (!superBound.equals(other.superBound))
             return false;
         return true;
     }

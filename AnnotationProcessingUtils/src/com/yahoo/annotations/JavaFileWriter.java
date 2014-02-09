@@ -219,22 +219,6 @@ public class JavaFileWriter {
         }
     }
 
-    private TypeNameVisitor<String, Boolean> genericDeclarationVisitor = new TypeNameVisitor<String, Boolean>() {
-
-        @Override
-        public String visitClassName(ClassName typeName, Boolean param) {
-            return shortenName(typeName, param);
-        }
-
-        @Override
-        public String visitGenericName(GenericName genericName, Boolean param) {
-            StringBuilder result = new StringBuilder(shortenName(genericName, param));
-            if (param && genericName.getUpperBound() != null)
-                result.append(" extends ").append(shortenName(genericName.getUpperBound(), param));
-            return result.toString();
-        }
-    };
-
     public boolean writeGenericsList(List<? extends TypeName> generics, boolean includeBounds) throws IOException {
         String genericsList = getGenericsListString(generics, includeBounds);
         if (!genericsList.isEmpty())
@@ -250,7 +234,7 @@ public class JavaFileWriter {
 
         for (int i = 0; i < generics.size(); i++) {
             TypeName generic = generics.get(i);
-            builder.append(generic.accept(genericDeclarationVisitor, includeBounds));
+            builder.append(shortenName(generic, includeBounds));
             if (i < generics.size() - 1)
                 builder.append(", ");
         }
@@ -267,10 +251,18 @@ public class JavaFileWriter {
 
         @Override
         public String visitGenericName(GenericName genericName, Boolean includeGenericBounds) {
-            String base = genericName.getGenericName();
-            if (genericName.isWildcard() && genericName.hasUpperBound())
-                base += " extends " + shortenName(genericName.getUpperBound(), includeGenericBounds);
-            return base + genericName.getArrayStringSuffix();
+            StringBuilder builder = new StringBuilder(genericName.getGenericName());
+            if (genericName.isWildcard() || includeGenericBounds) {
+                if (genericName.hasExtendsBound()) {
+                    boolean recursiveUpperBounds = includeGenericBounds && genericName.getExtendsBound() instanceof ClassName;
+                    builder.append(" extends ").append(shortenName(genericName.getExtendsBound(), recursiveUpperBounds));
+                }
+                if (genericName.hasSuperBound()) {
+                    boolean recursiveUpperBounds = includeGenericBounds && genericName.getSuperBound() instanceof ClassName;
+                    builder.append(" super ").append(shortenName(genericName.getSuperBound(), recursiveUpperBounds));
+                }
+            }
+            return builder.append(genericName.getArrayStringSuffix()).toString();
         }
 
         @Override

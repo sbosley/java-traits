@@ -18,7 +18,7 @@ public abstract class MathTrait<A extends Number, B extends A> {
 
     public abstract MathTraitInterface<A, B> getThis();
 
-    public void doSomeListThing(List<? extends ArrayList<? extends CharSequence>> strings) {
+    public void doSomeListThing(List<? super ArrayList<? extends CharSequence>>[][]... strings) {
         //
     }
 

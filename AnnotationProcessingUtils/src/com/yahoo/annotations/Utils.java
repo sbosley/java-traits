@@ -158,12 +158,10 @@ public class Utils {
             String genericName = getSimpleNameFromFullyQualifiedName(mirrorString);
             if (genericQualifier != null)
                 genericName = genericQualifier + "$" + genericName;
-            TypeMirror upperBoundMirror = typeVariable.getUpperBound();
-            toReturn = getGenericName(genericName, genericQualifier, upperBoundMirror);
+            toReturn = getGenericName(genericName, genericQualifier, typeVariable.getUpperBound(), null);
         } else if (kind == TypeKind.WILDCARD) {
             WildcardType wildcardType = (WildcardType) mirror;
-            TypeMirror upperBoundMirror = wildcardType.getExtendsBound();
-            toReturn = getGenericName("?", genericQualifier, upperBoundMirror);
+            toReturn = getGenericName("?", genericQualifier, wildcardType.getExtendsBound(), wildcardType.getSuperBound());
         } else {
             List<TypeName> typeArgs = Collections.emptyList();
             if (mirror instanceof DeclaredType) {
@@ -186,11 +184,14 @@ public class Utils {
         return toReturn;
     }
 
-    private static GenericName getGenericName(String genericName, String genericQualifier, TypeMirror upperBoundMirror) {
-        TypeName upperBound = null;
-        if (upperBoundMirror != null && !OBJECT_CLASS_NAME.equals(upperBoundMirror.toString()))
-            upperBound = getTypeNameFromTypeMirror(upperBoundMirror, genericQualifier);
-        return new GenericName(genericName, upperBound);
+    private static GenericName getGenericName(String genericName, String genericQualifier, TypeMirror extendsBoundMirror, TypeMirror superBoundMirror) {
+        TypeName extendsBound = null;
+        if (extendsBoundMirror != null && !OBJECT_CLASS_NAME.equals(extendsBoundMirror.toString()))
+            extendsBound = getTypeNameFromTypeMirror(extendsBoundMirror, genericQualifier);
+        TypeName superBound = null;
+        if (superBoundMirror != null && !OBJECT_CLASS_NAME.equals(superBoundMirror.toString()))
+            superBound = getTypeNameFromTypeMirror(superBoundMirror, genericQualifier);
+        return new GenericName(genericName, extendsBound, superBound);
     }
 
     public static List<String> beginMethodDeclarationForExecutableElement(JavaFileWriter writer, ExecutableElement exec, String nameOverride,
