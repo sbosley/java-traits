@@ -5,14 +5,17 @@
  */
 package com.yahoo.annotations;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class GenericName extends TypeName {
 
     private String qualifier;
     private String genericName;
-    private TypeName extendsBound;
+    private List<TypeName> extendsBound;
     private TypeName superBound;
 
-    public GenericName(String genericName, TypeName upperBound, TypeName superBound) {
+    public GenericName(String genericName, List<TypeName> upperBound, TypeName superBound) {
         this.genericName = genericName;
         this.extendsBound = upperBound;
         this.superBound = superBound;
@@ -23,7 +26,12 @@ public class GenericName extends TypeName {
         GenericName clone = (GenericName) super.clone();
         clone.qualifier = this.qualifier;
         clone.genericName = this.genericName;
-        clone.extendsBound = (TypeName) extendsBound.clone();
+        clone.extendsBound = this.extendsBound == null ? null : new ArrayList<TypeName>();
+        if (extendsBound != null) {
+            for (TypeName t : extendsBound) {
+                clone.extendsBound.add(t);
+            }
+        }
         clone.superBound = (TypeName) superBound.clone();
         return clone;
     }
@@ -41,10 +49,10 @@ public class GenericName extends TypeName {
     }
 
     public boolean hasExtendsBound() {
-        return extendsBound != null;
+        return extendsBound != null && extendsBound.size() > 0;
     }
 
-    public TypeName getExtendsBound() {
+    public List<TypeName> getExtendsBound() {
         return extendsBound;
     }
 
@@ -98,7 +106,7 @@ public class GenericName extends TypeName {
         if (extendsBound == null) {
             if (other.extendsBound != null)
                 return false;
-        } else if (!extendsBound.equals(other.extendsBound))
+        } else if (!Utils.deepCompareTypeList(extendsBound, other.extendsBound))
             return false;
         if (superBound == null) {
             if (other.superBound != null)

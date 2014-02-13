@@ -254,8 +254,14 @@ public class JavaFileWriter {
             StringBuilder builder = new StringBuilder(genericName.getGenericName());
             if (genericName.isWildcard() || includeGenericBounds) {
                 if (genericName.hasExtendsBound()) {
-                    boolean recursiveUpperBounds = includeGenericBounds && genericName.getExtendsBound() instanceof ClassName;
-                    builder.append(" extends ").append(shortenName(genericName.getExtendsBound(), recursiveUpperBounds));
+                    builder.append(" extends ");
+                    String separator = " & ";
+                    for (TypeName bound : genericName.getExtendsBound()) {                        
+                        boolean recursiveUpperBounds = includeGenericBounds && bound instanceof ClassName;
+                        builder.append(shortenName(bound, recursiveUpperBounds));
+                        builder.append(separator);
+                    }
+                    builder.delete(builder.length() - separator.length(), builder.length());
                 }
                 if (genericName.hasSuperBound()) {
                     boolean recursiveUpperBounds = includeGenericBounds && genericName.getSuperBound() instanceof ClassName;

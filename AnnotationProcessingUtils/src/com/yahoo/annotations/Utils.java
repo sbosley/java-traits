@@ -65,6 +65,26 @@ public class Utils {
         }
         return result;
     }
+    
+    public static boolean deepCompareTypeList(List<TypeName> l1, List<TypeName> l2) {
+        if (l1.size() != l2.size())
+            return false;
+        for (int i = 0; i < l1.size(); i++) {
+            if (!deepCompareTypes(l1.get(i), l2.get(i)))
+                return false;
+        }
+        return true;
+    }
+
+    public static boolean deepCompareTypes(TypeName t1, TypeName t2) {
+        if (!t1.equals(t2))
+            return false;
+        if (!(t1.getArrayDepth() == t2.getArrayDepth() && t1.isVarArgs() == t2.isVarArgs()))
+            return false;
+        if (t1 instanceof ClassName && t2 instanceof ClassName)
+            return deepCompareTypeList(((ClassName) t1).getTypeArgs(), ((ClassName) t2).getTypeArgs());
+        return true;
+    }
 
     public static AnnotationMirror findAnnotationMirror(Element elem, Class<?> annotationClass) {
         List<? extends AnnotationMirror> annotationMirrors = elem.getAnnotationMirrors();
@@ -191,7 +211,7 @@ public class Utils {
         TypeName superBound = null;
         if (superBoundMirror != null && !OBJECT_CLASS_NAME.equals(superBoundMirror.toString()))
             superBound = getTypeNameFromTypeMirror(superBoundMirror, genericQualifier);
-        return new GenericName(genericName, extendsBound, superBound);
+        return new GenericName(genericName, Arrays.asList(extendsBound), superBound);
     }
 
     public static List<String> beginMethodDeclarationForExecutableElement(JavaFileWriter writer, ExecutableElement exec, String nameOverride,

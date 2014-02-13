@@ -68,7 +68,7 @@ public class MethodSignature {
         if (argTypes == null) {
             if (other.argTypes != null)
                 return false;
-        } else if (!compareTypeList(argTypes, other.argTypes))
+        } else if (!Utils.deepCompareTypeList(argTypes, other.argTypes))
             return false;
         if (methodName == null) {
             if (other.methodName != null)
@@ -78,30 +78,12 @@ public class MethodSignature {
         if (returnType == null) {
             if (other.returnType != null)
                 return false;
-        } else if (!compareTypes(returnType, other.returnType))
+        } else if (!Utils.deepCompareTypes(returnType, other.returnType))
             return false;
         return true;
     }
 
-    private boolean compareTypeList(List<TypeName> l1, List<TypeName> l2) {
-        if (l1.size() != l2.size())
-            return false;
-        for (int i = 0; i < l1.size(); i++) {
-            if (!compareTypes(l1.get(i), l2.get(i)))
-                return false;
-        }
-        return true;
-    }
-
-    private boolean compareTypes(TypeName t1, TypeName t2) {
-        if (!t1.equals(t2))
-            return false;
-        if (!(t1.getArrayDepth() == t2.getArrayDepth() && t1.isVarArgs() == t2.isVarArgs()))
-            return false;
-        if (t1 instanceof ClassName && t2 instanceof ClassName)
-            return compareTypeList(((ClassName) t1).getTypeArgs(), ((ClassName) t2).getTypeArgs());
-        return true;
-    }
+    
 
 
 }
