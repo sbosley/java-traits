@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.annotation.processing.Filer;
-import javax.annotation.processing.Messager;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeKind;
@@ -31,15 +30,15 @@ public class TraitDelegateWriter {
 
     private ClassWithTraits cls;
     private TraitElement traitElement;
-    private Messager messager;
+    private Utils utils;
     private ClassName traitDelegateClass;
     private ClassName delegateClass;
     private JavaFileWriter writer;
 
-    public TraitDelegateWriter(ClassWithTraits cls, TraitElement traitElement, Messager messager) {
+    public TraitDelegateWriter(ClassWithTraits cls, TraitElement traitElement, Utils utils) {
         this.cls = cls;
         this.traitElement = traitElement;
-        this.messager = messager;
+        this.utils = utils;
         this.traitDelegateClass = cls.getDelegateClassNameForTraitElement(traitElement);
         this.traitDelegateClass.setTypeArgs(traitElement.getTypeParameters());
         this.delegateClass = cls.getFullyQualifiedGeneratedSuperclassName();
@@ -56,7 +55,7 @@ public class TraitDelegateWriter {
             emitDelegate();
             writer.close();
         } catch (IOException e) {
-            messager.printMessage(Kind.ERROR, "IOException writing delegate class with delegate " +
+            utils.getMessager().printMessage(Kind.ERROR, "IOException writing delegate class with delegate " +
                     cls.getSimpleName() + " for trait", cls.getSourceElement());
         }
     }
@@ -73,7 +72,7 @@ public class TraitDelegateWriter {
 
     private void emitImports() throws IOException {
         Set<ClassName> imports = new HashSet<ClassName>();
-        Utils.accumulateImportsFromExecutableElements(imports, traitElement.getDeclaredMethods(), messager);
+        utils.accumulateImportsFromExecutableElements(imports, traitElement.getDeclaredMethods());
         imports.add(delegateClass);
         imports.add(traitElement.getFullyQualifiedName());
         writer.writeImports(imports);
@@ -136,7 +135,7 @@ public class TraitDelegateWriter {
 
     private void emitMethodDeclaration(ExecutableElement exec, boolean isDefault, Modifier... modifiers) throws IOException {
         String name = isDefault ? "default__" + exec.getSimpleName().toString() : null;
-        List<String> argNames = Utils.beginMethodDeclarationForExecutableElement(writer, exec, name, traitElement.getSimpleName(), false, modifiers);
+        List<String> argNames = utils.beginMethodDeclarationForExecutableElement(writer, exec, name, traitElement.getSimpleName(), false, modifiers);
         StringBuilder statement = new StringBuilder();
         if (exec.getReturnType().getKind() != TypeKind.VOID)
             statement.append("return ");

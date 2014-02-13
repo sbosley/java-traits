@@ -11,7 +11,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.processing.Filer;
-import javax.annotation.processing.Messager;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.tools.Diagnostic.Kind;
@@ -26,12 +25,12 @@ import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
 public class TraitInterfaceWriter {
 
     private final TraitElement element;
-    private Messager messager;
+    private Utils utils;
     private JavaFileWriter writer = null;
 
-    public TraitInterfaceWriter(TraitElement element, Messager messager) {
+    public TraitInterfaceWriter(TraitElement element, Utils utils) {
         this.element = element;
-        this.messager = messager;
+        this.utils = utils;
     }
 
     public void writeInterface(Filer filer) {
@@ -44,7 +43,7 @@ public class TraitInterfaceWriter {
             emitInterface();
             writer.close();
         } catch (IOException e) {
-            messager.printMessage(Kind.ERROR, "IOException writing interface for trait", element.getSourceElement());
+            utils.getMessager().printMessage(Kind.ERROR, "IOException writing interface for trait", element.getSourceElement());
         }
     }
 
@@ -60,7 +59,7 @@ public class TraitInterfaceWriter {
 
     private void emitImports() throws IOException {
         Set<ClassName> imports = new HashSet<ClassName>();
-        Utils.accumulateImportsFromExecutableElements(imports, element.getDeclaredMethods(), messager);
+        utils.accumulateImportsFromExecutableElements(imports, element.getDeclaredMethods());
         writer.writeImports(imports);
     }
 
@@ -81,7 +80,7 @@ public class TraitInterfaceWriter {
     }
 
     private void emitMethodDeclarationForExecutableElement(ExecutableElement exec) throws IOException {
-        Utils.beginMethodDeclarationForExecutableElement(writer, exec, null, element.getSimpleName(), true, Modifier.PUBLIC);
+        utils.beginMethodDeclarationForExecutableElement(writer, exec, null, element.getSimpleName(), true, Modifier.PUBLIC);
     }
 
 }

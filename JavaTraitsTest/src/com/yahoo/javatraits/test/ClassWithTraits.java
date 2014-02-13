@@ -40,4 +40,9 @@ public class ClassWithTraits<A extends Number, B extends A, C, D> extends ClassW
         return null;
     }
 
+    @Override
+    public <T extends Number & Runnable> void testIntersectionType(T arg) {
+        arg.run();
+    }
+
 }

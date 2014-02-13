@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.processing.Messager;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.TypeElement;
@@ -32,28 +31,28 @@ public class ClassWithTraits extends TypeElementWrapper {
     private ClassName generatedSuperclass;
     private Map<String, ClassName> prefer;
 
-    public ClassWithTraits(TypeElement elem, Messager messager, Map<ClassName, TraitElement> traitMap) {
-        super(elem, messager);
+    public ClassWithTraits(TypeElement elem, Utils utils, Map<ClassName, TraitElement> traitMap) {
+        super(elem, utils);
         initTraitClasses(traitMap);
         initSuperclasses();
         initPreferValues();
     }
 
     private void initTraitClasses(final Map<ClassName, TraitElement> traitMap) {
-        List<ClassName> traitNames = Utils.getClassValuesFromAnnotation(HasTraits.class, elem, "traits", messager);
+        List<ClassName> traitNames = Utils.getClassValuesFromAnnotation(HasTraits.class, elem, "traits");
         traitClasses = Utils.map(traitNames, new Utils.MapFunction<ClassName, TraitElement>() {
             @Override
             public TraitElement map(ClassName arg) {
                 TraitElement correspondingTrait = traitMap.get(arg);
                 if (correspondingTrait == null)
-                    messager.printMessage(Kind.ERROR, "Couldn't find TraitElement for name " + arg.toString());
+                    utils.getMessager().printMessage(Kind.ERROR, "Couldn't find TraitElement for name " + arg.toString());
                 return correspondingTrait;
             }
         });
     }
 
     private void initSuperclasses() {
-        List<ClassName> desiredSuperclassResult = Utils.getClassValuesFromAnnotation(HasTraits.class, elem, "desiredSuperclass", messager);
+        List<ClassName> desiredSuperclassResult = Utils.getClassValuesFromAnnotation(HasTraits.class, elem, "desiredSuperclass");
         desiredSuperclass = desiredSuperclassResult.size() > 0 ? desiredSuperclassResult.get(0) : new ClassName("java.lang.Object");
         generatedSuperclass = new ClassName(fqn.toString() + GEN_SUFFIX);
     }

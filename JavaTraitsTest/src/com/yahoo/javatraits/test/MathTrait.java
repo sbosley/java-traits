@@ -21,6 +21,8 @@ public abstract class MathTrait<A extends Number, B extends A> {
     public void doSomeListThing(List<? super ArrayList<? extends CharSequence>>[][]... strings) {
         //
     }
+    
+    public abstract <T extends Number & Runnable> void testIntersectionType(T arg);
 
     public int add(int arg1, int arg2) {
         return arg1 + arg2;

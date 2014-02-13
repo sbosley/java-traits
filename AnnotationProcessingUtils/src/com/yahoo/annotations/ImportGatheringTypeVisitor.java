@@ -27,10 +27,12 @@ public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<ClassNa
 
     private Element elem;
     private Messager messager;
+    private Utils utils;
 
-    public ImportGatheringTypeVisitor(Element elem, Messager messager) {
+    public ImportGatheringTypeVisitor(Element elem, Messager messager, Utils utils) {
         this.elem = elem;
         this.messager = messager;
+        this.utils = utils;
     }
 
     @Override
@@ -105,8 +107,11 @@ public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<ClassNa
 
     @Override
     public Void visitTypeVariable(TypeVariable t, Set<ClassName> p) {
+        List<? extends TypeMirror> upperBounds = utils.getUpperBoundMirrors(t, t.getUpperBound());
+        for (TypeMirror upper : upperBounds) {
+            upper.accept(this, p);
+        }
         t.getLowerBound().accept(this, p);
-        t.getUpperBound().accept(this, p);
         return null;
     }
 
@@ -118,9 +123,10 @@ public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<ClassNa
 
     @Override
     public Void visitWildcard(WildcardType t, Set<ClassName> p) {
-        TypeMirror extendsBound = t.getExtendsBound();
-        if (extendsBound != null)
-            extendsBound.accept(this, p);
+        List<? extends TypeMirror> upperBounds = utils.getUpperBoundMirrors(t, t.getExtendsBound());
+        for (TypeMirror upper : upperBounds) {
+            upper.accept(this, p);
+        }
         TypeMirror superBound = t.getSuperBound();
         if (superBound != null)
             superBound.accept(this, p);

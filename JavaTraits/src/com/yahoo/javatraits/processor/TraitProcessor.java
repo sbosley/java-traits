@@ -25,6 +25,7 @@ import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 
 import com.yahoo.annotations.ClassName;
+import com.yahoo.annotations.Utils;
 import com.yahoo.javatraits.annotations.HasTraits;
 import com.yahoo.javatraits.annotations.Trait;
 import com.yahoo.javatraits.processor.data.ClassWithTraits;
@@ -38,6 +39,7 @@ import com.yahoo.javatraits.processor.writers.TraitInterfaceWriter;
 public class TraitProcessor extends AbstractProcessor {
 
     private Messager messager;
+    private Utils utils;
     private Filer filer;
     
     private Set<? extends Element> traitElements = null;
@@ -50,6 +52,7 @@ public class TraitProcessor extends AbstractProcessor {
 
         this.messager = env.getMessager();
         this.filer = env.getFiler();
+        this.utils = new Utils(messager, env.getTypeUtils());
     }
 
     @Override
@@ -94,7 +97,7 @@ public class TraitProcessor extends AbstractProcessor {
                 messager.printMessage(Kind.ERROR, "Only a class can be annotated with @Trait", e);
             else {
                 TypeElement typeElem = (TypeElement) e;
-                TraitElement traitElement = new TraitElement(typeElem, messager);
+                TraitElement traitElement = new TraitElement(typeElem, utils);
                 result.put(traitElement.getFullyQualifiedName(), traitElement);
             }
         }
@@ -108,7 +111,7 @@ public class TraitProcessor extends AbstractProcessor {
                 messager.printMessage(Kind.ERROR, "Only a class can be annotated with @Trait", e);
             else {
                 TypeElement typeElem = (TypeElement) e;
-                result.add(new ClassWithTraits(typeElem, messager, traitMap));
+                result.add(new ClassWithTraits(typeElem, utils, traitMap));
             }
         }
         return result;
@@ -116,7 +119,7 @@ public class TraitProcessor extends AbstractProcessor {
 
     private void generateTraitInterfaces(Map<ClassName, TraitElement> traitElements) {
         for (TraitElement te : traitElements.values()) {
-            new TraitInterfaceWriter(te, messager).writeInterface(filer);
+            new TraitInterfaceWriter(te, utils).writeInterface(filer);
         }
     }
 
@@ -124,14 +127,14 @@ public class TraitProcessor extends AbstractProcessor {
         for (ClassWithTraits cls : classesWithTraits) {
             List<TraitElement> allTraits = cls.getTraitClasses();
             for (TraitElement trait : allTraits) {
-                new TraitDelegateWriter(cls, trait, messager).writeDelegate(filer);
+                new TraitDelegateWriter(cls, trait, utils).writeDelegate(filer);
             }
         }
     }
 
     private void generateTraitImplementingSuperclasses(Set<ClassWithTraits> classesWithTraits, Map<ClassName, TraitElement> traitInterfaceMap) {
         for (ClassWithTraits cls : classesWithTraits) {
-            new ClassWithTraitsSuperclassWriter(cls, traitInterfaceMap, messager).writeClass(filer);
+            new ClassWithTraitsSuperclassWriter(cls, traitInterfaceMap, utils).writeClass(filer);
         }
     }
 }

@@ -7,7 +7,6 @@ package com.yahoo.javatraits.processor.data;
 
 import java.util.List;
 
-import javax.annotation.processing.Messager;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 
@@ -18,20 +17,20 @@ import com.yahoo.annotations.Utils;
 public abstract class TypeElementWrapper {
 
     protected TypeElement elem;
-    protected Messager messager;
+    protected Utils utils;
     protected ClassName fqn;
     protected List<TypeName> typeParameters;
     
-    public TypeElementWrapper(TypeElement elem, Messager messager) {
+    public TypeElementWrapper(TypeElement elem, Utils utils) {
         this.elem = elem;
-        this.messager = messager;
+        this.utils = utils;
         this.fqn = new ClassName(elem.getQualifiedName().toString());
         this.typeParameters = initTypeParameters(elem);
     }
     
     private List<TypeName> initTypeParameters(TypeElement elem) {
         List<? extends TypeParameterElement> typeParams = elem.getTypeParameters();
-        return Utils.mapTypeParameterElementsToTypeName(typeParams, getSimpleName());
+        return utils.mapTypeParameterElementsToTypeName(typeParams, getSimpleName());
     }
 
     public TypeElement getSourceElement() {

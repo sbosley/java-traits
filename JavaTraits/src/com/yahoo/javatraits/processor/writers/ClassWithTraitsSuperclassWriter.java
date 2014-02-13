@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.processing.Filer;
-import javax.annotation.processing.Messager;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeKind;
@@ -38,15 +37,15 @@ public class ClassWithTraitsSuperclassWriter {
 
     private ClassWithTraits cls;
     private Map<ClassName, TraitElement> traitElementMap;
-    private Messager messager;
+    private Utils utils;
     private List<TraitElement> allTraits;
     private JavaFileWriter writer;
 
-    public ClassWithTraitsSuperclassWriter(ClassWithTraits cls, Map<ClassName, TraitElement> traitElementMap, Messager messager) {
+    public ClassWithTraitsSuperclassWriter(ClassWithTraits cls, Map<ClassName, TraitElement> traitElementMap, Utils utils) {
         this.cls = cls;
         this.traitElementMap = traitElementMap;
-        this.messager = messager;
-        this.allTraits = Utils.map(Utils.getClassValuesFromAnnotation(HasTraits.class, cls.getSourceElement(), "traits", messager),
+        this.utils = utils;
+        this.allTraits = Utils.map(Utils.getClassValuesFromAnnotation(HasTraits.class, cls.getSourceElement(), "traits"),
                 new Utils.MapFunction<ClassName, TraitElement>() {
             public TraitElement map(ClassName fqn) {
                 return ClassWithTraitsSuperclassWriter.this.traitElementMap.get(fqn);
@@ -65,7 +64,7 @@ public class ClassWithTraitsSuperclassWriter {
             emitClassDefinition();
             writer.close();
         } catch (IOException e) {
-            messager.printMessage(Kind.ERROR, "IOException writing delegate class with delegate " +
+            utils.getMessager().printMessage(Kind.ERROR, "IOException writing delegate class with delegate " +
                     cls.getSimpleName() + " for trait", cls.getSourceElement());
         }
     }
@@ -84,7 +83,7 @@ public class ClassWithTraitsSuperclassWriter {
         Set<ClassName> imports = new HashSet<ClassName>();
         for (TraitElement elem : allTraits) {
             List<? extends ExecutableElement> declaredMethods = elem.getDeclaredMethods();
-            Utils.accumulateImportsFromExecutableElements(imports, declaredMethods, messager);
+            utils.accumulateImportsFromExecutableElements(imports, declaredMethods);
             imports.add(cls.getDelegateClassNameForTraitElement(elem));
             imports.add(elem.getInterfaceName());
         }
@@ -161,7 +160,7 @@ public class ClassWithTraitsSuperclassWriter {
         for (TraitElement elem : allTraits) {
             List<? extends ExecutableElement> execElems = elem.getDeclaredMethods();
             for (ExecutableElement exec : execElems) {
-                MethodSignature signature = Utils.getMethodSignature(exec, elem.getSimpleName());
+                MethodSignature signature = utils.getMethodSignature(exec, elem.getSimpleName());
                 List<Pair<TraitElement, ExecutableElement>> elements = methodToExecElements.get(signature);
                 if (elements == null) {
                     elements = new ArrayList<Pair<TraitElement, ExecutableElement>>();
@@ -203,7 +202,7 @@ public class ClassWithTraitsSuperclassWriter {
 
             Set<Modifier> modifiers = exec.getModifiers();
             boolean isAbstract = modifiers.contains(Modifier.ABSTRACT);
-            List<String> argNames = Utils.beginMethodDeclarationForExecutableElement(writer, exec, null, elem.getSimpleName(), isAbstract, modifiers.toArray(new Modifier[modifiers.size()]));
+            List<String> argNames = utils.beginMethodDeclarationForExecutableElement(writer, exec, null, elem.getSimpleName(), isAbstract, modifiers.toArray(new Modifier[modifiers.size()]));
 
             if (!isAbstract) {
                 StringBuilder nullCheck = new StringBuilder();
