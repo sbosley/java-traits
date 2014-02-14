@@ -153,7 +153,7 @@ public class ClassWithTraitsSuperclassWriter {
     }
 
     private void emitInitMethod() throws IOException {
-        writer.beginMethodDeclaration("init", null, Arrays.asList(Modifier.PROTECTED, Modifier.FINAL), null);
+        writer.beginMethodDeclaration("initTraits", null, Arrays.asList(Modifier.PROTECTED, Modifier.FINAL), null);
         writer.finishMethodDeclarationAndBeginMethodDefinition(null, false);
 
         for (TraitElement elem : allTraits) {
