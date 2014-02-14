@@ -73,6 +73,11 @@ public class TraitDelegateWriter {
     private void emitImports() throws IOException {
         Set<ClassName> imports = new HashSet<ClassName>();
         utils.accumulateImportsFromExecutableElements(imports, traitElement.getDeclaredMethods());
+        for (ExecutableElement e : traitElement.getDeclaredMethods()) {
+            if (TraitProcessorUtils.isGetThis(e)) {
+                imports.add(traitElement.getInterfaceName());
+            }
+        }
         imports.add(delegateClass);
         imports.add(traitElement.getFullyQualifiedName());
         writer.writeImports(imports);
