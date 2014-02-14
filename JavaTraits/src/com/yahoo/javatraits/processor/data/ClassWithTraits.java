@@ -27,7 +27,10 @@ public class ClassWithTraits extends TypeElementWrapper {
     public static final String DELEGATE_SUFFIX = "Delegate";
 
     private List<TraitElement> traitClasses;
+
     private ClassName desiredSuperclass;
+    private List<? extends TypeName> superclassTypeArgs = null;
+
     private ClassName generatedSuperclass;
     private Map<String, ClassName> prefer;
 
@@ -51,9 +54,48 @@ public class ClassWithTraits extends TypeElementWrapper {
         });
     }
 
+    @SuppressWarnings("unchecked")
     private void initSuperclasses() {
-        List<ClassName> desiredSuperclassResult = Utils.getClassValuesFromAnnotation(HasTraits.class, elem, "desiredSuperclass");
-        desiredSuperclass = desiredSuperclassResult.size() > 0 ? desiredSuperclassResult.get(0) : new ClassName("java.lang.Object");
+        AnnotationMirror hasTraits = Utils.findAnnotationMirror(elem, HasTraits.class);
+        AnnotationValue desiredSuperclassValue = Utils.findAnnotationValue(hasTraits, "desiredSuperclass");
+        if (desiredSuperclassValue != null) {
+            Object value = desiredSuperclassValue.getValue();
+            if (value instanceof AnnotationMirror) {
+                AnnotationMirror desiredSuperclassMirror = (AnnotationMirror) value;
+                AnnotationValue superclassValue = Utils.findAnnotationValue(desiredSuperclassMirror, "superclass");
+
+                List<ClassName> superclassNames = Utils.getClassValuesFromAnnotationValue(superclassValue);
+                desiredSuperclass = superclassNames.size() > 0 ? superclassNames.get(0) : new ClassName(Utils.OBJECT_CLASS_NAME);
+
+                AnnotationValue typeArgClassesValue = Utils.findAnnotationValue(desiredSuperclassMirror, "typeArgClasses");
+                List<ClassName> superclassTypeArgs = Utils.getClassValuesFromAnnotationValue(typeArgClassesValue);
+
+                AnnotationValue typeArgNames = Utils.findAnnotationValue(desiredSuperclassMirror, "typeArgNames");
+                List<String> superclassTypeArgNames = Utils.getStringValuesFromAnnotationValue(typeArgNames);
+
+                AnnotationValue numTypeArgs = Utils.findAnnotationValue(desiredSuperclassMirror, "numTypeArgs");
+                int superclassNumTypeArgs = numTypeArgs != null ? ((Integer) numTypeArgs.getValue()).intValue() : 0;
+
+                if (!Utils.isEmpty(superclassTypeArgs)) {
+                    this.superclassTypeArgs = superclassTypeArgs;
+                } else if (!Utils.isEmpty(superclassTypeArgNames)) {
+                    this.superclassTypeArgs = Utils.map(superclassTypeArgNames, new Utils.MapFunction<String, GenericName>() {
+                        @Override
+                        public GenericName map(String arg) {
+                            return new GenericName(arg, null, null);
+                        }
+                    });
+                } else if (superclassNumTypeArgs > 0) {
+                    this.superclassTypeArgs = new ArrayList<GenericName>();
+                    for (int i = 0; i < superclassNumTypeArgs; i++) {
+                        ((List<GenericName>) this.superclassTypeArgs).add(new GenericName("S" + Integer.toString(i), null, null));
+                    }
+                }
+            }
+        } else {
+            desiredSuperclass = new ClassName(Utils.OBJECT_CLASS_NAME);
+        }
+
         generatedSuperclass = new ClassName(fqn.toString() + GEN_SUFFIX);
     }
 
@@ -91,6 +133,14 @@ public class ClassWithTraits extends TypeElementWrapper {
         return desiredSuperclass;
     }
 
+    public boolean superclassHasTypeArgs() {
+        return !Utils.isEmpty(superclassTypeArgs);
+    }
+
+    public List<? extends TypeName> getSuperclassTypeArgs() {
+        return superclassTypeArgs;
+    }
+
     public Map<String, ClassName> getPreferMap() {
         return prefer;
     }
@@ -103,8 +153,14 @@ public class ClassWithTraits extends TypeElementWrapper {
 
     public List<TypeName> getTypeParametersForDelegate(TraitElement onlyForThisElement) {
         List<TypeName> result = new ArrayList<TypeName>();
-        for (int i = 0; i < traitClasses.size(); i++) {
-            TraitElement elem = traitClasses.get(i);
+        if (hasTypeParameters()) {
+            for (TypeName t : superclassTypeArgs) {
+                if (!(t instanceof ClassName))
+                    result.add(new GenericName("?", null, null));
+            }
+        }
+
+        for (TraitElement elem : traitClasses) {
             if (elem.hasTypeParameters()) {
                 if (onlyForThisElement != null && !onlyForThisElement.getFullyQualifiedName().equals(elem.getFullyQualifiedName())) {
                     int paramCount = elem.getTypeParameters().size();

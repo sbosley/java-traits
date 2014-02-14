@@ -6,12 +6,15 @@
 package com.yahoo.javatraits.test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
+import com.yahoo.javatraits.annotations.DesiredSuperclass;
 import com.yahoo.javatraits.annotations.HasTraits;
 import com.yahoo.javatraits.annotations.Prefer;
 
 @HasTraits(traits={MathTrait.class, AnotherTrait.class},
+           desiredSuperclass=@DesiredSuperclass(superclass=HashMap.class, typeArgClasses={String.class, Long.class}),
            prefer=@Prefer(target=AnotherTrait.class, method="duplicateMethod"))
 public class ClassWithTraits<A extends Number, B extends A, C, D> extends ClassWithTraitsGen<A, B, C, D> {
 

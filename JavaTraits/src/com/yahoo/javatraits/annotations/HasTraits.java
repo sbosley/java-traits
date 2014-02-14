@@ -1,6 +1,6 @@
 /**
  * Copyright 2014 Yahoo Inc.
- * 
+ *
  * See the file "LICENSE" for the full license governing this code.
  */
 package com.yahoo.javatraits.annotations;
@@ -11,9 +11,9 @@ import java.lang.annotation.Target;
 /**
  * The {@link @HasTraits} annotation allows you to declare that
  * classes implement a set of traits.
- * 
+ *
  * <br/><br/>
- * 
+ *
  * Classes that use {@literal @}{@link HasTraits} cause several supporting classes
  * to be generated at compile time. One such class will be the intended
  * superclass for the annotated class. The generated superclass will have
@@ -24,16 +24,16 @@ import java.lang.annotation.Target;
  * <br/>
  * Example:
  * <pre>
- * {@literal @}HasTraits(traits={MyTrait.class}) 
+ * {@literal @}HasTraits(traits={MyTrait.class})
  * public class MyClass extends MyClassGen {
  *    ...
  * }
  * </pre>
- * 
+ *
  * The code generator will guarantee that the generated superclasses
  * implement all the interfaces implicitly defined by the specified
  * {@literal @}{@link Trait} classes.
- * 
+ *
  * @author Sam Bosley <sboz88@gmail.com>
  */
 @Target(ElementType.TYPE)
@@ -43,15 +43,17 @@ public @interface HasTraits {
      * that the annotated class uses.
      */
     Class<?>[] traits();
-    
+
+
     /**
-     * The desired superclass for this class. Classes annotated with
+     * An annotation describing the desired superclass for this class. Classes annotated with
      * {@literal @}{@link HasTraits} will have to subclass a generated abstract class, but
      * if you want the generated subclass to have a parent class that is not
-     * {@literal @}{@link Object} you can specify it here.
+     * {@literal @}{@link Object} you can specify it here using the
+     * {@ literal @}{@link DesiredSuperclass} annotation;
      */
-    Class<?> desiredSuperclass() default Object.class;
-    
+    DesiredSuperclass desiredSuperclass() default @DesiredSuperclass(superclass=Object.class);
+
     /**
      * Optional list of {@literal @}{@link Prefer} annotations that allow manual control
      * when resolving method naming conflicts.

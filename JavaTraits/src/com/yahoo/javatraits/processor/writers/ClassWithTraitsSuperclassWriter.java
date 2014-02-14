@@ -88,16 +88,29 @@ public class ClassWithTraitsSuperclassWriter {
             imports.add(elem.getInterfaceName());
         }
         ClassName desiredSuperclass = cls.getDesiredSuperclass();
-        if (!Utils.OBJECT_CLASS_NAME.equals(desiredSuperclass.toString()))
+        if (!Utils.OBJECT_CLASS_NAME.equals(desiredSuperclass.toString())) {
             imports.add(desiredSuperclass);
+            if (cls.superclassHasTypeArgs()) {
+                List<? extends TypeName> superclassTypeArgs = cls.getSuperclassTypeArgs();
+                for (TypeName t : superclassTypeArgs) {
+                    if (t instanceof ClassName)
+                        imports.add((ClassName) t);
+                }
+            }
+        }
 
         writer.writeImports(imports);
     }
 
     private void emitClassDeclaration() throws IOException {
         List<TypeName> generics = new ArrayList<TypeName>();
-        for (int i = 0; i < allTraits.size(); i++) {
-            TraitElement elem = allTraits.get(i);
+        if (cls.superclassHasTypeArgs()) {
+            for (TypeName t : cls.getSuperclassTypeArgs()) {
+                if (!(t instanceof ClassName))
+                    generics.add(t);
+            }
+        }
+        for (TraitElement elem : allTraits) {
             if (elem.hasTypeParameters()) {
                 generics.addAll(elem.getTypeParameters());
             }
@@ -107,8 +120,11 @@ public class ClassWithTraitsSuperclassWriter {
         writer.beginTypeDeclaration(superclassName, "class", Modifier.PUBLIC, Modifier.ABSTRACT);
 
         ClassName desiredSuperclass = cls.getDesiredSuperclass();
-        if (!Utils.OBJECT_CLASS_NAME.equals(desiredSuperclass.toString()))
+        if (!Utils.OBJECT_CLASS_NAME.equals(desiredSuperclass.toString())) {
             writer.addSuperclassToTypeDeclaration(desiredSuperclass);
+            if (cls.superclassHasTypeArgs())
+                writer.writeGenericsList(cls.getSuperclassTypeArgs(), false);
+        }
 
         if (allTraits.size() > 0) {
             List<ClassName> interfaces = new ArrayList<ClassName>();

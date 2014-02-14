@@ -8,6 +8,7 @@ package com.yahoo.annotations;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
@@ -252,6 +253,10 @@ public class Utils {
         return str == null || str.isEmpty();
     }
 
+    public static boolean isEmpty(Collection<?> collection) {
+        return collection == null || collection.isEmpty();
+    }
+
     public static String getPackageFromFullyQualifiedName(String name) {
         int split = getFQNSplitIndex(name);
         if (split < 0)
@@ -318,21 +323,42 @@ public class Utils {
         return null;
     }
 
-    public static List<ClassName> getClassValuesFromAnnotationValue(AnnotationValue annotationValue) {
-        List<ClassName> result = new ArrayList<ClassName>();
-        Object value = annotationValue.getValue();
-        if (value instanceof TypeMirror) {
-            result.add(new ClassName(value.toString()));
-        } else if (value instanceof List) {
-            @SuppressWarnings("unchecked")
-            List<? extends AnnotationValue> annotationValues = (List<? extends AnnotationValue>) value;
-            for (AnnotationValue av : annotationValues) {
-                Object itemValue = av.getValue();
-                if (itemValue instanceof TypeMirror)
-                    result.add(new ClassName(itemValue.toString()));
+    @SuppressWarnings("unchecked")
+    public static <V, T> List<T> getValuesFromAnnotationValue(AnnotationValue annotationValue, Class<V> valueClass, MapFunction<V, T> mapResult) {
+        List<T> result = new ArrayList<T>();
+        if (annotationValue != null) {
+            Object value = annotationValue.getValue();
+            if (valueClass.isAssignableFrom(value.getClass())) {
+                result.add(mapResult.map((V) value));
+            } else if (value instanceof List) {
+                List<? extends AnnotationValue> annotationValues = (List<? extends AnnotationValue>) value;
+                for (AnnotationValue av : annotationValues) {
+                    Object itemValue = av.getValue();
+                    if (valueClass.isAssignableFrom(itemValue.getClass()))
+                        result.add(mapResult.map((V) itemValue));
+                }
             }
         }
         return result;
+    }
+
+    public static List<ClassName> getClassValuesFromAnnotationValue(AnnotationValue annotationValue) {
+        return getValuesFromAnnotationValue(annotationValue, TypeMirror.class, new MapFunction<TypeMirror, ClassName>() {
+            @Override
+            public ClassName map(TypeMirror arg) {
+                return new ClassName(arg.toString());
+            }
+        });
+    }
+
+    public static List<String> getStringValuesFromAnnotationValue(AnnotationValue annotationValue) {
+        return getValuesFromAnnotationValue(annotationValue, String.class, new MapFunction<String, String>() {
+            @Override
+            public String map(String arg) {
+                return arg;
+            }
+
+        });
     }
 
     public static List<ClassName> getClassValuesFromAnnotation(Class<?> annotationClass, Element elem, String propertyName) {
