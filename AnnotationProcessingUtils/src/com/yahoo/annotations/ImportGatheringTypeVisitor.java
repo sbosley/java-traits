@@ -86,7 +86,6 @@ public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<ClassNa
         for (TypeMirror thrown : thrownTypes) {
             thrown.accept(this, p);
         }
-        messager.printMessage(Kind.ERROR, "Encountered ExecutableType accumulating imports", elem);
         return null;
     }
 
