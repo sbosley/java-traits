@@ -28,24 +28,23 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.WildcardType;
 import javax.lang.model.util.Types;
-import javax.tools.Diagnostic.Kind;
 
 public class Utils {
 
     public static final String OBJECT_CLASS_NAME = "java.lang.Object";
-    
+
     private Messager messager;
     private Types types;
-    
+
     public Utils(Messager messager, Types types) {
         this.messager = messager;
         this.types = types;
     }
-    
+
     public Messager getMessager() {
         return messager;
     }
-    
+
     public Types getTypes() {
         return types;
     }
@@ -134,7 +133,7 @@ public class Utils {
             superBound = getTypeNameFromTypeMirror(superBoundMirror, genericQualifier);
         return new GenericName(genericName, extendsBound, superBound);
     }
-    
+
     private List<TypeName> getUpperBoundsFromTypeMirror(TypeMirror sourceMirror, TypeMirror extendsBoundMirror, final String genericQualifier) {
         List<? extends TypeMirror> upperBounds = getUpperBoundMirrors(sourceMirror, extendsBoundMirror);
         return map(upperBounds, new MapFunction<TypeMirror, TypeName>() {
@@ -144,25 +143,32 @@ public class Utils {
             }
         });
     }
-    
+
     public List<? extends TypeMirror> getUpperBoundMirrors(TypeMirror sourceMirror, TypeMirror extendsBoundMirror) {
         List<TypeMirror> result = new ArrayList<TypeMirror>();
         if (extendsBoundMirror == null)
             return result;
-        
+
         if (extendsBoundMirror instanceof DeclaredType) {
-            // TODO: Check here for intersection type (maybe toString() contains '&' ?)
-            messager.printMessage(Kind.WARNING, "Found DeclaredType for upper bound: " + extendsBoundMirror.toString() + ", has type args: " + ((DeclaredType) extendsBoundMirror).getTypeArguments());
-            result.add(extendsBoundMirror);
-        } else if (types.isSameType(sourceMirror, extendsBoundMirror)) { // Workaround for an Eclipse bug that mishandles intersection types
-            List<? extends TypeMirror> supertypes = types.directSupertypes(extendsBoundMirror);
-            for (TypeMirror t : supertypes) {
-                result.add(t);
+            if (extendsBoundMirror.toString().contains("&")) { // Is intersection type
+                addSupertypesToUpperBoundList(result, extendsBoundMirror);
+            } else {
+                result.add(extendsBoundMirror);
             }
+        } else if (types.isSameType(sourceMirror, extendsBoundMirror)) { // Workaround for an Eclipse bug that mishandles intersection types
+            addSupertypesToUpperBoundList(result, extendsBoundMirror);
         } else {
             result.add(extendsBoundMirror);
         }
         return result;
+    }
+
+    private void addSupertypesToUpperBoundList(List<TypeMirror> list, TypeMirror upperBoundMirror) {
+        List<? extends TypeMirror> supertypes = types.directSupertypes(upperBoundMirror);
+        for (TypeMirror t : supertypes) {
+            if (!OBJECT_CLASS_NAME.equals(t.toString()))
+                list.add(t);
+        }
     }
 
     public List<String> beginMethodDeclarationForExecutableElement(JavaFileWriter writer, ExecutableElement exec, String nameOverride,
@@ -240,7 +246,7 @@ public class Utils {
         });
         return thrownTypes;
     }
-    
+
     // --- static methods
     public static boolean isEmpty(String str) {
         return str == null || str.isEmpty();
@@ -275,7 +281,7 @@ public class Utils {
         }
         return result;
     }
-    
+
     public static boolean deepCompareTypeList(List<TypeName> l1, List<TypeName> l2) {
         if (l1.size() != l2.size())
             return false;

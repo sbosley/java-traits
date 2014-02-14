@@ -70,7 +70,7 @@ public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<ClassNa
 
     @Override
     public Void visitError(ErrorType t, Set<ClassName> p) {
-        messager.printMessage(Kind.ERROR, "Encountered ErrorType accumulating imports", t.asElement());
+        messager.printMessage(Kind.WARNING, "Encountered ErrorType accumulating imports", t.asElement());
         return null;
     }
 
