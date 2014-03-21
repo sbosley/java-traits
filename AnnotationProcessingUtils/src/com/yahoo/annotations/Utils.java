@@ -30,6 +30,8 @@ import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.WildcardType;
 import javax.lang.model.util.Types;
 
+import com.yahoo.annotations.JavaFileWriter.MethodDeclarationParams;
+
 public class Utils {
 
     public static final String OBJECT_CLASS_NAME = "java.lang.Object";
@@ -173,17 +175,25 @@ public class Utils {
     }
 
     public List<String> beginMethodDeclarationForExecutableElement(JavaFileWriter writer, ExecutableElement exec, String nameOverride,
-            String genericQualifier, boolean isAbstract, Modifier... modifiers) throws IOException {
+            String genericQualifier, Modifier... modifiers) throws IOException {
         String name = nameOverride != null ? nameOverride : exec.getSimpleName().toString();
         List<TypeName> methodGenerics = mapTypeParameterElementsToTypeName(exec.getTypeParameters(), null);
         TypeName returnType = getTypeNameFromTypeMirror(exec.getReturnType(), null);
         qualifyReturnTypeGenerics(methodGenerics, returnType, genericQualifier);
 
-        writer.beginMethodDeclaration(name, returnType, Arrays.asList(modifiers), methodGenerics);
-        List<String> argNames = writeMethodArguments(writer, exec, genericQualifier, methodGenerics);
-        List<TypeName> thrownTypes = getThrownTypes(exec, genericQualifier, methodGenerics);
-        writer.finishMethodDeclarationAndBeginMethodDefinition(thrownTypes, isAbstract);
-        return argNames;
+        Pair<List<TypeName>, List<String>> arguments = getMethodArgumentsFromExecutableElement(exec, genericQualifier, methodGenerics);
+
+        MethodDeclarationParams params = new MethodDeclarationParams();
+        params.name = name;
+        params.returnType = returnType;
+        params.modifiers = Arrays.asList(modifiers);
+        params.methodGenerics = methodGenerics;
+        params.argumentTypes = arguments.getLeft();
+        params.argumentNames = arguments.getRight();
+        params.throwsTypes = getThrownTypes(exec, genericQualifier, methodGenerics);
+        writer.beginMethodDefinition(params);
+
+        return arguments.getRight();
     }
 
     private static void qualifyReturnTypeGenerics(List<TypeName> methodGenerics, TypeName returnType, String genericQualifier) {
@@ -214,7 +224,7 @@ public class Utils {
         return typeNames;
     }
 
-    private List<String> writeMethodArguments(JavaFileWriter writer, ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) throws IOException {
+    private Pair<List<TypeName>, List<String>> getMethodArgumentsFromExecutableElement(ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) throws IOException {
         List<? extends VariableElement> arguments = exec.getParameters();
         List<TypeName> typeNames = getArgumentTypeNames(exec, genericQualifier, methodGenerics);
         List<String> argNames = Utils.map(arguments, new Utils.MapFunction<VariableElement, String>() {
@@ -225,8 +235,7 @@ public class Utils {
         });
         if (exec.isVarArgs())
             typeNames.get(typeNames.size() - 1).setIsVarArgs(true);
-        writer.addArgumentList(typeNames, argNames);
-        return argNames;
+        return Pair.create(typeNames, argNames);
     }
 
     private List<TypeName> getThrownTypes(ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) {
@@ -287,7 +296,7 @@ public class Utils {
         return result;
     }
 
-    public static boolean deepCompareTypeList(List<TypeName> l1, List<TypeName> l2) {
+    public static boolean deepCompareTypeList(List<? extends TypeName> l1, List<? extends TypeName> l2) {
         if (l1.size() != l2.size())
             return false;
         for (int i = 0; i < l1.size(); i++) {

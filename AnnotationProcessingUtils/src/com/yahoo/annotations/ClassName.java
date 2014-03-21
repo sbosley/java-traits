@@ -12,7 +12,7 @@ public class ClassName extends TypeName {
 
     private String packageName;
     private String simpleName;
-    private List<TypeName> typeArgs = null;
+    private List<? extends TypeName> typeArgs = null;
 
     public ClassName(String packageName, String simpleName) {
         this.packageName = packageName;
@@ -37,11 +37,11 @@ public class ClassName extends TypeName {
         return "java.lang".equals(packageName);
     }
 
-    public List<TypeName> getTypeArgs() {
+    public List<? extends TypeName> getTypeArgs() {
         return typeArgs;
     }
 
-    public void setTypeArgs(List<TypeName> typeArgs) {
+    public void setTypeArgs(List<? extends TypeName> typeArgs) {
         this.typeArgs = typeArgs;
     }
 

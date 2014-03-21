@@ -29,7 +29,6 @@ public class ClassWithTraits extends TypeElementWrapper {
     private List<TraitElement> traitClasses;
 
     private ClassName desiredSuperclass;
-    private List<? extends TypeName> superclassTypeArgs = null;
 
     private ClassName generatedSuperclass;
     private Map<String, ClassName> prefer;
@@ -54,7 +53,6 @@ public class ClassWithTraits extends TypeElementWrapper {
         });
     }
 
-    @SuppressWarnings("unchecked")
     private void initSuperclasses() {
         AnnotationMirror hasTraits = Utils.findAnnotationMirror(elem, HasTraits.class);
         AnnotationValue desiredSuperclassValue = Utils.findAnnotationValue(hasTraits, "desiredSuperclass");
@@ -77,19 +75,20 @@ public class ClassWithTraits extends TypeElementWrapper {
                 int superclassNumTypeArgs = numTypeArgs != null ? ((Integer) numTypeArgs.getValue()).intValue() : 0;
 
                 if (!Utils.isEmpty(superclassTypeArgs)) {
-                    this.superclassTypeArgs = superclassTypeArgs;
+                    desiredSuperclass.setTypeArgs(superclassTypeArgs);
                 } else if (!Utils.isEmpty(superclassTypeArgNames)) {
-                    this.superclassTypeArgs = Utils.map(superclassTypeArgNames, new Utils.MapFunction<String, GenericName>() {
+                    desiredSuperclass.setTypeArgs(Utils.map(superclassTypeArgNames, new Utils.MapFunction<String, GenericName>() {
                         @Override
                         public GenericName map(String arg) {
                             return new GenericName(arg, null, null);
                         }
-                    });
+                    }));
                 } else if (superclassNumTypeArgs > 0) {
-                    this.superclassTypeArgs = new ArrayList<GenericName>();
+                    List<GenericName> typeArgs = new ArrayList<GenericName>();
                     for (int i = 0; i < superclassNumTypeArgs; i++) {
-                        ((List<GenericName>) this.superclassTypeArgs).add(new GenericName("S" + Integer.toString(i), null, null));
+                        typeArgs.add(new GenericName("S" + Integer.toString(i), null, null));
                     }
+                    desiredSuperclass.setTypeArgs(typeArgs);
                 }
             }
         } else {
@@ -134,11 +133,7 @@ public class ClassWithTraits extends TypeElementWrapper {
     }
 
     public boolean superclassHasTypeArgs() {
-        return !Utils.isEmpty(superclassTypeArgs);
-    }
-
-    public List<? extends TypeName> getSuperclassTypeArgs() {
-        return superclassTypeArgs;
+        return !Utils.isEmpty(desiredSuperclass.getTypeArgs());
     }
 
     public Map<String, ClassName> getPreferMap() {
@@ -154,7 +149,7 @@ public class ClassWithTraits extends TypeElementWrapper {
     public List<TypeName> getTypeParametersForDelegate(TraitElement onlyForThisElement) {
         List<TypeName> result = new ArrayList<TypeName>();
         if (hasTypeParameters()) {
-            for (TypeName t : superclassTypeArgs) {
+            for (TypeName t : desiredSuperclass.getTypeArgs()) {
                 if (!(t instanceof ClassName))
                     result.add(new GenericName("?", null, null));
             }

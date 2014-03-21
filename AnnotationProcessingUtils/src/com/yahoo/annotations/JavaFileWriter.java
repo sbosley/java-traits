@@ -8,7 +8,6 @@ package com.yahoo.annotations;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -30,10 +29,8 @@ public class JavaFileWriter {
     private static enum Scope {
         PACKAGE,
         IMPORTS,
-        TYPE_DECLARATION,
         TYPE_DEFINITION,
         FIELD_DECLARATION,
-        METHOD_DECLARATION,
         METHOD_DEFINITION,
         FINISHED
     }
@@ -80,41 +77,35 @@ public class JavaFileWriter {
         out.append("\n");
     }
 
-    public void beginTypeDeclaration(ClassName name, String kind, Modifier... modifiers) throws IOException {
-        beginTypeDeclaration(name, kind, Arrays.asList(modifiers));
+    public static class TypeDeclarationParameters {
+        public ClassName name;
+        public String kind;
+        public List<Modifier> modifiers;
+        public ClassName superclass;
+        public List<ClassName> interfaces;
     }
 
-    public void beginTypeDeclaration(ClassName name, String kind, List<Modifier> modifiers) throws IOException {
+    public void beginTypeDefinition(TypeDeclarationParameters typeDeclaration) throws IOException {
+        // TODO: Validate args
         checkScope(Scope.IMPORTS);
-        writeModifierList(modifiers);
-        out.append(kind).append(" ").append(name.getSimpleName());
-        writeGenericsList(name.getTypeArgs(), true);
-        moveToScope(Scope.TYPE_DECLARATION);
-    }
+        writeModifierList(typeDeclaration.modifiers);
+        out.append(typeDeclaration.kind).append(" ").append(typeDeclaration.name.getSimpleName());
+        writeGenericsList(typeDeclaration.name.getTypeArgs(), true);
 
-    public void addSuperclassToTypeDeclaration(ClassName superclass) throws IOException {
-        checkScope(Scope.TYPE_DECLARATION);
-        out.append(" extends ").append(shortenName(superclass, false));
-    }
-
-    public void addInterfacesToTypeDeclaration(List<ClassName> interfaces) throws IOException {
-        checkScope(Scope.TYPE_DECLARATION);
-        out.append(" implements ");
-        for (int i = 0; i < interfaces.size(); i++) {
-            out.append(shortenName(interfaces.get(i), false));
-            if (i < interfaces.size() - 1)
-                out.append(", ");
+        if (typeDeclaration.superclass != null && !Utils.OBJECT_CLASS_NAME.equals(typeDeclaration.superclass.toString())) {
+            out.append(" extends ").append(shortenName(typeDeclaration.superclass, false));
         }
-    }
 
-    public void finishTypeDeclarationAndBeginTypeDefinition() throws IOException {
-        checkScope(Scope.TYPE_DECLARATION);
+        if (!Utils.isEmpty(typeDeclaration.interfaces)) {
+            out.append(" implements ");
+            for (int i = 0; i < typeDeclaration.interfaces.size(); i++) {
+                out.append(shortenName(typeDeclaration.interfaces.get(i), false));
+                if (i < typeDeclaration.interfaces.size() - 1)
+                    out.append(", ");
+            }
+        }
         out.append(" {\n\n");
         moveToScope(Scope.TYPE_DEFINITION);
-    }
-
-    public void writeFieldDeclaration(TypeName type, String name, Modifier... modifiers) throws IOException {
-        writeFieldDeclaration(type, name, Arrays.asList(modifiers));
     }
 
     public void writeFieldDeclaration(TypeName type, String name, List<Modifier> modifiers) throws IOException {
@@ -127,65 +118,81 @@ public class JavaFileWriter {
         moveToScope(Scope.TYPE_DEFINITION);
     }
 
-    public void beginMethodDeclaration(String name, TypeName returnType, List<Modifier> modifiers, List<? extends TypeName> methodGenerics) throws IOException {
+    public static class MethodDeclarationParams {
+        public String name;
+        public TypeName returnType;
+        public List<Modifier> modifiers;
+        public List<? extends TypeName> methodGenerics;
+        public List<? extends TypeName> argumentTypes;
+        public List<String> argumentNames;
+        public List<? extends TypeName> throwsTypes;
+    }
+
+    public void beginMethodDefinition(MethodDeclarationParams methodDeclaration) throws IOException {
+        // TODO: Validate args
         checkScope(Scope.TYPE_DEFINITION);
         indent(1);
-        moveToScope(Scope.METHOD_DECLARATION);
-        writeModifierList(modifiers);
-        if (writeGenericsList(methodGenerics, true))
+        boolean isAbstract = Utils.isEmpty(methodDeclaration.modifiers) ?
+                false : methodDeclaration.modifiers.contains(Modifier.ABSTRACT);
+        writeModifierList(methodDeclaration.modifiers);
+        if (writeGenericsList(methodDeclaration.methodGenerics, true))
             out.append(" ");
-        if (returnType == null)
+        if (methodDeclaration.returnType == null)
             out.append("void");
         else {
-            out.append(shortenName(returnType, false));
+            out.append(shortenName(methodDeclaration.returnType, false));
         }
-        out.append(" ").append(name).append("(");
-    }
-
-    public void beginConstructorDeclaration(String type, Modifier... modifiers) throws IOException {
-        beginConstructorDeclaration(type, Arrays.asList(modifiers));
-    }
-
-    public void beginConstructorDeclaration(String type, List<Modifier> modifiers) throws IOException {
-        checkScope(Scope.TYPE_DEFINITION);
-        indent(1);
-        moveToScope(Scope.METHOD_DECLARATION);
-        writeModifierList(modifiers);
-        out.append(type).append("(");
-    }
-
-    public void addArgumentList(List<? extends TypeName> argTypes, List<String> argNames) throws IOException {
-        checkScope(Scope.METHOD_DECLARATION);
-        if (argTypes != null) {
-            for (int i = 0; i < argTypes.size(); i++) {
-                TypeName argType = argTypes.get(i);
-                String argName = argNames.get(i);
-                out.append(shortenName(argType, false));
-                out.append(" ").append(argName);
-                if (i < argTypes.size() - 1)
-                    out.append(", ");
-            }
-        }
-    }
-
-    public void finishMethodDeclarationAndBeginMethodDefinition(List<? extends TypeName> thrownTypes, boolean wasAbstract) throws IOException {
-        checkScope(Scope.METHOD_DECLARATION);
-        out.append(")");
-        if (thrownTypes != null && thrownTypes.size() > 0) {
+        out.append(" ").append(methodDeclaration.name);
+        writeArgumentList(methodDeclaration.argumentTypes, methodDeclaration.argumentNames);
+        if (!Utils.isEmpty(methodDeclaration.throwsTypes)) {
             out.append(" throws ");
-            for (int i = 0; i < thrownTypes.size(); i++) {
-                out.append(shortenName(thrownTypes.get(i), false));
-                if (i < thrownTypes.size() - 1)
+            for (int i = 0; i < methodDeclaration.throwsTypes.size(); i++) {
+                out.append(shortenName(methodDeclaration.throwsTypes.get(i), false));
+                if (i < methodDeclaration.throwsTypes.size() - 1)
                     out.append(", ");
             }
         }
-        if (wasAbstract) {
+        if (isAbstract) {
             out.append(";\n\n");
-            moveToScope(Scope.TYPE_DEFINITION);
         } else {
             out.append(" {\n");
             moveToScope(Scope.METHOD_DEFINITION);
         }
+    }
+
+    private void writeArgumentList(List<? extends TypeName> argumentTypes, List<String> argumentNames) throws IOException {
+        // TODO: Validate arguments
+        out.append("(");
+        if (argumentTypes != null) {
+            for (int i = 0; i < argumentTypes.size(); i++) {
+                TypeName argType = argumentTypes.get(i);
+                String argName = argumentNames.get(i);
+                out.append(shortenName(argType, false));
+                out.append(" ").append(argName);
+                if (i < argumentTypes.size() - 1)
+                    out.append(", ");
+            }
+        }
+        out.append(")");
+    }
+
+    public static class ConstructorDeclarationParams {
+        public ClassName name;
+        public List<Modifier> modifiers;
+        public List<? extends TypeName> methodGenerics;
+        public List<? extends TypeName> argumentTypes;
+        public List<String> argumentNames;
+    }
+
+    public void beginConstructorDeclaration(ConstructorDeclarationParams constructorDeclaration) throws IOException {
+        checkScope(Scope.TYPE_DEFINITION);
+        indent(1);
+        writeModifierList(constructorDeclaration.modifiers);
+        out.append(constructorDeclaration.name.getSimpleName());
+        writeGenericsList(constructorDeclaration.methodGenerics, false);
+        writeArgumentList(constructorDeclaration.argumentTypes, constructorDeclaration.argumentNames);
+        out.append(" {\n");
+        moveToScope(Scope.METHOD_DEFINITION);
     }
 
     public void writeStatement(String statement, int indentLevel) throws IOException {
@@ -205,7 +212,7 @@ public class JavaFileWriter {
         moveToScope(Scope.TYPE_DEFINITION);
     }
 
-    public void finishTypeDefinitionAndCloseType() throws IOException {
+    public void finishTypeDefinition() throws IOException {
         checkScope(Scope.TYPE_DEFINITION);
         out.append("}\n");
         moveToScope(Scope.FINISHED);
@@ -219,7 +226,7 @@ public class JavaFileWriter {
         }
     }
 
-    public boolean writeGenericsList(List<? extends TypeName> generics, boolean includeBounds) throws IOException {
+    private boolean writeGenericsList(List<? extends TypeName> generics, boolean includeBounds) throws IOException {
         String genericsList = getGenericsListString(generics, includeBounds);
         if (!genericsList.isEmpty())
             out.append(genericsList);
@@ -227,7 +234,7 @@ public class JavaFileWriter {
     }
 
     public String getGenericsListString(List<? extends TypeName> generics, boolean includeBounds) {
-        if (generics == null || generics.size() == 0)
+        if (Utils.isEmpty(generics))
             return "";
         StringBuilder builder = new StringBuilder();
         builder.append("<");
@@ -256,7 +263,7 @@ public class JavaFileWriter {
                 if (genericName.hasExtendsBound()) {
                     builder.append(" extends ");
                     String separator = " & ";
-                    for (TypeName bound : genericName.getExtendsBound()) {                        
+                    for (TypeName bound : genericName.getExtendsBound()) {
                         boolean recursiveUpperBounds = includeGenericBounds && bound instanceof ClassName;
                         builder.append(shortenName(bound, recursiveUpperBounds));
                         builder.append(separator);

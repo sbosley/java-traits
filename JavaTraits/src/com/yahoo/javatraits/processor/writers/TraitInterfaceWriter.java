@@ -7,6 +7,7 @@ package com.yahoo.javatraits.processor.writers;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,6 +20,7 @@ import javax.tools.JavaFileObject;
 import com.yahoo.annotations.ClassName;
 import com.yahoo.annotations.JavaFileWriter;
 import com.yahoo.annotations.Utils;
+import com.yahoo.annotations.JavaFileWriter.TypeDeclarationParameters;
 import com.yahoo.javatraits.processor.data.TraitElement;
 import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
 
@@ -64,10 +66,14 @@ public class TraitInterfaceWriter {
     }
 
     private void emitInterfaceDeclaration() throws IOException {
-        writer.beginTypeDeclaration(element.getInterfaceName(), "interface", Modifier.PUBLIC);
-        writer.finishTypeDeclarationAndBeginTypeDefinition();
+        TypeDeclarationParameters params = new TypeDeclarationParameters();
+        params.name = element.getInterfaceName();
+        params.kind = "interface";
+        params.modifiers = Arrays.asList(Modifier.PUBLIC);
+
+        writer.beginTypeDefinition(params);
         emitMethodDeclarations();
-        writer.finishTypeDefinitionAndCloseType();
+        writer.finishTypeDefinition();
     }
 
     private void emitMethodDeclarations() throws IOException {
@@ -80,7 +86,7 @@ public class TraitInterfaceWriter {
     }
 
     private void emitMethodDeclarationForExecutableElement(ExecutableElement exec) throws IOException {
-        utils.beginMethodDeclarationForExecutableElement(writer, exec, null, element.getSimpleName(), true, Modifier.PUBLIC);
+        utils.beginMethodDeclarationForExecutableElement(writer, exec, null, element.getSimpleName(), Modifier.PUBLIC);
     }
 
 }

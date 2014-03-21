@@ -21,6 +21,9 @@ import javax.tools.JavaFileObject;
 
 import com.yahoo.annotations.ClassName;
 import com.yahoo.annotations.JavaFileWriter;
+import com.yahoo.annotations.JavaFileWriter.ConstructorDeclarationParams;
+import com.yahoo.annotations.JavaFileWriter.MethodDeclarationParams;
+import com.yahoo.annotations.JavaFileWriter.TypeDeclarationParameters;
 import com.yahoo.annotations.Utils;
 import com.yahoo.javatraits.processor.data.ClassWithTraits;
 import com.yahoo.javatraits.processor.data.TraitElement;
@@ -84,30 +87,35 @@ public class TraitDelegateWriter {
     }
 
     private void emitDelegateDeclaration() throws IOException {
-        writer.beginTypeDeclaration(traitDelegateClass, "class", Modifier.PUBLIC);
-
         ClassName superclass = traitElement.getFullyQualifiedName().clone();
         superclass.setTypeArgs(traitElement.getTypeParameters());
-        writer.addSuperclassToTypeDeclaration(superclass);
-        writer.finishTypeDeclarationAndBeginTypeDefinition();
+        TypeDeclarationParameters params = new TypeDeclarationParameters();
+        params.name = traitDelegateClass;
+        params.kind = "class";
+        params.modifiers = Arrays.asList(Modifier.PUBLIC);
+        params.superclass = superclass;
+
+        writer.beginTypeDefinition(params);
 
         emitDelegateInstance();
         emitConstructor();
         emitDefaultMethodImplementations();
         emitDelegateMethodImplementations();
 
-        writer.finishTypeDefinitionAndCloseType();
+        writer.finishTypeDefinition();
     }
 
     private void emitDelegateInstance() throws IOException {
-        writer.writeFieldDeclaration(delegateClass, "delegate", Modifier.PRIVATE);
+        writer.writeFieldDeclaration(delegateClass, "delegate", Arrays.asList(Modifier.PRIVATE));
     }
 
     private void emitConstructor() throws IOException {
-        writer.beginConstructorDeclaration(traitDelegateClass.getSimpleName(), Modifier.PUBLIC);
-        writer.addArgumentList(Arrays.asList(delegateClass),
-                Arrays.asList("delegate"));
-        writer.finishMethodDeclarationAndBeginMethodDefinition(null, false);
+        ConstructorDeclarationParams params = new ConstructorDeclarationParams();
+        params.name = traitDelegateClass;
+        params.modifiers = Arrays.asList(Modifier.PUBLIC);
+        params.argumentTypes = Arrays.asList(delegateClass);
+        params.argumentNames = Arrays.asList("delegate");
+
         writer.writeStatement("this.delegate = delegate;\n", 2);
         writer.finishMethodDefinition();
     }
@@ -132,15 +140,19 @@ public class TraitDelegateWriter {
     }
 
     private void emitGetThis() throws IOException {
-        writer.beginMethodDeclaration(TraitProcessorUtils.GET_THIS, traitElement.getInterfaceName(), Arrays.asList(Modifier.PUBLIC), null);
-        writer.finishMethodDeclarationAndBeginMethodDefinition(null, false);
+        MethodDeclarationParams params = new MethodDeclarationParams();
+        params.name = TraitProcessorUtils.GET_THIS;
+        params.returnType = traitElement.getInterfaceName();
+        params.modifiers = Arrays.asList(Modifier.PUBLIC);
+
+        writer.beginMethodDefinition(params);
         writer.writeStatement("return delegate;\n", 2);
         writer.finishMethodDefinition();
     }
 
     private void emitMethodDeclaration(ExecutableElement exec, boolean isDefault, Modifier... modifiers) throws IOException {
         String name = isDefault ? "default__" + exec.getSimpleName().toString() : null;
-        List<String> argNames = utils.beginMethodDeclarationForExecutableElement(writer, exec, name, traitElement.getSimpleName(), false, modifiers);
+        List<String> argNames = utils.beginMethodDeclarationForExecutableElement(writer, exec, name, traitElement.getSimpleName(), modifiers);
         StringBuilder statement = new StringBuilder();
         if (exec.getReturnType().getKind() != TypeKind.VOID)
             statement.append("return ");

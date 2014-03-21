@@ -24,13 +24,15 @@ import javax.tools.JavaFileObject;
 
 import com.yahoo.annotations.ClassName;
 import com.yahoo.annotations.JavaFileWriter;
+import com.yahoo.annotations.JavaFileWriter.MethodDeclarationParams;
+import com.yahoo.annotations.JavaFileWriter.TypeDeclarationParameters;
 import com.yahoo.annotations.MethodSignature;
+import com.yahoo.annotations.Pair;
 import com.yahoo.annotations.TypeName;
 import com.yahoo.annotations.Utils;
 import com.yahoo.javatraits.annotations.HasTraits;
 import com.yahoo.javatraits.processor.data.ClassWithTraits;
 import com.yahoo.javatraits.processor.data.TraitElement;
-import com.yahoo.javatraits.processor.utils.Pair;
 import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
 
 public class ClassWithTraitsSuperclassWriter {
@@ -91,7 +93,7 @@ public class ClassWithTraitsSuperclassWriter {
         if (!Utils.OBJECT_CLASS_NAME.equals(desiredSuperclass.toString())) {
             imports.add(desiredSuperclass);
             if (cls.superclassHasTypeArgs()) {
-                List<? extends TypeName> superclassTypeArgs = cls.getSuperclassTypeArgs();
+                List<? extends TypeName> superclassTypeArgs = cls.getDesiredSuperclass().getTypeArgs();
                 for (TypeName t : superclassTypeArgs) {
                     if (t instanceof ClassName)
                         imports.add((ClassName) t);
@@ -105,7 +107,7 @@ public class ClassWithTraitsSuperclassWriter {
     private void emitClassDeclaration() throws IOException {
         List<TypeName> generics = new ArrayList<TypeName>();
         if (cls.superclassHasTypeArgs()) {
-            for (TypeName t : cls.getSuperclassTypeArgs()) {
+            for (TypeName t : cls.getDesiredSuperclass().getTypeArgs()) {
                 if (!(t instanceof ClassName))
                     generics.add(t);
             }
@@ -117,44 +119,47 @@ public class ClassWithTraitsSuperclassWriter {
         }
         ClassName superclassName = cls.getFullyQualifiedGeneratedSuperclassName().clone();
         superclassName.setTypeArgs(generics);
-        writer.beginTypeDeclaration(superclassName, "class", Modifier.PUBLIC, Modifier.ABSTRACT);
 
-        ClassName desiredSuperclass = cls.getDesiredSuperclass();
-        if (!Utils.OBJECT_CLASS_NAME.equals(desiredSuperclass.toString())) {
-            writer.addSuperclassToTypeDeclaration(desiredSuperclass);
-            if (cls.superclassHasTypeArgs())
-                writer.writeGenericsList(cls.getSuperclassTypeArgs(), false);
-        }
-
+        List<ClassName> interfaces = null;
         if (allTraits.size() > 0) {
-            List<ClassName> interfaces = new ArrayList<ClassName>();
+            interfaces = new ArrayList<ClassName>();
             for (int i = 0; i < allTraits.size(); i++) {
                 TraitElement elem = allTraits.get(i);
                 interfaces.add(elem.getInterfaceName());
             }
-            writer.addInterfacesToTypeDeclaration(interfaces);
         }
 
-        writer.finishTypeDeclarationAndBeginTypeDefinition();
+        TypeDeclarationParameters params = new TypeDeclarationParameters();
+        params.name = superclassName;
+        params.kind = "class";
+        params.modifiers = Arrays.asList(Modifier.PUBLIC, Modifier.ABSTRACT);
+        params.superclass = cls.getDesiredSuperclass();
+        params.interfaces = interfaces;
+
+        writer.beginTypeDefinition(params);
 
         emitDelegateFields();
         emitInitMethod();
         emitDelegateMethods();
 
-        writer.finishTypeDefinitionAndCloseType();
+        writer.finishTypeDefinition();
     }
 
     private void emitDelegateFields() throws IOException {
         for (TraitElement elem : allTraits) {
             ClassName delegateClass = cls.getDelegateClassNameForTraitElement(elem);
-            writer.writeFieldDeclaration(delegateClass, getDelegateVariableName(elem), Modifier.PRIVATE);
+            writer.writeFieldDeclaration(delegateClass, getDelegateVariableName(elem), Arrays.asList(Modifier.PRIVATE));
         }
         writer.writeNewline();
     }
 
     private void emitInitMethod() throws IOException {
-        writer.beginMethodDeclaration("initTraits", null, Arrays.asList(Modifier.PROTECTED, Modifier.FINAL), null);
-        writer.finishMethodDeclarationAndBeginMethodDefinition(null, false);
+        MethodDeclarationParams params = new MethodDeclarationParams();
+        params.name = "initTraits";
+        params.returnType = null;
+        params.modifiers = Arrays.asList(Modifier.PROTECTED, Modifier.FINAL);
+
+        writer.beginMethodDefinition(params);
 
         for (TraitElement elem : allTraits) {
             ClassName delegateClass = cls.getDelegateClassNameForTraitElement(elem);
@@ -218,7 +223,7 @@ public class ClassWithTraitsSuperclassWriter {
 
             Set<Modifier> modifiers = exec.getModifiers();
             boolean isAbstract = modifiers.contains(Modifier.ABSTRACT);
-            List<String> argNames = utils.beginMethodDeclarationForExecutableElement(writer, exec, null, elem.getSimpleName(), isAbstract, modifiers.toArray(new Modifier[modifiers.size()]));
+            List<String> argNames = utils.beginMethodDeclarationForExecutableElement(writer, exec, null, elem.getSimpleName(), modifiers.toArray(new Modifier[modifiers.size()]));
 
             if (!isAbstract) {
                 StringBuilder nullCheck = new StringBuilder();
