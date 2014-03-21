@@ -137,13 +137,33 @@ public class JavaFileWriter {
         }
     }
 
-    public void writeFieldDeclaration(TypeName type, String name, List<Modifier> modifiers) throws IOException {
+    public static interface FieldInitializationExpression {
+        public void writeInitializationString(JavaFileWriter writer) throws IOException;
+    }
+
+    public static class ConstructorInitialization implements FieldInitializationExpression {
+        public ClassName constructorType;
+        public List<String> argumentNames;
+
+        public final void writeInitializationString(JavaFileWriter writer) throws IOException {
+            writer.out.append("new ").append(writer.shortenName(constructorType, false)).append("(");
+            writer.writeTypelessArgumentList(argumentNames);
+            writer.out.append(")");
+        }
+    }
+
+    public void writeFieldDeclaration(TypeName type, String name, List<Modifier> modifiers, FieldInitializationExpression initializer) throws IOException {
         checkScope(Scope.TYPE_DEFINITION);
         indent(1);
         moveToScope(Scope.FIELD_DECLARATION);
         writeModifierList(modifiers);
         out.append(shortenName(type, false));
-        out.append(" ").append(name).append(";\n");
+        out.append(" ").append(name);
+        if (initializer != null) {
+            out.append(" = ");
+            initializer.writeInitializationString(this);
+        }
+        out.append(";\n");
         moveToScope(Scope.TYPE_DEFINITION);
     }
 
@@ -216,18 +236,24 @@ public class JavaFileWriter {
 
     private void writeArgumentList(List<? extends TypeName> argumentTypes, List<String> argumentNames) throws IOException {
         out.append("(");
-        if (argumentTypes != null) {
-            for (int i = 0; i < argumentTypes.size(); i++) {
-                TypeName argType = argumentTypes.get(i);
+        if (argumentNames != null) {
+            for (int i = 0; i < argumentNames.size(); i++) {
+                TypeName argType = argumentTypes != null ? argumentTypes.get(i) : null;
                 String argName = argumentNames.get(i);
-                out.append(shortenName(argType, false));
-                out.append(" ").append(argName);
-                if (i < argumentTypes.size() - 1) {
+                if (argType != null) {
+                    out.append(shortenName(argType, false)).append(" ");
+                }
+                out.append(argName);
+                if (i < argumentNames.size() - 1) {
                     out.append(", ");
                 }
             }
         }
         out.append(")");
+    }
+
+    private void writeTypelessArgumentList(List<String> argumentNames) throws IOException {
+        writeArgumentList(null, argumentNames);
     }
 
     public static class ConstructorDeclarationParams {

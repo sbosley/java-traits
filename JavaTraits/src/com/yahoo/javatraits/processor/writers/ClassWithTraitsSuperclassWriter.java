@@ -28,7 +28,7 @@ import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.utils.Pair;
 import com.yahoo.annotations.utils.Utils;
 import com.yahoo.annotations.writer.JavaFileWriter;
-import com.yahoo.annotations.writer.JavaFileWriter.MethodDeclarationParams;
+import com.yahoo.annotations.writer.JavaFileWriter.ConstructorInitialization;
 import com.yahoo.annotations.writer.JavaFileWriter.Type;
 import com.yahoo.annotations.writer.JavaFileWriter.TypeDeclarationParameters;
 import com.yahoo.javatraits.annotations.HasTraits;
@@ -143,7 +143,6 @@ public class ClassWithTraitsSuperclassWriter {
         writer.beginTypeDefinition(params);
 
         emitDelegateFields();
-        emitInitMethod();
         emitDelegateMethods();
 
         writer.finishTypeDefinition();
@@ -152,26 +151,12 @@ public class ClassWithTraitsSuperclassWriter {
     private void emitDelegateFields() throws IOException {
         for (TraitElement elem : allTraits) {
             ClassName delegateClass = cls.getDelegateClassNameForTraitElement(elem);
-            writer.writeFieldDeclaration(delegateClass, getDelegateVariableName(elem), Arrays.asList(Modifier.PRIVATE));
+            ConstructorInitialization init = new ConstructorInitialization();
+            init.constructorType = delegateClass;
+            init.argumentNames = Arrays.asList("this");
+            writer.writeFieldDeclaration(delegateClass, getDelegateVariableName(elem), Arrays.asList(Modifier.PRIVATE), init);
         }
         writer.writeNewline();
-    }
-
-    private void emitInitMethod() throws IOException {
-        MethodDeclarationParams params = new MethodDeclarationParams();
-        params.name = "initTraits";
-        params.returnType = null;
-        params.modifiers = Arrays.asList(Modifier.PROTECTED, Modifier.FINAL);
-
-        writer.beginMethodDefinition(params);
-
-        for (TraitElement elem : allTraits) {
-            ClassName delegateClass = cls.getDelegateClassNameForTraitElement(elem);
-            writer.writeStatement(getDelegateVariableName(elem) + " = new ", 2);
-            writer.writeStatement(writer.shortenName(delegateClass, false), 0);
-            writer.writeStatement("(this);\n", 0);
-        }
-        writer.finishMethodDefinition();
     }
 
     private String getDelegateVariableName(TraitElement elem) {
@@ -232,12 +217,7 @@ public class ClassWithTraitsSuperclassWriter {
             List<String> argNames = utils.beginMethodDeclarationForExecutableElement(writer, exec, null, elem.getSimpleName(), modifiers.toArray(new Modifier[modifiers.size()]));
 
             if (!isAbstract) {
-                StringBuilder nullCheck = new StringBuilder();
                 String delegateVariableName = getDelegateVariableName(elem);
-                nullCheck.append("if (").append(delegateVariableName).append(" == null)");
-                writer.writeStatement("if (" + delegateVariableName + " == null)\n", 2);
-                writer.writeStatement("throw new IllegalStateException(\"init() not called on instance of class \" + getClass());\n", 3);
-
                 StringBuilder statement = new StringBuilder();
                 if (exec.getReturnType().getKind() != TypeKind.VOID) {
                     statement.append("return ");

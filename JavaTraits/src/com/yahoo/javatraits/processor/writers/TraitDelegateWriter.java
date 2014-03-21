@@ -108,7 +108,7 @@ public class TraitDelegateWriter {
     }
 
     private void emitDelegateInstance() throws IOException {
-        writer.writeFieldDeclaration(delegateClass, "delegate", Arrays.asList(Modifier.PRIVATE));
+        writer.writeFieldDeclaration(delegateClass, "delegate", Arrays.asList(Modifier.PRIVATE), null);
     }
 
     private void emitConstructor() throws IOException {
