@@ -98,9 +98,9 @@ public class JavaFileWriter {
     }
 
     public void beginTypeDefinition(TypeDeclarationParameters typeDeclaration) throws IOException {
-        // TODO: Validate args
-        this.kind = typeDeclaration.kind;
+        validateTypeDeclarationParams(typeDeclaration);
         checkScope(Scope.IMPORTS);
+        this.kind = typeDeclaration.kind;
         writeModifierList(typeDeclaration.modifiers);
         out.append(typeDeclaration.kind.name).append(" ").append(typeDeclaration.name.getSimpleName());
         writeGenericsList(typeDeclaration.name.getTypeArgs(), true);
@@ -119,6 +119,15 @@ public class JavaFileWriter {
         }
         out.append(" {\n\n");
         moveToScope(Scope.TYPE_DEFINITION);
+    }
+
+    private void validateTypeDeclarationParams(TypeDeclarationParameters params) {
+        if (params.name == null) {
+            throw new IllegalArgumentException("Must specify a class name for TypeDeclarationParameters");
+        }
+        if (params.kind == null) {
+            throw new IllegalArgumentException("Must specify a type for TypeDeclarationParameters (one of Type.CLASS or Type.INTERFACE)");
+        }
     }
 
     public void writeFieldDeclaration(TypeName type, String name, List<Modifier> modifiers) throws IOException {
@@ -142,7 +151,7 @@ public class JavaFileWriter {
     }
 
     public void beginMethodDefinition(MethodDeclarationParams methodDeclaration) throws IOException {
-        // TODO: Validate args
+        validateMethodDefinitionParams(methodDeclaration);
         checkScope(Scope.TYPE_DEFINITION);
         indent(1);
         boolean isAbstract = kind.equals(Type.INTERFACE) ||
@@ -174,8 +183,29 @@ public class JavaFileWriter {
         }
     }
 
+    private void validateMethodDefinitionParams(MethodDeclarationParams params) {
+        if (Utils.isEmpty(params.name)) {
+            throw new IllegalArgumentException("Must specify a method name for MethodDeclarationParams");
+        }
+        verifyArgumentTypesAndNames(params.argumentTypes, params.argumentNames);
+    }
+
+    private void verifyArgumentTypesAndNames(List<? extends TypeName> argumentTypes, List<String> argumentNames) {
+        if (Utils.isEmpty(argumentTypes) && !Utils.isEmpty(argumentNames)) {
+            throw new IllegalArgumentException("Must specify argument types for MethodDeclarationParams");
+        }
+        if (!Utils.isEmpty(argumentTypes) && Utils.isEmpty(argumentNames)) {
+            throw new IllegalArgumentException("Must specify argument names for MethodDeclarationParams");
+        }
+        if (!Utils.isEmpty(argumentTypes) && !Utils.isEmpty(argumentNames)
+                && argumentTypes.size() != argumentNames.size()) {
+            String error = "Different number of argument types and names in MethodDeclarationParams. "
+                    + argumentTypes.size() + " types, " + argumentNames.size() + " names.";
+            throw new IllegalArgumentException(error);
+        }
+    }
+
     private void writeArgumentList(List<? extends TypeName> argumentTypes, List<String> argumentNames) throws IOException {
-        // TODO: Validate arguments
         out.append("(");
         if (argumentTypes != null) {
             for (int i = 0; i < argumentTypes.size(); i++) {
@@ -199,6 +229,7 @@ public class JavaFileWriter {
     }
 
     public void beginConstructorDeclaration(ConstructorDeclarationParams constructorDeclaration) throws IOException {
+        verifyConstructorDeclarationParams(constructorDeclaration);
         checkScope(Scope.TYPE_DEFINITION);
         indent(1);
         writeModifierList(constructorDeclaration.modifiers);
@@ -207,6 +238,13 @@ public class JavaFileWriter {
         writeArgumentList(constructorDeclaration.argumentTypes, constructorDeclaration.argumentNames);
         out.append(" {\n");
         moveToScope(Scope.METHOD_DEFINITION);
+    }
+
+    private void verifyConstructorDeclarationParams(ConstructorDeclarationParams params) {
+        if (params.name == null) {
+            throw new IllegalArgumentException("Must specify a method name for ConstructorDeclarationParams");
+        }
+        verifyArgumentTypesAndNames(params.argumentTypes, params.argumentNames);
     }
 
     public void writeStatement(String statement, int indentLevel) throws IOException {
