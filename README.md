@@ -61,7 +61,7 @@ public abstract class RectangleGen extends Shape implements ResizeableInterface 
 ```
 
 ### Implement details
-There are two things that you are still responsible for. One is to implement all the abstract methods declared in all the traits your class is using -- the code generator does NOT implement those for you! The other is that you must call `init()` (a method implemented by all generated superclasses) in your constructor--if you don't, exceptions will be thrown when you try to call trait methods.
+There only thing you are still responsible for is to implement all the abstract methods declared in all the traits your class is using -- the code generator does NOT implement those for you!
 
 A complete class definition using traits would look something like this:
 
