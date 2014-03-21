@@ -24,7 +24,19 @@ public class JavaFileWriter {
 
     private Writer out;
     private Map<String, List<ClassName>> knownNames;
+    private Type kind = null;
     private Scope currentScope = Scope.PACKAGE;
+
+    public static enum Type {
+        CLASS("class"),
+        INTERFACE("interface");
+
+
+        private String name;
+        private Type(String name) {
+            this.name = name;
+        }
+    }
 
     private static enum Scope {
         PACKAGE,
@@ -79,7 +91,7 @@ public class JavaFileWriter {
 
     public static class TypeDeclarationParameters {
         public ClassName name;
-        public String kind;
+        public Type kind;
         public List<Modifier> modifiers;
         public ClassName superclass;
         public List<ClassName> interfaces;
@@ -87,9 +99,10 @@ public class JavaFileWriter {
 
     public void beginTypeDefinition(TypeDeclarationParameters typeDeclaration) throws IOException {
         // TODO: Validate args
+        this.kind = typeDeclaration.kind;
         checkScope(Scope.IMPORTS);
         writeModifierList(typeDeclaration.modifiers);
-        out.append(typeDeclaration.kind).append(" ").append(typeDeclaration.name.getSimpleName());
+        out.append(typeDeclaration.kind.name).append(" ").append(typeDeclaration.name.getSimpleName());
         writeGenericsList(typeDeclaration.name.getTypeArgs(), true);
 
         if (typeDeclaration.superclass != null && !Utils.OBJECT_CLASS_NAME.equals(typeDeclaration.superclass.toString())) {
@@ -132,8 +145,9 @@ public class JavaFileWriter {
         // TODO: Validate args
         checkScope(Scope.TYPE_DEFINITION);
         indent(1);
-        boolean isAbstract = Utils.isEmpty(methodDeclaration.modifiers) ?
-                false : methodDeclaration.modifiers.contains(Modifier.ABSTRACT);
+        boolean isAbstract = kind.equals(Type.INTERFACE) ||
+                (Utils.isEmpty(methodDeclaration.modifiers) ?
+                        false : methodDeclaration.modifiers.contains(Modifier.ABSTRACT));
         writeModifierList(methodDeclaration.modifiers);
         if (writeGenericsList(methodDeclaration.methodGenerics, true))
             out.append(" ");

@@ -23,6 +23,7 @@ import com.yahoo.annotations.ClassName;
 import com.yahoo.annotations.JavaFileWriter;
 import com.yahoo.annotations.JavaFileWriter.ConstructorDeclarationParams;
 import com.yahoo.annotations.JavaFileWriter.MethodDeclarationParams;
+import com.yahoo.annotations.JavaFileWriter.Type;
 import com.yahoo.annotations.JavaFileWriter.TypeDeclarationParameters;
 import com.yahoo.annotations.Utils;
 import com.yahoo.javatraits.processor.data.ClassWithTraits;
@@ -91,7 +92,7 @@ public class TraitDelegateWriter {
         superclass.setTypeArgs(traitElement.getTypeParameters());
         TypeDeclarationParameters params = new TypeDeclarationParameters();
         params.name = traitDelegateClass;
-        params.kind = "class";
+        params.kind = Type.CLASS;
         params.modifiers = Arrays.asList(Modifier.PUBLIC);
         params.superclass = superclass;
 
@@ -116,6 +117,7 @@ public class TraitDelegateWriter {
         params.argumentTypes = Arrays.asList(delegateClass);
         params.argumentNames = Arrays.asList("delegate");
 
+        writer.beginConstructorDeclaration(params);
         writer.writeStatement("this.delegate = delegate;\n", 2);
         writer.finishMethodDefinition();
     }

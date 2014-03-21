@@ -25,6 +25,7 @@ import javax.tools.JavaFileObject;
 import com.yahoo.annotations.ClassName;
 import com.yahoo.annotations.JavaFileWriter;
 import com.yahoo.annotations.JavaFileWriter.MethodDeclarationParams;
+import com.yahoo.annotations.JavaFileWriter.Type;
 import com.yahoo.annotations.JavaFileWriter.TypeDeclarationParameters;
 import com.yahoo.annotations.MethodSignature;
 import com.yahoo.annotations.Pair;
@@ -131,7 +132,7 @@ public class ClassWithTraitsSuperclassWriter {
 
         TypeDeclarationParameters params = new TypeDeclarationParameters();
         params.name = superclassName;
-        params.kind = "class";
+        params.kind = Type.CLASS;
         params.modifiers = Arrays.asList(Modifier.PUBLIC, Modifier.ABSTRACT);
         params.superclass = cls.getDesiredSuperclass();
         params.interfaces = interfaces;

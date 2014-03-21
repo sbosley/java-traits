@@ -19,8 +19,9 @@ import javax.tools.JavaFileObject;
 
 import com.yahoo.annotations.ClassName;
 import com.yahoo.annotations.JavaFileWriter;
-import com.yahoo.annotations.Utils;
+import com.yahoo.annotations.JavaFileWriter.Type;
 import com.yahoo.annotations.JavaFileWriter.TypeDeclarationParameters;
+import com.yahoo.annotations.Utils;
 import com.yahoo.javatraits.processor.data.TraitElement;
 import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
 
@@ -68,7 +69,7 @@ public class TraitInterfaceWriter {
     private void emitInterfaceDeclaration() throws IOException {
         TypeDeclarationParameters params = new TypeDeclarationParameters();
         params.name = element.getInterfaceName();
-        params.kind = "interface";
+        params.kind = Type.INTERFACE;
         params.modifiers = Arrays.asList(Modifier.PUBLIC);
 
         writer.beginTypeDefinition(params);
