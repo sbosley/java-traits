@@ -7,7 +7,6 @@ package com.yahoo.javatraits.processor;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -64,7 +63,7 @@ public class TraitProcessor extends AbstractProcessor {
             Map<ClassName, TraitElement> traitMap = getTraitElements();
             Set<ClassWithTraits> classesWithTraits = getClassesWithTraits(traitMap);
             generateTraitInterfaces(traitMap);
-            generateTraitDelegates(classesWithTraits, traitMap);
+            generateTraitDelegates(traitMap);
             generateTraitImplementingSuperclasses(classesWithTraits, traitMap);
             finishedGeneratingFiles = true;
         }
@@ -125,12 +124,9 @@ public class TraitProcessor extends AbstractProcessor {
         }
     }
 
-    private void generateTraitDelegates(Set<ClassWithTraits> classesWithTraits, Map<ClassName, TraitElement> traitInterfaceMap) {
-        for (ClassWithTraits cls : classesWithTraits) {
-            List<TraitElement> allTraits = cls.getTraitClasses();
-            for (TraitElement trait : allTraits) {
-                new TraitDelegateWriter(cls, trait, utils).writeDelegate(filer);
-            }
+    private void generateTraitDelegates(Map<ClassName, TraitElement> traitElements) {
+        for (TraitElement trait : traitElements.values()) {
+            new TraitDelegateWriter(trait, utils).writeDelegate(filer);
         }
     }
 

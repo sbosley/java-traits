@@ -17,14 +17,12 @@ import javax.tools.Diagnostic.Kind;
 
 import com.yahoo.annotations.model.ClassName;
 import com.yahoo.annotations.model.GenericName;
-import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.utils.Utils;
 import com.yahoo.javatraits.annotations.HasTraits;
 
 public class ClassWithTraits extends TypeElementWrapper {
 
     public static final String GEN_SUFFIX = "Gen";
-    public static final String DELEGATE_SUFFIX = "Delegate";
 
     private List<TraitElement> traitClasses;
 
@@ -139,36 +137,5 @@ public class ClassWithTraits extends TypeElementWrapper {
 
     public Map<String, ClassName> getPreferMap() {
         return prefer;
-    }
-
-    public ClassName getDelegateClassNameForTraitElement(TraitElement traitElement) {
-        ClassName delegate = new ClassName(traitElement.getFullyQualifiedName() + "__" + getSimpleName() + DELEGATE_SUFFIX);
-        delegate.setTypeArgs(traitElement.getTypeParameters());
-        return delegate;
-    }
-
-    public List<TypeName> getTypeParametersForDelegate(TraitElement onlyForThisElement) {
-        List<TypeName> result = new ArrayList<TypeName>();
-        if (hasTypeParameters()) {
-            for (TypeName t : desiredSuperclass.getTypeArgs()) {
-                if (!(t instanceof ClassName)) {
-                    result.add(new GenericName("?", null, null));
-                }
-            }
-        }
-
-        for (TraitElement elem : traitClasses) {
-            if (elem.hasTypeParameters()) {
-                if (onlyForThisElement != null && !onlyForThisElement.getFullyQualifiedName().equals(elem.getFullyQualifiedName())) {
-                    int paramCount = elem.getTypeParameters().size();
-                    for (int p = 0; p < paramCount; p++) {
-                        result.add(new GenericName("?", null, null));
-                    }
-                } else {
-                    result.addAll(elem.getTypeParameters());
-                }
-            }
-        }
-        return result;
     }
 }

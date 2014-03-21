@@ -26,27 +26,22 @@ import com.yahoo.annotations.writer.JavaFileWriter.ConstructorDeclarationParams;
 import com.yahoo.annotations.writer.JavaFileWriter.MethodDeclarationParams;
 import com.yahoo.annotations.writer.JavaFileWriter.Type;
 import com.yahoo.annotations.writer.JavaFileWriter.TypeDeclarationParameters;
-import com.yahoo.javatraits.processor.data.ClassWithTraits;
 import com.yahoo.javatraits.processor.data.TraitElement;
 import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
 
 public class TraitDelegateWriter {
 
-    private ClassWithTraits cls;
     private TraitElement traitElement;
     private Utils utils;
     private ClassName traitDelegateClass;
     private ClassName delegateClass;
     private JavaFileWriter writer;
 
-    public TraitDelegateWriter(ClassWithTraits cls, TraitElement traitElement, Utils utils) {
-        this.cls = cls;
+    public TraitDelegateWriter(TraitElement traitElement, Utils utils) {
         this.traitElement = traitElement;
         this.utils = utils;
-        this.traitDelegateClass = cls.getDelegateClassNameForTraitElement(traitElement);
-        this.traitDelegateClass.setTypeArgs(traitElement.getTypeParameters());
-        this.delegateClass = cls.getFullyQualifiedGeneratedSuperclassName();
-        this.delegateClass.setTypeArgs(cls.getTypeParametersForDelegate(traitElement));
+        this.traitDelegateClass = traitElement.getDelegateName();
+        this.delegateClass = traitElement.getInterfaceName();
     }
 
     public void writeDelegate(Filer filer) {
@@ -54,14 +49,13 @@ public class TraitDelegateWriter {
             if (writer != null) {
                 throw new IllegalStateException("Already created source file for " + traitDelegateClass.toString());
             }
-            JavaFileObject jfo = filer.createSourceFile(traitDelegateClass.toString(), cls.getSourceElement());
+            JavaFileObject jfo = filer.createSourceFile(traitDelegateClass.toString(), traitElement.getSourceElement());
             Writer out = jfo.openWriter();
             writer = new JavaFileWriter(out);
             emitDelegate();
             writer.close();
         } catch (IOException e) {
-            utils.getMessager().printMessage(Kind.ERROR, "IOException writing delegate class with delegate " +
-                    cls.getSimpleName() + " for trait", cls.getSourceElement());
+            utils.getMessager().printMessage(Kind.ERROR, "IOException writing delegate class for trait", traitElement.getSourceElement());
         }
     }
 
@@ -146,7 +140,7 @@ public class TraitDelegateWriter {
     private void emitGetThis() throws IOException {
         MethodDeclarationParams params = new MethodDeclarationParams();
         params.name = TraitProcessorUtils.GET_THIS;
-        params.returnType = traitElement.getInterfaceName();
+        params.returnType = delegateClass;
         params.modifiers = Arrays.asList(Modifier.PUBLIC);
 
         writer.beginMethodDefinition(params);

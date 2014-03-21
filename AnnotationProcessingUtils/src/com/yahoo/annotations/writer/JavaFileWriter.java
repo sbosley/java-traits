@@ -146,9 +146,8 @@ public class JavaFileWriter {
         public List<String> argumentNames;
 
         public final void writeInitializationString(JavaFileWriter writer) throws IOException {
-            writer.out.append("new ").append(writer.shortenName(constructorType, false)).append("(");
-            writer.writeTypelessArgumentList(argumentNames);
-            writer.out.append(")");
+            writer.out.append("new ").append(writer.shortenName(constructorType, false));
+            writer.writeTypelessArgumentList(argumentNames);;
         }
     }
 

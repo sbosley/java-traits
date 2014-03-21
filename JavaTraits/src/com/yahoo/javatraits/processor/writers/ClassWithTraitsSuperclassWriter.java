@@ -39,19 +39,17 @@ import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
 public class ClassWithTraitsSuperclassWriter {
 
     private ClassWithTraits cls;
-    private Map<ClassName, TraitElement> traitElementMap;
     private Utils utils;
     private List<TraitElement> allTraits;
     private JavaFileWriter writer;
 
-    public ClassWithTraitsSuperclassWriter(ClassWithTraits cls, Map<ClassName, TraitElement> traitElementMap, Utils utils) {
+    public ClassWithTraitsSuperclassWriter(ClassWithTraits cls, final Map<ClassName, TraitElement> traitElementMap, Utils utils) {
         this.cls = cls;
-        this.traitElementMap = traitElementMap;
         this.utils = utils;
         this.allTraits = Utils.map(Utils.getClassValuesFromAnnotation(HasTraits.class, cls.getSourceElement(), "traits"),
                 new Utils.MapFunction<ClassName, TraitElement>() {
             public TraitElement map(ClassName fqn) {
-                return ClassWithTraitsSuperclassWriter.this.traitElementMap.get(fqn);
+                return traitElementMap.get(fqn);
             };
         });;
     }
@@ -88,7 +86,7 @@ public class ClassWithTraitsSuperclassWriter {
         for (TraitElement elem : allTraits) {
             List<? extends ExecutableElement> declaredMethods = elem.getDeclaredMethods();
             utils.accumulateImportsFromExecutableElements(imports, declaredMethods);
-            imports.add(cls.getDelegateClassNameForTraitElement(elem));
+            imports.add(elem.getDelegateName());
             imports.add(elem.getInterfaceName());
         }
         ClassName desiredSuperclass = cls.getDesiredSuperclass();
@@ -150,7 +148,7 @@ public class ClassWithTraitsSuperclassWriter {
 
     private void emitDelegateFields() throws IOException {
         for (TraitElement elem : allTraits) {
-            ClassName delegateClass = cls.getDelegateClassNameForTraitElement(elem);
+            ClassName delegateClass = elem.getDelegateName();
             ConstructorInitialization init = new ConstructorInitialization();
             init.constructorType = delegateClass;
             init.argumentNames = Arrays.asList("this");
@@ -161,7 +159,7 @@ public class ClassWithTraitsSuperclassWriter {
 
     private String getDelegateVariableName(TraitElement elem) {
         String base = elem.getSimpleName();
-        return base.substring(0, 1).toLowerCase() + base.substring(1) + ClassWithTraits.DELEGATE_SUFFIX;
+        return base.substring(0, 1).toLowerCase() + base.substring(1) + TraitElement.DELEGATE_SUFFIX;
     }
 
     private void emitDelegateMethods() throws IOException {

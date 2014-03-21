@@ -20,9 +20,11 @@ import com.yahoo.annotations.utils.Utils;
 public class TraitElement extends TypeElementWrapper {
 
     public static final String INTERFACE_SUFFIX = "Interface";
+    public static final String DELEGATE_SUFFIX = "DelegateWrapper";
 
     private List<ExecutableElement> declaredMethods;
     private ClassName interfaceName;
+    private ClassName delegateName;
 
     public TraitElement(TypeElement elem, Utils utils) {
         super(elem, utils);
@@ -51,10 +53,17 @@ public class TraitElement extends TypeElementWrapper {
         }
         interfaceName = new ClassName(fqn.getPackageName(), fqn.getSimpleName() + INTERFACE_SUFFIX);
         interfaceName.setTypeArgs(getTypeParameters());
+
+        delegateName = new ClassName(fqn.getPackageName(), fqn.getSimpleName() + DELEGATE_SUFFIX);
+        delegateName.setTypeArgs(getTypeParameters());
     }
 
     public ClassName getInterfaceName() {
         return interfaceName;
+    }
+
+    public ClassName getDelegateName() {
+        return delegateName;
     }
 
     public List<? extends ExecutableElement> getDeclaredMethods() {
