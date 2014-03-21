@@ -3,7 +3,7 @@
  *
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.yahoo.annotations;
+package com.yahoo.annotations.writer;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -16,7 +16,11 @@ import java.util.TreeSet;
 
 import javax.lang.model.element.Modifier;
 
-import com.yahoo.annotations.TypeName.TypeNameVisitor;
+import com.yahoo.annotations.model.ClassName;
+import com.yahoo.annotations.model.GenericName;
+import com.yahoo.annotations.model.TypeName;
+import com.yahoo.annotations.model.TypeName.TypeNameVisitor;
+import com.yahoo.annotations.utils.Utils;
 
 public class JavaFileWriter {
 
@@ -48,8 +52,9 @@ public class JavaFileWriter {
     }
 
     public JavaFileWriter(Writer out) {
-        if (out == null)
+        if (out == null) {
             throw new IllegalArgumentException("Writer must be non-null");
+        }
         this.out = out;
         this.knownNames = new HashMap<String, List<ClassName>>();
     }
@@ -84,8 +89,9 @@ public class JavaFileWriter {
                 }
             }
         }
-        for (String item : sortedImports)
+        for (String item : sortedImports) {
             out.append("import ").append(item).append(";\n");
+        }
         out.append("\n");
     }
 
@@ -113,8 +119,9 @@ public class JavaFileWriter {
             out.append(" implements ");
             for (int i = 0; i < typeDeclaration.interfaces.size(); i++) {
                 out.append(shortenName(typeDeclaration.interfaces.get(i), false));
-                if (i < typeDeclaration.interfaces.size() - 1)
+                if (i < typeDeclaration.interfaces.size() - 1) {
                     out.append(", ");
+                }
             }
         }
         out.append(" {\n\n");
@@ -158,11 +165,12 @@ public class JavaFileWriter {
                 (Utils.isEmpty(methodDeclaration.modifiers) ?
                         false : methodDeclaration.modifiers.contains(Modifier.ABSTRACT));
         writeModifierList(methodDeclaration.modifiers);
-        if (writeGenericsList(methodDeclaration.methodGenerics, true))
+        if (writeGenericsList(methodDeclaration.methodGenerics, true)) {
             out.append(" ");
-        if (methodDeclaration.returnType == null)
+        }
+        if (methodDeclaration.returnType == null) {
             out.append("void");
-        else {
+        } else {
             out.append(shortenName(methodDeclaration.returnType, false));
         }
         out.append(" ").append(methodDeclaration.name);
@@ -171,8 +179,9 @@ public class JavaFileWriter {
             out.append(" throws ");
             for (int i = 0; i < methodDeclaration.throwsTypes.size(); i++) {
                 out.append(shortenName(methodDeclaration.throwsTypes.get(i), false));
-                if (i < methodDeclaration.throwsTypes.size() - 1)
+                if (i < methodDeclaration.throwsTypes.size() - 1) {
                     out.append(", ");
+                }
             }
         }
         if (isAbstract) {
@@ -213,8 +222,9 @@ public class JavaFileWriter {
                 String argName = argumentNames.get(i);
                 out.append(shortenName(argType, false));
                 out.append(" ").append(argName);
-                if (i < argumentTypes.size() - 1)
+                if (i < argumentTypes.size() - 1) {
                     out.append(", ");
+                }
             }
         }
         out.append(")");
@@ -280,30 +290,34 @@ public class JavaFileWriter {
 
     private boolean writeGenericsList(List<? extends TypeName> generics, boolean includeBounds) throws IOException {
         String genericsList = getGenericsListString(generics, includeBounds);
-        if (!genericsList.isEmpty())
+        if (!genericsList.isEmpty()) {
             out.append(genericsList);
+        }
         return !genericsList.isEmpty();
     }
 
     public String getGenericsListString(List<? extends TypeName> generics, boolean includeBounds) {
-        if (Utils.isEmpty(generics))
+        if (Utils.isEmpty(generics)) {
             return "";
+        }
         StringBuilder builder = new StringBuilder();
         builder.append("<");
 
         for (int i = 0; i < generics.size(); i++) {
             TypeName generic = generics.get(i);
             builder.append(shortenName(generic, includeBounds));
-            if (i < generics.size() - 1)
+            if (i < generics.size() - 1) {
                 builder.append(", ");
+            }
         }
         builder.append(">");
         return builder.toString();
     }
 
     private void indent(int times) throws IOException {
-        for (int i = 0; i < times; i++)
+        for (int i = 0; i < times; i++) {
             out.append(INDENT);
+        }
     }
 
     private TypeNameVisitor<String, Boolean> nameShorteningVisitor = new TypeNameVisitor<String, Boolean>() {
@@ -335,12 +349,13 @@ public class JavaFileWriter {
             String simpleName = typeName.getSimpleName();
             List<ClassName> allNames = knownNames.get(simpleName);
             boolean simple;
-            if (allNames == null || allNames.size() == 0)
+            if (allNames == null || allNames.size() == 0) {
                 simple = false;
-            else if (allNames.get(0).equals(typeName))
+            } else if (allNames.get(0).equals(typeName)) {
                 simple = true;
-            else
+            } else {
                 simple = false;
+            }
             StringBuilder nameBuilder = new StringBuilder();
             String nameBase = simple ? typeName.getSimpleName() : typeName.toString();
             nameBuilder.append(nameBase);
@@ -355,8 +370,9 @@ public class JavaFileWriter {
     }
 
     private void checkScope(Scope expectedScope) {
-        if (currentScope != expectedScope)
+        if (currentScope != expectedScope) {
             throw new IllegalStateException("Expected scope " + expectedScope + ", current scope " + currentScope);
+        }
     }
 
     private void moveToScope(Scope moveTo) {

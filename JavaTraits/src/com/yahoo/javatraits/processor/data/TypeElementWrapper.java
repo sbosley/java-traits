@@ -10,9 +10,9 @@ import java.util.List;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 
-import com.yahoo.annotations.ClassName;
-import com.yahoo.annotations.TypeName;
-import com.yahoo.annotations.Utils;
+import com.yahoo.annotations.model.ClassName;
+import com.yahoo.annotations.model.TypeName;
+import com.yahoo.annotations.utils.Utils;
 
 public abstract class TypeElementWrapper {
 

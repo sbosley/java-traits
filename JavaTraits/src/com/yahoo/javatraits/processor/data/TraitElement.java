@@ -14,8 +14,8 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 
-import com.yahoo.annotations.ClassName;
-import com.yahoo.annotations.Utils;
+import com.yahoo.annotations.model.ClassName;
+import com.yahoo.annotations.utils.Utils;
 
 public class TraitElement extends TypeElementWrapper {
 
@@ -38,8 +38,9 @@ public class TraitElement extends TypeElementWrapper {
         for (Element e : enclosedElements) {
             if (e.getKind() != ElementKind.METHOD || !(e instanceof ExecutableElement))
                 if (e.getKind() == ElementKind.CONSTRUCTOR && (e instanceof ExecutableElement)) {
-                    if (((ExecutableElement) e).getParameters().size() > 0)
+                    if (((ExecutableElement) e).getParameters().size() > 0) {
                         utils.getMessager().printMessage(Kind.ERROR, "Trait constructors cannot have arguments", e);
+                    }
                 } else {
                     utils.getMessager().printMessage(Kind.ERROR, "Trait elements may only declare methods or abstract methods", e);
                 }

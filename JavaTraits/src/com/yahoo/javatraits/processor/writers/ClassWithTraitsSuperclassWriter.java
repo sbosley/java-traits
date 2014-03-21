@@ -22,15 +22,15 @@ import javax.lang.model.type.TypeKind;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
-import com.yahoo.annotations.ClassName;
-import com.yahoo.annotations.JavaFileWriter;
-import com.yahoo.annotations.JavaFileWriter.MethodDeclarationParams;
-import com.yahoo.annotations.JavaFileWriter.Type;
-import com.yahoo.annotations.JavaFileWriter.TypeDeclarationParameters;
-import com.yahoo.annotations.MethodSignature;
-import com.yahoo.annotations.Pair;
-import com.yahoo.annotations.TypeName;
-import com.yahoo.annotations.Utils;
+import com.yahoo.annotations.model.ClassName;
+import com.yahoo.annotations.model.MethodSignature;
+import com.yahoo.annotations.model.TypeName;
+import com.yahoo.annotations.utils.Pair;
+import com.yahoo.annotations.utils.Utils;
+import com.yahoo.annotations.writer.JavaFileWriter;
+import com.yahoo.annotations.writer.JavaFileWriter.MethodDeclarationParams;
+import com.yahoo.annotations.writer.JavaFileWriter.Type;
+import com.yahoo.annotations.writer.JavaFileWriter.TypeDeclarationParameters;
 import com.yahoo.javatraits.annotations.HasTraits;
 import com.yahoo.javatraits.processor.data.ClassWithTraits;
 import com.yahoo.javatraits.processor.data.TraitElement;
@@ -58,8 +58,9 @@ public class ClassWithTraitsSuperclassWriter {
 
     public void writeClass(Filer filer) {
         try {
-            if (writer != null)
+            if (writer != null) {
                 throw new IllegalStateException("Already created source file for " + cls.getFullyQualifiedGeneratedSuperclassName().toString());
+            }
             JavaFileObject jfo = filer.createSourceFile(cls.getFullyQualifiedGeneratedSuperclassName().toString(),
                     cls.getSourceElement());
             Writer out = jfo.openWriter();
@@ -96,8 +97,9 @@ public class ClassWithTraitsSuperclassWriter {
             if (cls.superclassHasTypeArgs()) {
                 List<? extends TypeName> superclassTypeArgs = cls.getDesiredSuperclass().getTypeArgs();
                 for (TypeName t : superclassTypeArgs) {
-                    if (t instanceof ClassName)
+                    if (t instanceof ClassName) {
                         imports.add((ClassName) t);
+                    }
                 }
             }
         }
@@ -109,8 +111,9 @@ public class ClassWithTraitsSuperclassWriter {
         List<TypeName> generics = new ArrayList<TypeName>();
         if (cls.superclassHasTypeArgs()) {
             for (TypeName t : cls.getDesiredSuperclass().getTypeArgs()) {
-                if (!(t instanceof ClassName))
+                if (!(t instanceof ClassName)) {
                     generics.add(t);
+                }
             }
         }
         for (TraitElement elem : allTraits) {
@@ -204,8 +207,9 @@ public class ClassWithTraitsSuperclassWriter {
                     int index = 0;
                     for (index = 0; index < allExecElems.size(); index++) {
                         Pair<TraitElement, ExecutableElement> item = allExecElems.get(index);
-                        if (item.getLeft().getFullyQualifiedName().equals(preferTarget))
+                        if (item.getLeft().getFullyQualifiedName().equals(preferTarget)) {
                             break;
+                        }
                     }
                     if (index > 0) {
                         Pair<TraitElement, ExecutableElement> item = allExecElems.remove(index);
@@ -219,8 +223,9 @@ public class ClassWithTraitsSuperclassWriter {
             Pair<TraitElement, ExecutableElement> executablePair = executablePairList.get(0);
             TraitElement elem = executablePair.getLeft();
             ExecutableElement exec = executablePair.getRight();
-            if (TraitProcessorUtils.isGetThis(exec))
+            if (TraitProcessorUtils.isGetThis(exec)) {
                 continue;
+            }
 
             Set<Modifier> modifiers = exec.getModifiers();
             boolean isAbstract = modifiers.contains(Modifier.ABSTRACT);
@@ -234,14 +239,16 @@ public class ClassWithTraitsSuperclassWriter {
                 writer.writeStatement("throw new IllegalStateException(\"init() not called on instance of class \" + getClass());\n", 3);
 
                 StringBuilder statement = new StringBuilder();
-                if (exec.getReturnType().getKind() != TypeKind.VOID)
+                if (exec.getReturnType().getKind() != TypeKind.VOID) {
                     statement.append("return ");
+                }
                 statement.append(delegateVariableName)
                 .append(".").append("default__").append(exec.getSimpleName()).append("(");
                 for (int i = 0; i < argNames.size(); i++) {
                     statement.append(argNames.get(i));
-                    if (i < argNames.size() - 1)
+                    if (i < argNames.size() - 1) {
                         statement.append(", ");
+                    }
                 }
                 statement.append(");\n");
                 writer.writeStatement(statement.toString(), 2);

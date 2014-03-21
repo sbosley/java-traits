@@ -3,10 +3,12 @@
  *
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.yahoo.annotations;
+package com.yahoo.annotations.model;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.yahoo.annotations.utils.Utils;
 
 public class GenericName extends TypeName {
 
@@ -38,8 +40,9 @@ public class GenericName extends TypeName {
 
     public String getGenericName() {
         StringBuilder result = new StringBuilder();
-        if (qualifier != null && !"?".equals(genericName))
+        if (qualifier != null && !"?".equals(genericName)) {
             result.append(qualifier).append("$");
+        }
         result.append(genericName);
         return result.toString();
     }
@@ -65,8 +68,9 @@ public class GenericName extends TypeName {
     }
 
     public void addQualifier(String qualifier) {
-        if (this.qualifier != null)
+        if (this.qualifier != null) {
             throw new IllegalArgumentException("Generic " + genericName + " already has qualifier " + this.qualifier);
+        }
         this.qualifier = qualifier;
     }
 
@@ -91,28 +95,37 @@ public class GenericName extends TypeName {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         GenericName other = (GenericName) obj;
         if (genericName == null) {
-            if (other.genericName != null)
+            if (other.genericName != null) {
                 return false;
-        } else if (!genericName.equals(other.genericName))
+            }
+        } else if (!genericName.equals(other.genericName)) {
             return false;
+        }
         if (extendsBound == null) {
-            if (other.extendsBound != null)
+            if (other.extendsBound != null) {
                 return false;
-        } else if (!Utils.deepCompareTypeList(extendsBound, other.extendsBound))
+            }
+        } else if (!Utils.deepCompareTypeList(extendsBound, other.extendsBound)) {
             return false;
+        }
         if (superBound == null) {
-            if (other.superBound != null)
+            if (other.superBound != null) {
                 return false;
-        } else if (!superBound.equals(other.superBound))
+            }
+        } else if (!superBound.equals(other.superBound)) {
             return false;
+        }
         return true;
     }
 

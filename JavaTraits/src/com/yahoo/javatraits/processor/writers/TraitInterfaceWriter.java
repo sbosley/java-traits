@@ -17,11 +17,11 @@ import javax.lang.model.element.Modifier;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
-import com.yahoo.annotations.ClassName;
-import com.yahoo.annotations.JavaFileWriter;
-import com.yahoo.annotations.JavaFileWriter.Type;
-import com.yahoo.annotations.JavaFileWriter.TypeDeclarationParameters;
-import com.yahoo.annotations.Utils;
+import com.yahoo.annotations.model.ClassName;
+import com.yahoo.annotations.utils.Utils;
+import com.yahoo.annotations.writer.JavaFileWriter;
+import com.yahoo.annotations.writer.JavaFileWriter.Type;
+import com.yahoo.annotations.writer.JavaFileWriter.TypeDeclarationParameters;
 import com.yahoo.javatraits.processor.data.TraitElement;
 import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
 
@@ -38,8 +38,9 @@ public class TraitInterfaceWriter {
 
     public void writeInterface(Filer filer) {
         try {
-            if (writer != null)
+            if (writer != null) {
                 throw new IllegalStateException("Already created source file for " + element.getInterfaceName());
+            }
             JavaFileObject jfo = filer.createSourceFile(element.getInterfaceName().toString(), element.getSourceElement());
             Writer out = jfo.openWriter();
             writer = new JavaFileWriter(out);
@@ -79,10 +80,11 @@ public class TraitInterfaceWriter {
 
     private void emitMethodDeclarations() throws IOException {
         for (ExecutableElement exec : element.getDeclaredMethods()) {
-            if (TraitProcessorUtils.isGetThis(exec))
+            if (TraitProcessorUtils.isGetThis(exec)) {
                 continue;
-            else
+            } else {
                 emitMethodDeclarationForExecutableElement(exec);
+            }
         }
     }
 

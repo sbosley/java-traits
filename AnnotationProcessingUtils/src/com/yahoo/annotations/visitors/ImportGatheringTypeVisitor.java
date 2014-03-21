@@ -3,7 +3,7 @@
  *
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.yahoo.annotations;
+package com.yahoo.annotations.visitors;
 
 import java.util.List;
 import java.util.Set;
@@ -22,6 +22,9 @@ import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.type.WildcardType;
 import javax.tools.Diagnostic.Kind;
+
+import com.yahoo.annotations.model.ClassName;
+import com.yahoo.annotations.utils.Utils;
 
 public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<ClassName>> {
 
@@ -127,8 +130,9 @@ public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<ClassNa
             upper.accept(this, p);
         }
         TypeMirror superBound = t.getSuperBound();
-        if (superBound != null)
+        if (superBound != null) {
             superBound.accept(this, p);
+        }
         return null;
     }
 }

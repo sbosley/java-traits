@@ -3,7 +3,7 @@
  *
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.yahoo.annotations;
+package com.yahoo.annotations.utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,7 +30,13 @@ import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.WildcardType;
 import javax.lang.model.util.Types;
 
-import com.yahoo.annotations.JavaFileWriter.MethodDeclarationParams;
+import com.yahoo.annotations.model.ClassName;
+import com.yahoo.annotations.model.GenericName;
+import com.yahoo.annotations.model.MethodSignature;
+import com.yahoo.annotations.model.TypeName;
+import com.yahoo.annotations.visitors.ImportGatheringTypeVisitor;
+import com.yahoo.annotations.writer.JavaFileWriter;
+import com.yahoo.annotations.writer.JavaFileWriter.MethodDeclarationParams;
 
 public class Utils {
 
@@ -65,8 +71,9 @@ public class Utils {
 
         List<TypeName> methodGenerics = mapTypeParameterElementsToTypeName(exec.getTypeParameters(), null);
         TypeName returnType = getTypeNameFromTypeMirror(exec.getReturnType(), null);
-        if (!methodGenerics.contains(returnType) && returnType instanceof GenericName)
+        if (!methodGenerics.contains(returnType) && returnType instanceof GenericName) {
             ((GenericName) returnType).addQualifier(genericQualifier);
+        }
         result.setReturnType(returnType);
 
         List<TypeName> argTypeNames = getArgumentTypeNames(exec, genericQualifier, methodGenerics);
@@ -99,8 +106,9 @@ public class Utils {
         if (kind == TypeKind.TYPEVAR) {
             TypeVariable typeVariable = (TypeVariable) mirror;
             String genericName = getSimpleNameFromFullyQualifiedName(mirrorString);
-            if (genericQualifier != null)
+            if (genericQualifier != null) {
                 genericName = genericQualifier + "$" + genericName;
+            }
             toReturn = getGenericName(genericName, genericQualifier, typeVariable, typeVariable.getUpperBound(), null);
         } else if (kind == TypeKind.WILDCARD) {
             WildcardType wildcardType = (WildcardType) mirror;
@@ -129,11 +137,13 @@ public class Utils {
 
     private GenericName getGenericName(String genericName, String genericQualifier, TypeMirror fromMirror, TypeMirror extendsBoundMirror, TypeMirror superBoundMirror) {
         List<TypeName> extendsBound = null;
-        if (extendsBoundMirror != null && !OBJECT_CLASS_NAME.equals(extendsBoundMirror.toString()))
+        if (extendsBoundMirror != null && !OBJECT_CLASS_NAME.equals(extendsBoundMirror.toString())) {
             extendsBound = getUpperBoundsFromTypeMirror(fromMirror, extendsBoundMirror, genericQualifier);
+        }
         TypeName superBound = null;
-        if (superBoundMirror != null && !OBJECT_CLASS_NAME.equals(superBoundMirror.toString()))
+        if (superBoundMirror != null && !OBJECT_CLASS_NAME.equals(superBoundMirror.toString())) {
             superBound = getTypeNameFromTypeMirror(superBoundMirror, genericQualifier);
+        }
         return new GenericName(genericName, extendsBound, superBound);
     }
 
@@ -149,8 +159,9 @@ public class Utils {
 
     public List<? extends TypeMirror> getUpperBoundMirrors(TypeMirror sourceMirror, TypeMirror extendsBoundMirror) {
         List<TypeMirror> result = new ArrayList<TypeMirror>();
-        if (extendsBoundMirror == null)
+        if (extendsBoundMirror == null) {
             return result;
+        }
 
         if (extendsBoundMirror instanceof DeclaredType) {
             if (extendsBoundMirror.toString().contains("&")) { // Is intersection type
@@ -169,8 +180,9 @@ public class Utils {
     private void addSupertypesToUpperBoundList(List<TypeMirror> list, TypeMirror upperBoundMirror) {
         List<? extends TypeMirror> supertypes = types.directSupertypes(upperBoundMirror);
         for (TypeMirror t : supertypes) {
-            if (!OBJECT_CLASS_NAME.equals(t.toString()))
+            if (!OBJECT_CLASS_NAME.equals(t.toString())) {
                 list.add(t);
+            }
         }
     }
 
@@ -197,12 +209,14 @@ public class Utils {
     }
 
     private static void qualifyReturnTypeGenerics(List<TypeName> methodGenerics, TypeName returnType, String genericQualifier) {
-        if (!methodGenerics.contains(returnType) && returnType instanceof GenericName)
+        if (!methodGenerics.contains(returnType) && returnType instanceof GenericName) {
             ((GenericName) returnType).addQualifier(genericQualifier);
+        }
         if (returnType instanceof ClassName) {
             ClassName returnClass = (ClassName) returnType;
-            for (TypeName nestedType : returnClass.getTypeArgs())
+            for (TypeName nestedType : returnClass.getTypeArgs()) {
                 qualifyReturnTypeGenerics(methodGenerics, nestedType, genericQualifier);
+            }
         }
     }
 
@@ -216,8 +230,9 @@ public class Utils {
         Utils.map(typeNames, new Utils.MapFunction<TypeName, Void>() {
             @Override
             public Void map(TypeName arg) {
-                if (!methodGenerics.contains(arg) && arg instanceof GenericName)
+                if (!methodGenerics.contains(arg) && arg instanceof GenericName) {
                     ((GenericName) arg).addQualifier(genericQualifier);
+                }
                 return null;
             }
         });
@@ -233,8 +248,9 @@ public class Utils {
                 return arg.toString();
             }
         });
-        if (exec.isVarArgs())
+        if (exec.isVarArgs()) {
             typeNames.get(typeNames.size() - 1).setIsVarArgs(true);
+        }
         return Pair.create(typeNames, argNames);
     }
 
@@ -249,8 +265,9 @@ public class Utils {
         Utils.map(thrownTypes, new Utils.MapFunction<TypeName, Void>() {
             @Override
             public Void map(TypeName arg) {
-                if (!methodGenerics.contains(arg) && arg instanceof GenericName)
+                if (!methodGenerics.contains(arg) && arg instanceof GenericName) {
                     ((GenericName) arg).addQualifier(genericQualifier);
+                }
                 return null;
             }
         });
@@ -268,15 +285,17 @@ public class Utils {
 
     public static String getPackageFromFullyQualifiedName(String name) {
         int split = getFQNSplitIndex(name);
-        if (split < 0)
+        if (split < 0) {
             return "";
+        }
         return name.substring(0, split);
     }
 
     public static String getSimpleNameFromFullyQualifiedName(String name) {
         int split = getFQNSplitIndex(name);
-        if (split < 0)
+        if (split < 0) {
             return name;
+        }
         return name.substring(split + 1);
     }
 
@@ -297,38 +316,47 @@ public class Utils {
     }
 
     public static boolean deepCompareTypeList(List<? extends TypeName> l1, List<? extends TypeName> l2) {
-        if (l1.size() != l2.size())
+        if (l1.size() != l2.size()) {
             return false;
+        }
         for (int i = 0; i < l1.size(); i++) {
-            if (!deepCompareTypes(l1.get(i), l2.get(i)))
+            if (!deepCompareTypes(l1.get(i), l2.get(i))) {
                 return false;
+            }
         }
         return true;
     }
 
     public static boolean deepCompareTypes(TypeName t1, TypeName t2) {
-        if (!t1.equals(t2))
+        if (!t1.equals(t2)) {
             return false;
-        if (!(t1.getArrayDepth() == t2.getArrayDepth() && t1.isVarArgs() == t2.isVarArgs()))
+        }
+        if (!(t1.getArrayDepth() == t2.getArrayDepth() && t1.isVarArgs() == t2.isVarArgs())) {
             return false;
-        if (t1 instanceof ClassName && t2 instanceof ClassName)
+        }
+        if (t1 instanceof ClassName && t2 instanceof ClassName) {
             return deepCompareTypeList(((ClassName) t1).getTypeArgs(), ((ClassName) t2).getTypeArgs());
+        }
         return true;
     }
 
     public static AnnotationMirror findAnnotationMirror(Element elem, Class<?> annotationClass) {
         List<? extends AnnotationMirror> annotationMirrors = elem.getAnnotationMirrors();
         String annotationClassName = annotationClass.getName();
-        for (AnnotationMirror mirror : annotationMirrors)
-            if (annotationClassName.equals(mirror.getAnnotationType().toString()))
+        for (AnnotationMirror mirror : annotationMirrors) {
+            if (annotationClassName.equals(mirror.getAnnotationType().toString())) {
                 return mirror;
+            }
+        }
         return null;
     }
 
     public static AnnotationValue findAnnotationValue(AnnotationMirror mirror, String propertyName) {
-        for(Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : mirror.getElementValues().entrySet())
-            if (propertyName.equals(entry.getKey().getSimpleName().toString()))
+        for(Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : mirror.getElementValues().entrySet()) {
+            if (propertyName.equals(entry.getKey().getSimpleName().toString())) {
                 return entry.getValue();
+            }
+        }
         return null;
     }
 
@@ -343,8 +371,9 @@ public class Utils {
                 List<? extends AnnotationValue> annotationValues = (List<? extends AnnotationValue>) value;
                 for (AnnotationValue av : annotationValues) {
                     Object itemValue = av.getValue();
-                    if (valueClass.isAssignableFrom(itemValue.getClass()))
+                    if (valueClass.isAssignableFrom(itemValue.getClass())) {
                         result.add(mapResult.map((V) itemValue));
+                    }
                 }
             }
         }
@@ -374,8 +403,9 @@ public class Utils {
         AnnotationMirror mirror = findAnnotationMirror(elem, annotationClass);
         if (mirror != null) {
             AnnotationValue annotationValue = findAnnotationValue(mirror, propertyName);
-            if (annotationValue != null)
+            if (annotationValue != null) {
                 return getClassValuesFromAnnotationValue(annotationValue);
+            }
         }
         return new ArrayList<ClassName>();
     }

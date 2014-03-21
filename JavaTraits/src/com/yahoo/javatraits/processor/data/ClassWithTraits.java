@@ -15,10 +15,10 @@ import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 
-import com.yahoo.annotations.ClassName;
-import com.yahoo.annotations.GenericName;
-import com.yahoo.annotations.TypeName;
-import com.yahoo.annotations.Utils;
+import com.yahoo.annotations.model.ClassName;
+import com.yahoo.annotations.model.GenericName;
+import com.yahoo.annotations.model.TypeName;
+import com.yahoo.annotations.utils.Utils;
 import com.yahoo.javatraits.annotations.HasTraits;
 
 public class ClassWithTraits extends TypeElementWrapper {
@@ -46,8 +46,9 @@ public class ClassWithTraits extends TypeElementWrapper {
             @Override
             public TraitElement map(ClassName arg) {
                 TraitElement correspondingTrait = traitMap.get(arg);
-                if (correspondingTrait == null)
+                if (correspondingTrait == null) {
                     utils.getMessager().printMessage(Kind.ERROR, "Couldn't find TraitElement for name " + arg.toString());
+                }
                 return correspondingTrait;
             }
         });
@@ -150,8 +151,9 @@ public class ClassWithTraits extends TypeElementWrapper {
         List<TypeName> result = new ArrayList<TypeName>();
         if (hasTypeParameters()) {
             for (TypeName t : desiredSuperclass.getTypeArgs()) {
-                if (!(t instanceof ClassName))
+                if (!(t instanceof ClassName)) {
                     result.add(new GenericName("?", null, null));
+                }
             }
         }
 

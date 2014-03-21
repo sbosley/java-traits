@@ -3,7 +3,7 @@
  *
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.yahoo.annotations;
+package com.yahoo.annotations.model;
 
 public abstract class TypeName implements Cloneable {
 
@@ -42,10 +42,11 @@ public abstract class TypeName implements Cloneable {
     public String getArrayStringSuffix() {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < arrayDepth; i++) {
-            if (i == arrayDepth - 1 && isVarArgs)
+            if (i == arrayDepth - 1 && isVarArgs) {
                 builder.append("...");
-            else
+            } else {
                 builder.append("[]");
+            }
         }
         return builder.toString();
     }

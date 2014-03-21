@@ -1,6 +1,6 @@
 /**
  * Copyright 2014 Yahoo Inc.
- * 
+ *
  * See the file "LICENSE" for the full license governing this code.
  */
 package com.yahoo.javatraits.processor;
@@ -24,8 +24,8 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 
-import com.yahoo.annotations.ClassName;
-import com.yahoo.annotations.Utils;
+import com.yahoo.annotations.model.ClassName;
+import com.yahoo.annotations.utils.Utils;
 import com.yahoo.javatraits.annotations.HasTraits;
 import com.yahoo.javatraits.annotations.Trait;
 import com.yahoo.javatraits.processor.data.ClassWithTraits;
@@ -41,7 +41,7 @@ public class TraitProcessor extends AbstractProcessor {
     private Messager messager;
     private Utils utils;
     private Filer filer;
-    
+
     private Set<? extends Element> traitElements = null;
     private Set<? extends Element> elementsWithTraits = null;
     private boolean finishedGeneratingFiles = false;
@@ -59,7 +59,7 @@ public class TraitProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
         tryToInitTraitElements(env);
         tryToInitClassesWithTraits(env);
-        
+
         if (traitElements != null && elementsWithTraits != null && !finishedGeneratingFiles) {
             Map<ClassName, TraitElement> traitMap = getTraitElements();
             Set<ClassWithTraits> classesWithTraits = getClassesWithTraits(traitMap);
@@ -69,33 +69,35 @@ public class TraitProcessor extends AbstractProcessor {
             finishedGeneratingFiles = true;
         }
 
-        
+
         return true;
     }
-    
+
     private void tryToInitTraitElements(RoundEnvironment env) {
         if (traitElements == null) {
             Set<? extends Element> traitElements = env.getElementsAnnotatedWith(Trait.class);
-            if (traitElements.size() > 0)
+            if (traitElements.size() > 0) {
                 this.traitElements = traitElements;
+            }
         }
     }
-    
+
     private void tryToInitClassesWithTraits(RoundEnvironment env) {
         if (elementsWithTraits == null) {
             Set<? extends Element> elementsWithTraits = env.getElementsAnnotatedWith(HasTraits.class);
-            if (elementsWithTraits.size() > 0)
+            if (elementsWithTraits.size() > 0) {
                 this.elementsWithTraits = elementsWithTraits;
+            }
         }
     }
 
     private Map<ClassName, TraitElement> getTraitElements() {
         Map<ClassName, TraitElement> result = new HashMap<ClassName, TraitElement>();
-        
+
         for (Element e : traitElements) {
-            if (e.getKind() != ElementKind.CLASS)
+            if (e.getKind() != ElementKind.CLASS) {
                 messager.printMessage(Kind.ERROR, "Only a class can be annotated with @Trait", e);
-            else {
+            } else {
                 TypeElement typeElem = (TypeElement) e;
                 TraitElement traitElement = new TraitElement(typeElem, utils);
                 result.put(traitElement.getFullyQualifiedName(), traitElement);
@@ -107,9 +109,9 @@ public class TraitProcessor extends AbstractProcessor {
     private Set<ClassWithTraits> getClassesWithTraits(Map<ClassName, TraitElement> traitMap) {
         Set<ClassWithTraits> result = new HashSet<ClassWithTraits>();
         for (Element e : elementsWithTraits) {
-            if (e.getKind() != ElementKind.CLASS)
+            if (e.getKind() != ElementKind.CLASS) {
                 messager.printMessage(Kind.ERROR, "Only a class can be annotated with @Trait", e);
-            else {
+            } else {
                 TypeElement typeElem = (TypeElement) e;
                 result.add(new ClassWithTraits(typeElem, utils, traitMap));
             }

@@ -3,9 +3,11 @@
  *
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.yahoo.annotations;
+package com.yahoo.annotations.model;
 
 import java.util.List;
+
+import com.yahoo.annotations.utils.Utils;
 
 
 public class ClassName extends TypeName {
@@ -46,8 +48,9 @@ public class ClassName extends TypeName {
     }
 
     public String toString() {
-        if (Utils.isEmpty(packageName))
+        if (Utils.isEmpty(packageName)) {
             return simpleName;
+        }
         return packageName + "." + simpleName;
     }
 
@@ -72,23 +75,30 @@ public class ClassName extends TypeName {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ClassName other = (ClassName) obj;
         if (packageName == null) {
-            if (other.packageName != null)
+            if (other.packageName != null) {
                 return false;
-        } else if (!packageName.equals(other.packageName))
+            }
+        } else if (!packageName.equals(other.packageName)) {
             return false;
+        }
         if (simpleName == null) {
-            if (other.simpleName != null)
+            if (other.simpleName != null) {
                 return false;
-        } else if (!simpleName.equals(other.simpleName))
+            }
+        } else if (!simpleName.equals(other.simpleName)) {
             return false;
+        }
         return true;
     }
 

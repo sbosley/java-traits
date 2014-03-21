@@ -3,11 +3,13 @@
  *
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.yahoo.annotations;
+package com.yahoo.annotations.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import com.yahoo.annotations.utils.Utils;
 
 public class MethodSignature {
 
@@ -58,32 +60,41 @@ public class MethodSignature {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         MethodSignature other = (MethodSignature) obj;
         if (argTypes == null) {
-            if (other.argTypes != null)
+            if (other.argTypes != null) {
                 return false;
-        } else if (!Utils.deepCompareTypeList(argTypes, other.argTypes))
+            }
+        } else if (!Utils.deepCompareTypeList(argTypes, other.argTypes)) {
             return false;
+        }
         if (methodName == null) {
-            if (other.methodName != null)
+            if (other.methodName != null) {
                 return false;
-        } else if (!methodName.equals(other.methodName))
+            }
+        } else if (!methodName.equals(other.methodName)) {
             return false;
+        }
         if (returnType == null) {
-            if (other.returnType != null)
+            if (other.returnType != null) {
                 return false;
-        } else if (!Utils.deepCompareTypes(returnType, other.returnType))
+            }
+        } else if (!Utils.deepCompareTypes(returnType, other.returnType)) {
             return false;
+        }
         return true;
     }
 
-    
+
 
 
 }

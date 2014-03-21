@@ -19,13 +19,13 @@ import javax.lang.model.type.TypeKind;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
-import com.yahoo.annotations.ClassName;
-import com.yahoo.annotations.JavaFileWriter;
-import com.yahoo.annotations.JavaFileWriter.ConstructorDeclarationParams;
-import com.yahoo.annotations.JavaFileWriter.MethodDeclarationParams;
-import com.yahoo.annotations.JavaFileWriter.Type;
-import com.yahoo.annotations.JavaFileWriter.TypeDeclarationParameters;
-import com.yahoo.annotations.Utils;
+import com.yahoo.annotations.model.ClassName;
+import com.yahoo.annotations.utils.Utils;
+import com.yahoo.annotations.writer.JavaFileWriter;
+import com.yahoo.annotations.writer.JavaFileWriter.ConstructorDeclarationParams;
+import com.yahoo.annotations.writer.JavaFileWriter.MethodDeclarationParams;
+import com.yahoo.annotations.writer.JavaFileWriter.Type;
+import com.yahoo.annotations.writer.JavaFileWriter.TypeDeclarationParameters;
 import com.yahoo.javatraits.processor.data.ClassWithTraits;
 import com.yahoo.javatraits.processor.data.TraitElement;
 import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
@@ -51,8 +51,9 @@ public class TraitDelegateWriter {
 
     public void writeDelegate(Filer filer) {
         try {
-            if (writer != null)
+            if (writer != null) {
                 throw new IllegalStateException("Already created source file for " + traitDelegateClass.toString());
+            }
             JavaFileObject jfo = filer.createSourceFile(traitDelegateClass.toString(), cls.getSourceElement());
             Writer out = jfo.openWriter();
             writer = new JavaFileWriter(out);
@@ -134,10 +135,11 @@ public class TraitDelegateWriter {
     private void emitDelegateMethodImplementations() throws IOException {
         List<? extends ExecutableElement> allMethods = traitElement.getDeclaredMethods();
         for (ExecutableElement exec : allMethods) {
-            if (TraitProcessorUtils.isGetThis(exec))
+            if (TraitProcessorUtils.isGetThis(exec)) {
                 emitGetThis();
-            else
+            } else {
                 emitMethodDeclaration(exec, false, Modifier.PUBLIC);
+            }
         }
     }
 
@@ -156,14 +158,16 @@ public class TraitDelegateWriter {
         String name = isDefault ? "default__" + exec.getSimpleName().toString() : null;
         List<String> argNames = utils.beginMethodDeclarationForExecutableElement(writer, exec, name, traitElement.getSimpleName(), modifiers);
         StringBuilder statement = new StringBuilder();
-        if (exec.getReturnType().getKind() != TypeKind.VOID)
+        if (exec.getReturnType().getKind() != TypeKind.VOID) {
             statement.append("return ");
+        }
         String callTo = isDefault ? "super" : "delegate";
         statement.append(callTo).append(".").append(exec.getSimpleName().toString()).append("(");
         for (int i = 0; i < argNames.size(); i++) {
             statement.append(argNames.get(i));
-            if (i < argNames.size() - 1)
+            if (i < argNames.size() - 1) {
                 statement.append(", ");
+            }
         }
         statement.append(");\n");
         writer.writeStatement(statement.toString(), 2);
