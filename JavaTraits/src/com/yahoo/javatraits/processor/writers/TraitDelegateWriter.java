@@ -88,7 +88,7 @@ public class TraitDelegateWriter {
         TypeDeclarationParameters params = new TypeDeclarationParameters();
         params.name = traitDelegateClass;
         params.kind = Type.CLASS;
-        params.modifiers = Arrays.asList(Modifier.PUBLIC);
+        params.modifiers = Arrays.asList(Modifier.PUBLIC, Modifier.FINAL);
         params.superclass = superclass;
 
         writer.beginTypeDefinition(params);
