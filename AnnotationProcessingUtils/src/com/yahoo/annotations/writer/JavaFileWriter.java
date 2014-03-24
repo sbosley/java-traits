@@ -9,10 +9,11 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 import java.util.TreeSet;
 
 import javax.lang.model.element.Modifier;
@@ -30,7 +31,7 @@ public class JavaFileWriter {
     private Writer out;
     private Map<String, List<ClassName>> knownNames;
     private Type kind = null;
-    private Stack<Scope> scopeStack = new Stack<Scope>();
+    private Deque<Scope> scopeStack = new LinkedList<Scope>();
 
     public static enum Type {
         CLASS("class"),
