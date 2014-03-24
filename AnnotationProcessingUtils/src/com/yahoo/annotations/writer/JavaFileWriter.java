@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 import java.util.TreeSet;
 
 import javax.lang.model.element.Modifier;
@@ -29,7 +30,7 @@ public class JavaFileWriter {
     private Writer out;
     private Map<String, List<ClassName>> knownNames;
     private Type kind = null;
-    private Scope currentScope = Scope.PACKAGE;
+    private Stack<Scope> scopeStack = new Stack<Scope>();
 
     public static enum Type {
         CLASS("class"),
@@ -46,9 +47,7 @@ public class JavaFileWriter {
         PACKAGE,
         IMPORTS,
         TYPE_DEFINITION,
-        FIELD_DECLARATION,
         METHOD_DEFINITION,
-        FINISHED
     }
 
     public JavaFileWriter(Writer out) {
@@ -57,6 +56,7 @@ public class JavaFileWriter {
         }
         this.out = out;
         this.knownNames = new HashMap<String, List<ClassName>>();
+        scopeStack.push(Scope.PACKAGE);
     }
 
     public void close() throws IOException {
@@ -66,6 +66,7 @@ public class JavaFileWriter {
     public void writePackage(String packageName) throws IOException {
         checkScope(Scope.PACKAGE);
         out.append("package ").append(packageName).append(";\n\n");
+        finishScope(Scope.PACKAGE);
         moveToScope(Scope.IMPORTS);
     }
 
@@ -125,6 +126,7 @@ public class JavaFileWriter {
             }
         }
         out.append(" {\n\n");
+        finishScope(Scope.IMPORTS);
         moveToScope(Scope.TYPE_DEFINITION);
     }
 
@@ -153,8 +155,7 @@ public class JavaFileWriter {
 
     public void writeFieldDeclaration(TypeName type, String name, List<Modifier> modifiers, FieldInitializationExpression initializer) throws IOException {
         checkScope(Scope.TYPE_DEFINITION);
-        indent(1);
-        moveToScope(Scope.FIELD_DECLARATION);
+        indent();
         writeModifierList(modifiers);
         out.append(shortenName(type, false));
         out.append(" ").append(name);
@@ -163,7 +164,6 @@ public class JavaFileWriter {
             initializer.writeInitializationString(this);
         }
         out.append(";\n");
-        moveToScope(Scope.TYPE_DEFINITION);
     }
 
     public static class MethodDeclarationParams {
@@ -179,7 +179,7 @@ public class JavaFileWriter {
     public void beginMethodDefinition(MethodDeclarationParams methodDeclaration) throws IOException {
         validateMethodDefinitionParams(methodDeclaration);
         checkScope(Scope.TYPE_DEFINITION);
-        indent(1);
+        indent();
         boolean isAbstract = kind.equals(Type.INTERFACE) ||
                 (Utils.isEmpty(methodDeclaration.modifiers) ?
                         false : methodDeclaration.modifiers.contains(Modifier.ABSTRACT));
@@ -266,7 +266,7 @@ public class JavaFileWriter {
     public void beginConstructorDeclaration(ConstructorDeclarationParams constructorDeclaration) throws IOException {
         verifyConstructorDeclarationParams(constructorDeclaration);
         checkScope(Scope.TYPE_DEFINITION);
-        indent(1);
+        indent();
         writeModifierList(constructorDeclaration.modifiers);
         out.append(constructorDeclaration.name.getSimpleName());
         writeGenericsList(constructorDeclaration.methodGenerics, false);
@@ -282,9 +282,9 @@ public class JavaFileWriter {
         verifyArgumentTypesAndNames(params.argumentTypes, params.argumentNames);
     }
 
-    public void writeStatement(String statement, int indentLevel) throws IOException {
+    public void writeStatement(String statement) throws IOException {
         checkScope(Scope.METHOD_DEFINITION);
-        indent(indentLevel);
+        indent();
         out.append(statement);
     }
 
@@ -293,16 +293,14 @@ public class JavaFileWriter {
     }
 
     public void finishMethodDefinition() throws IOException {
-        checkScope(Scope.METHOD_DEFINITION);
-        indent(1);
+        finishScope(Scope.METHOD_DEFINITION);
+        indent();
         out.append("}\n\n");
-        moveToScope(Scope.TYPE_DEFINITION);
     }
 
     public void finishTypeDefinition() throws IOException {
-        checkScope(Scope.TYPE_DEFINITION);
+        finishScope(Scope.TYPE_DEFINITION);
         out.append("}\n");
-        moveToScope(Scope.FINISHED);
     }
 
     private void writeModifierList(List<Modifier> modifiers) throws IOException {
@@ -339,8 +337,9 @@ public class JavaFileWriter {
         return builder.toString();
     }
 
-    private void indent(int times) throws IOException {
-        for (int i = 0; i < times; i++) {
+    private void indent() throws IOException {
+        int indentLevel = scopeStack.size();
+        for (int i = 0; i < indentLevel; i++) {
             out.append(INDENT);
         }
     }
@@ -394,13 +393,23 @@ public class JavaFileWriter {
         return name.accept(nameShorteningVisitor, includeGenericBounds);
     }
 
+    private Scope getCurrentScope() {
+        return scopeStack.peek();
+    }
+
     private void checkScope(Scope expectedScope) {
+        Scope currentScope = getCurrentScope();
         if (currentScope != expectedScope) {
             throw new IllegalStateException("Expected scope " + expectedScope + ", current scope " + currentScope);
         }
     }
 
     private void moveToScope(Scope moveTo) {
-        this.currentScope = moveTo;
+        scopeStack.push(moveTo);
+    }
+
+    private void finishScope(Scope expectedFinishScope) {
+        checkScope(expectedFinishScope);
+        scopeStack.pop();
     }
 }

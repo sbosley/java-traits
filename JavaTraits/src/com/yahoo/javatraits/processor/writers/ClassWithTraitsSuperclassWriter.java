@@ -229,7 +229,7 @@ public class ClassWithTraitsSuperclassWriter {
                     }
                 }
                 statement.append(");\n");
-                writer.writeStatement(statement.toString(), 2);
+                writer.writeStatement(statement.toString());
                 writer.finishMethodDefinition();
             }
         }
