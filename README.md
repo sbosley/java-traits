@@ -11,20 +11,19 @@ For the purposes of this project, traits are defined as abstract classes with an
 ```java
 @Trait
 public abstract class Rectangular {
-
     public abstract int getWidth();
     public abstract int getHeight();
 
     public int getPerimeter() {
-        return 2 * (getWitdth() + getHeight());
+        return 2 * (getWidth() + getHeight());
     }
 
     public int getArea() {
-        return getWidth() * getHeight();
+        return (getWidth() * getHeight());
     }
 
     public boolean isSquare() {
-        return getWidth() == getHeight();
+        return (getWidth() == getHeight());
     }
 }
 ```
@@ -79,7 +78,6 @@ A complete class definition using traits would look something like this:
 ```java
 @HasTraits(traits={Rectangular.class}, desiredSuperclass=SportsField.class)
 public class FootballField extends FootballFieldWithTraits {
-
     public int getWidth() {
         return 160;
     }
