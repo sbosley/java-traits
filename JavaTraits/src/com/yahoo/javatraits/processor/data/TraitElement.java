@@ -19,8 +19,8 @@ import com.yahoo.annotations.utils.Utils;
 
 public class TraitElement extends TypeElementWrapper {
 
-    public static final String INTERFACE_SUFFIX = "Interface";
-    public static final String DELEGATE_SUFFIX = "DelegateWrapper";
+    private static final String INTERFACE_PREFIX = "I";
+    private static final String DELEGATE_SUFFIX = "DelegateWrapper";
 
     private List<ExecutableElement> declaredMethods;
     private ClassName interfaceName;
@@ -51,7 +51,7 @@ public class TraitElement extends TypeElementWrapper {
                 declaredMethods.add(exec);
             }
         }
-        interfaceName = new ClassName(fqn.getPackageName(), fqn.getSimpleName() + INTERFACE_SUFFIX);
+        interfaceName = new ClassName(fqn.getPackageName(), INTERFACE_PREFIX + fqn.getSimpleName());
         interfaceName.setTypeArgs(getTypeParameters());
 
         delegateName = new ClassName(fqn.getPackageName(), fqn.getSimpleName() + DELEGATE_SUFFIX);

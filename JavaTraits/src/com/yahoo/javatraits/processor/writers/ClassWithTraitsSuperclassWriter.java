@@ -158,8 +158,8 @@ public class ClassWithTraitsSuperclassWriter {
     }
 
     private String getDelegateVariableName(TraitElement elem) {
-        String base = elem.getSimpleName();
-        return base.substring(0, 1).toLowerCase() + base.substring(1) + TraitElement.DELEGATE_SUFFIX;
+        String base = elem.getDelegateName().getSimpleName();
+        return base.substring(0, 1).toLowerCase() + base.substring(1);
     }
 
     private void emitDelegateMethods() throws IOException {

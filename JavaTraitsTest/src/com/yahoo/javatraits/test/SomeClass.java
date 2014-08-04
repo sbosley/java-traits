@@ -16,7 +16,7 @@ import com.yahoo.javatraits.annotations.Prefer;
 @HasTraits(traits={MathTrait.class, AnotherTrait.class},
            desiredSuperclass=@DesiredSuperclass(superclass=HashMap.class, typeArgClasses={String.class, Long.class}),
            prefer=@Prefer(target=AnotherTrait.class, method="duplicateMethod"))
-public class ClassWithTraits<A extends Number, B extends A, C, D> extends ClassWithTraitsGen<A, B, C, D> {
+public class SomeClass<A extends Number, B extends A, C, D> extends SomeClassWithTraits<A, B, C, D> {
 
     @Override
     public int someWeirdOp(int arg1, int arg2) {

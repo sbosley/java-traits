@@ -16,7 +16,7 @@ public abstract class MathTrait<A extends Number, B extends A> {
 
     public abstract Map<String, ArrayList<B[]>>[][] getParametrizedArg();
 
-    public abstract MathTraitInterface<A, B> getThis();
+    public abstract IMathTrait<A, B> getThis();
 
     public void doSomeListThing(List<? super ArrayList<? extends CharSequence>>[][]... strings) {
         //

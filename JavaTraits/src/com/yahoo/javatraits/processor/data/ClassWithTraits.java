@@ -22,7 +22,7 @@ import com.yahoo.javatraits.annotations.HasTraits;
 
 public class ClassWithTraits extends TypeElementWrapper {
 
-    public static final String GEN_SUFFIX = "Gen";
+    private static final String GEN_SUFFIX = "WithTraits";
 
     private List<TraitElement> traitClasses;
 
