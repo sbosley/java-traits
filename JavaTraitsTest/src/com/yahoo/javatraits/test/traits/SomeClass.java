@@ -3,7 +3,7 @@
  *
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.yahoo.javatraits.test;
+package com.yahoo.javatraits.test.traits;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,8 +14,8 @@ import com.yahoo.javatraits.annotations.HasTraits;
 import com.yahoo.javatraits.annotations.Prefer;
 
 @HasTraits(traits={MathTrait.class, AnotherTrait.class},
-           desiredSuperclass=@DesiredSuperclass(superclass=HashMap.class, typeArgClasses={String.class, Long.class}),
-           prefer=@Prefer(target=AnotherTrait.class, method="duplicateMethod"))
+//           desiredSuperclass=@DesiredSuperclass(superclass=HashMap.class, typeArgClasses={String.class, Long.class}),
+           prefer=@Prefer(target=AnotherTrait.class, method="intToStringV2"))
 public class SomeClass<A extends Number, B extends A, C, D> extends SomeClassWithTraits<A, B, C, D> {
 
     @Override

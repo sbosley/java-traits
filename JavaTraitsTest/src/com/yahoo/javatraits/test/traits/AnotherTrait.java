@@ -3,7 +3,7 @@
  * 
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.yahoo.javatraits.test;
+package com.yahoo.javatraits.test.traits;
 
 import com.yahoo.javatraits.annotations.Trait;
 
@@ -30,7 +30,11 @@ public abstract class AnotherTrait<A, B> {
         return arg2 - arg1;
     }
     
-    public String duplicateMethod(int someArg) {
+    public String intToStringV1(int someArg) {
+        return Integer.toBinaryString(someArg);
+    }
+    
+    public String intToStringV2(int someArg) {
         return Integer.toBinaryString(someArg);
     }
 }

@@ -3,7 +3,7 @@
  *
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.yahoo.javatraits.test;
+package com.yahoo.javatraits.test.traits;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +55,11 @@ public abstract class MathTrait<A extends Number, B extends A> {
         return number.intValue();
     }
 
-    public String duplicateMethod(int someArg) {
+    public String intToStringV1(int someArg) {
+        return Integer.toHexString(someArg);
+    }
+    
+    public String intToStringV2(int someArg) {
         return Integer.toHexString(someArg);
     }
 }
