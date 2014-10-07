@@ -31,7 +31,6 @@ import com.yahoo.annotations.writer.JavaFileWriter;
 import com.yahoo.annotations.writer.JavaFileWriter.ConstructorInitialization;
 import com.yahoo.annotations.writer.JavaFileWriter.Type;
 import com.yahoo.annotations.writer.JavaFileWriter.TypeDeclarationParameters;
-import com.yahoo.javatraits.annotations.HasTraits;
 import com.yahoo.javatraits.processor.data.ClassWithTraits;
 import com.yahoo.javatraits.processor.data.TraitElement;
 import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
@@ -43,15 +42,10 @@ public class ClassWithTraitsSuperclassWriter {
     private List<TraitElement> allTraits;
     private JavaFileWriter writer;
 
-    public ClassWithTraitsSuperclassWriter(ClassWithTraits cls, final Map<ClassName, TraitElement> traitElementMap, Utils utils) {
+    public ClassWithTraitsSuperclassWriter(ClassWithTraits cls, Utils utils) {
         this.cls = cls;
         this.utils = utils;
-        this.allTraits = Utils.map(Utils.getClassValuesFromAnnotation(HasTraits.class, cls.getSourceElement(), "traits"),
-                new Utils.MapFunction<ClassName, TraitElement>() {
-            public TraitElement map(ClassName fqn) {
-                return traitElementMap.get(fqn);
-            };
-        });;
+        this.allTraits = cls.getTraitClasses();
     }
 
     public void writeClass(Filer filer) {
@@ -206,7 +200,7 @@ public class ClassWithTraitsSuperclassWriter {
             Pair<TraitElement, ExecutableElement> executablePair = executablePairList.get(0);
             TraitElement elem = executablePair.getLeft();
             ExecutableElement exec = executablePair.getRight();
-            if (TraitProcessorUtils.isGetThis(exec)) {
+            if (TraitProcessorUtils.isGetThis(utils, elem, exec)) {
                 continue;
             }
 

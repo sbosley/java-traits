@@ -388,6 +388,15 @@ public class Utils {
             }
         });
     }
+    
+    public static List<TypeMirror> getClassMirrorsFromAnnotationValue(AnnotationValue annotationValue) {
+        return getValuesFromAnnotationValue(annotationValue, TypeMirror.class, new MapFunction<TypeMirror, TypeMirror>() {
+            @Override
+            public TypeMirror map(TypeMirror arg) {
+                return arg;
+            }
+        });
+    }
 
     public static List<String> getStringValuesFromAnnotationValue(AnnotationValue annotationValue) {
         return getValuesFromAnnotationValue(annotationValue, String.class, new MapFunction<String, String>() {
@@ -408,6 +417,17 @@ public class Utils {
             }
         }
         return new ArrayList<ClassName>();
+    }
+    
+    public static List<TypeMirror> getClassMirrorsFromAnnotation(Class<?> annotationClass, Element elem, String propertyName) {
+        AnnotationMirror mirror = findAnnotationMirror(elem, annotationClass);
+        if (mirror != null) {
+            AnnotationValue annotationValue = findAnnotationValue(mirror, propertyName);
+            if (annotationValue != null) {
+                return getClassMirrorsFromAnnotationValue(annotationValue);
+            }
+        }
+        return new ArrayList<TypeMirror>();
     }
 
 }

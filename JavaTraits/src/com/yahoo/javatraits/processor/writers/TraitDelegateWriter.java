@@ -73,7 +73,7 @@ public class TraitDelegateWriter {
         Set<ClassName> imports = new HashSet<ClassName>();
         utils.accumulateImportsFromExecutableElements(imports, traitElement.getDeclaredMethods());
         for (ExecutableElement e : traitElement.getDeclaredMethods()) {
-            if (TraitProcessorUtils.isGetThis(e)) {
+            if (TraitProcessorUtils.isGetThis(utils, traitElement, e)) {
                 imports.add(traitElement.getInterfaceName());
             }
         }
@@ -129,7 +129,7 @@ public class TraitDelegateWriter {
     private void emitDelegateMethodImplementations() throws IOException {
         List<? extends ExecutableElement> allMethods = traitElement.getDeclaredMethods();
         for (ExecutableElement exec : allMethods) {
-            if (TraitProcessorUtils.isGetThis(exec)) {
+            if (TraitProcessorUtils.isGetThis(utils, traitElement, exec)) {
                 emitGetThis();
             } else {
                 emitMethodDeclaration(exec, false, Modifier.PUBLIC);

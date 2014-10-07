@@ -13,6 +13,8 @@ import java.util.Map;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
 
 import com.yahoo.annotations.model.ClassName;
@@ -31,23 +33,24 @@ public class ClassWithTraits extends TypeElementWrapper {
     private ClassName generatedSuperclass;
     private Map<String, ClassName> prefer;
 
-    public ClassWithTraits(TypeElement elem, Utils utils, Map<ClassName, TraitElement> traitMap) {
+    public ClassWithTraits(TypeElement elem, Utils utils) {
         super(elem, utils);
-        initTraitClasses(traitMap);
+        initTraitClasses();
         initSuperclasses();
         initPreferValues();
     }
 
-    private void initTraitClasses(final Map<ClassName, TraitElement> traitMap) {
-        List<ClassName> traitNames = Utils.getClassValuesFromAnnotation(HasTraits.class, elem, "traits");
-        traitClasses = Utils.map(traitNames, new Utils.MapFunction<ClassName, TraitElement>() {
+    private void initTraitClasses() {
+        List<TypeMirror> traitMirrors = Utils.getClassMirrorsFromAnnotation(HasTraits.class, elem, "traits");
+        traitClasses = Utils.map(traitMirrors, new Utils.MapFunction<TypeMirror, TraitElement>() {
             @Override
-            public TraitElement map(ClassName arg) {
-                TraitElement correspondingTrait = traitMap.get(arg);
-                if (correspondingTrait == null) {
-                    utils.getMessager().printMessage(Kind.ERROR, "Couldn't find TraitElement for name " + arg.toString());
+            public TraitElement map(TypeMirror arg) {
+                if (!(arg instanceof DeclaredType)) {
+                    utils.getMessager().printMessage(Kind.ERROR, "Type mirror " + arg + " for trait argument is not a DeclaredType");
+                    return null;
+                } else {
+                    return new TraitElement((TypeElement) ((DeclaredType) arg).asElement(), utils);
                 }
-                return correspondingTrait;
             }
         });
     }

@@ -80,7 +80,7 @@ public class TraitInterfaceWriter {
 
     private void emitMethodDeclarations() throws IOException {
         for (ExecutableElement exec : element.getDeclaredMethods()) {
-            if (TraitProcessorUtils.isGetThis(exec)) {
+            if (TraitProcessorUtils.isGetThis(utils, element, exec)) {
                 continue;
             } else {
                 emitMethodDeclarationForExecutableElement(exec);
