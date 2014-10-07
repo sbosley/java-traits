@@ -12,6 +12,8 @@ import com.yahoo.annotations.utils.Utils;
 
 public class GenericName extends TypeName {
 
+    public static final String GENERIC_QUALIFIER_SEPARATOR = "_";
+    
     private String qualifier;
     private String genericName;
     private List<TypeName> extendsBound;
@@ -41,7 +43,7 @@ public class GenericName extends TypeName {
     public String getGenericName() {
         StringBuilder result = new StringBuilder();
         if (qualifier != null && !"?".equals(genericName)) {
-            result.append(qualifier).append("$");
+            result.append(qualifier).append(GENERIC_QUALIFIER_SEPARATOR);
         }
         result.append(genericName);
         return result.toString();

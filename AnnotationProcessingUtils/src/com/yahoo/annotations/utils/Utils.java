@@ -107,7 +107,7 @@ public class Utils {
             TypeVariable typeVariable = (TypeVariable) mirror;
             String genericName = getSimpleNameFromFullyQualifiedName(mirrorString);
             if (genericQualifier != null) {
-                genericName = genericQualifier + "$" + genericName;
+                genericName = genericQualifier + GenericName.GENERIC_QUALIFIER_SEPARATOR + genericName;
             }
             toReturn = getGenericName(genericName, genericQualifier, typeVariable, typeVariable.getUpperBound(), null);
         } else if (kind == TypeKind.WILDCARD) {

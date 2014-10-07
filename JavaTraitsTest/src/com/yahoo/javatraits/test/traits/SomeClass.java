@@ -14,7 +14,7 @@ import com.yahoo.javatraits.annotations.HasTraits;
 import com.yahoo.javatraits.annotations.Prefer;
 
 @HasTraits(traits={MathTrait.class, AnotherTrait.class},
-//           desiredSuperclass=@DesiredSuperclass(superclass=HashMap.class, typeArgClasses={String.class, Long.class}),
+           desiredSuperclass=@DesiredSuperclass(superclass=HashMap.class, typeArgClasses={String.class, Long.class}),
            prefer=@Prefer(target=AnotherTrait.class, method="intToStringV2"))
 public class SomeClass<A extends Number, B extends A, C, D> extends SomeClassWithTraits<A, B, C, D> {
 

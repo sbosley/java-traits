@@ -1,14 +1,21 @@
 package com.yahoo.javatraits.test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+
+import java.util.HashMap;
 
 import org.junit.Test;
 
 import com.yahoo.javatraits.test.traits.FootballField;
+import com.yahoo.javatraits.test.traits.IAnotherTrait;
+import com.yahoo.javatraits.test.traits.IMathTrait;
 import com.yahoo.javatraits.test.traits.LyingRectangle;
+import com.yahoo.javatraits.test.traits.SomeClass;
 
 public class BasicTraitsTest {
 
+    private SomeClass<Number, Integer, String, Long> instance = new SomeClass<Number, Integer, String, Long>();
+    
     @Test
     public void testBasicTraitFunctions() {
         FootballField field = new FootballField();
@@ -33,31 +40,31 @@ public class BasicTraitsTest {
         assertEquals(0, lyingRect.getVolumeWithHeight(3));
     }
     
-//    @Test
-//    public void testSuperclassSpecification() {
-//        assertTrue(instance instanceof HashMap<?, ?>);
-//        instance.put("Hello", 1L);
-//        assertEquals(1L, instance.get("Hello").longValue());
-//    }
+    @Test
+    public void testSuperclassSpecification() {
+        assertTrue(instance instanceof HashMap<?, ?>);
+        instance.put("Hello", 1L);
+        assertEquals(1L, instance.get("Hello").longValue());
+    }
     
-//    @Test
-//    public void testTraitClassesImplementAllInterfaces() {
-//        assertTrue(instance instanceof IMathTrait);
-//        assertTrue(instance instanceof IAnotherTrait);
-//    }
+    @Test
+    public void testTraitClassesImplementAllInterfaces() {
+        assertTrue(instance instanceof IMathTrait);
+        assertTrue(instance instanceof IAnotherTrait);
+    }
     
-//    @Test
-//    public void testDiamondResolutionWithoutPrefer() {
-//        int hexInt = 0xabc;
-//        String hexString = instance.intToStringV1(hexInt);
-//        assertEquals("abc", hexString);
-//    }
-//    
-//    @Test
-//    public void testDiamondResolutionWithPrefer() {
-//        int hexInt = 0xabc;
-//        String binaryString = instance.intToStringV2(hexInt);
-//        assertEquals("101010111100", binaryString);
-//    }
+    @Test
+    public void testDiamondResolutionWithoutPrefer() {
+        int hexInt = 0xabc;
+        String hexString = instance.intToStringV1(hexInt);
+        assertEquals("abc", hexString);
+    }
+    
+    @Test
+    public void testDiamondResolutionWithPrefer() {
+        int hexInt = 0xabc;
+        String binaryString = instance.intToStringV2(hexInt);
+        assertEquals("101010111100", binaryString);
+    }
 
 }
