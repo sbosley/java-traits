@@ -36,7 +36,7 @@ public class HasTraitsProcessor extends JavaTraitsProcessor {
         List<ClassWithTraits> result = new ArrayList<ClassWithTraits>();
         for (Element e : elements) {
             if (e.getKind() != ElementKind.CLASS) {
-                messager.printMessage(Kind.ERROR, "Only a class can be annotated with @Trait", e);
+                messager.printMessage(Kind.ERROR, "Only a class can be annotated with @HasTraits", e);
             } else {
                 TypeElement typeElem = (TypeElement) e;
                 result.add(new ClassWithTraits(typeElem, utils));
