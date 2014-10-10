@@ -20,7 +20,6 @@ import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
 import com.yahoo.annotations.model.ClassName;
-import com.yahoo.annotations.utils.Utils;
 import com.yahoo.annotations.writer.JavaFileWriter;
 import com.yahoo.annotations.writer.JavaFileWriter.ConstructorDeclarationParams;
 import com.yahoo.annotations.writer.JavaFileWriter.MethodDeclarationParams;
@@ -32,12 +31,12 @@ import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
 public class TraitDelegateWriter {
 
     private TraitElement traitElement;
-    private Utils utils;
+    private TraitProcessorUtils utils;
     private ClassName traitDelegateClass;
     private ClassName delegateClass;
     private JavaFileWriter writer;
 
-    public TraitDelegateWriter(TraitElement traitElement, Utils utils) {
+    public TraitDelegateWriter(TraitElement traitElement, TraitProcessorUtils utils) {
         this.traitElement = traitElement;
         this.utils = utils;
         this.traitDelegateClass = traitElement.getDelegateName();
@@ -73,7 +72,7 @@ public class TraitDelegateWriter {
         Set<ClassName> imports = new HashSet<ClassName>();
         utils.accumulateImportsFromExecutableElements(imports, traitElement.getDeclaredMethods());
         for (ExecutableElement e : traitElement.getDeclaredMethods()) {
-            if (TraitProcessorUtils.isGetThis(utils, traitElement, e)) {
+            if (utils.isGetThis(traitElement, e)) {
                 imports.add(traitElement.getInterfaceName());
             }
         }
@@ -129,7 +128,7 @@ public class TraitDelegateWriter {
     private void emitDelegateMethodImplementations() throws IOException {
         List<? extends ExecutableElement> allMethods = traitElement.getDeclaredMethods();
         for (ExecutableElement exec : allMethods) {
-            if (TraitProcessorUtils.isGetThis(utils, traitElement, exec)) {
+            if (utils.isGetThis(traitElement, exec)) {
                 emitGetThis();
             } else {
                 emitMethodDeclaration(exec, false, Modifier.PUBLIC);

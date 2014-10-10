@@ -18,7 +18,6 @@ import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
 import com.yahoo.annotations.model.ClassName;
-import com.yahoo.annotations.utils.Utils;
 import com.yahoo.annotations.writer.JavaFileWriter;
 import com.yahoo.annotations.writer.JavaFileWriter.Type;
 import com.yahoo.annotations.writer.JavaFileWriter.TypeDeclarationParameters;
@@ -28,10 +27,10 @@ import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
 public class TraitInterfaceWriter {
 
     private final TraitElement element;
-    private Utils utils;
+    private TraitProcessorUtils utils;
     private JavaFileWriter writer = null;
 
-    public TraitInterfaceWriter(TraitElement element, Utils utils) {
+    public TraitInterfaceWriter(TraitElement element, TraitProcessorUtils utils) {
         this.element = element;
         this.utils = utils;
     }
@@ -80,7 +79,7 @@ public class TraitInterfaceWriter {
 
     private void emitMethodDeclarations() throws IOException {
         for (ExecutableElement exec : element.getDeclaredMethods()) {
-            if (TraitProcessorUtils.isGetThis(utils, element, exec)) {
+            if (utils.isGetThis(element, exec)) {
                 continue;
             } else {
                 emitMethodDeclarationForExecutableElement(exec);

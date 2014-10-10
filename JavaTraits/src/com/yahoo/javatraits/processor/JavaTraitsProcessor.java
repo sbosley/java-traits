@@ -11,12 +11,12 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
-import com.yahoo.annotations.utils.Utils;
+import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
 
 public abstract class JavaTraitsProcessor extends AbstractProcessor {
 
     protected Messager messager;
-    protected Utils utils;
+    protected TraitProcessorUtils utils;
     protected Filer filer;
     
     protected Set<? extends Element> elements = null;
@@ -30,7 +30,7 @@ public abstract class JavaTraitsProcessor extends AbstractProcessor {
 
         this.messager = env.getMessager();
         this.filer = env.getFiler();
-        this.utils = new Utils(messager, env.getTypeUtils());
+        this.utils = new TraitProcessorUtils(messager, env.getTypeUtils());
     }
     
     @Override

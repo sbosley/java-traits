@@ -38,11 +38,11 @@ import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
 public class ClassWithTraitsSuperclassWriter {
 
     private ClassWithTraits cls;
-    private Utils utils;
+    private TraitProcessorUtils utils;
     private List<TraitElement> allTraits;
     private JavaFileWriter writer;
 
-    public ClassWithTraitsSuperclassWriter(ClassWithTraits cls, Utils utils) {
+    public ClassWithTraitsSuperclassWriter(ClassWithTraits cls, TraitProcessorUtils utils) {
         this.cls = cls;
         this.utils = utils;
         this.allTraits = cls.getTraitClasses();
@@ -157,8 +157,24 @@ public class ClassWithTraitsSuperclassWriter {
     }
 
     private void emitDelegateMethods() throws IOException {
-        Set<MethodSignature> dupes = new HashSet<MethodSignature>();
+        Set<MethodSignature> duplicateMethods = new HashSet<MethodSignature>();
         Map<MethodSignature, List<Pair<TraitElement, ExecutableElement>>> methodToExecElements = new HashMap<MethodSignature, List<Pair<TraitElement, ExecutableElement>>>();
+        
+        accumulateMethods(duplicateMethods, methodToExecElements);
+
+        if (!duplicateMethods.isEmpty()) {
+            reorderDuplicatesForPreferValues(duplicateMethods, methodToExecElements);
+        }
+
+        for (List<Pair<TraitElement, ExecutableElement>> executablePairList : methodToExecElements.values()) {
+            Pair<TraitElement, ExecutableElement> executablePair = executablePairList.get(0);
+            emitMethodDefinition(executablePair.getLeft(), executablePair.getRight());
+        }
+    }
+
+    private void accumulateMethods(Set<MethodSignature> duplicateMethods, 
+            Map<MethodSignature, List<Pair<TraitElement, ExecutableElement>>> methodToExecElements) {
+        
         for (TraitElement elem : allTraits) {
             List<? extends ExecutableElement> execElems = elem.getDeclaredMethods();
             for (ExecutableElement exec : execElems) {
@@ -168,64 +184,67 @@ public class ClassWithTraitsSuperclassWriter {
                     elements = new ArrayList<Pair<TraitElement, ExecutableElement>>();
                     methodToExecElements.put(signature, elements);
                 } else {
-                    dupes.add(signature);
+                    duplicateMethods.add(signature);
                 }
                 elements.add(Pair.create(elem, exec));
             }
         }
-
-        if (!dupes.isEmpty()) {
-            Map<String, ClassName> prefer = cls.getPreferMap();
-            for (MethodSignature dup : dupes) {
-                String simpleMethodName = dup.getMethodName();
-                if (prefer.containsKey(simpleMethodName)) {
-                    ClassName preferTarget = prefer.get(simpleMethodName);
-                    List<Pair<TraitElement, ExecutableElement>> allExecElems = methodToExecElements.get(dup);
-                    int index = 0;
-                    for (index = 0; index < allExecElems.size(); index++) {
-                        Pair<TraitElement, ExecutableElement> item = allExecElems.get(index);
-                        if (item.getLeft().getFullyQualifiedName().equals(preferTarget)) {
-                            break;
-                        }
+    }
+    
+    private void reorderDuplicatesForPreferValues(Set<MethodSignature> duplicateMethods,
+            Map<MethodSignature, List<Pair<TraitElement, ExecutableElement>>> methodToExecElements) {
+        
+        Map<String, ClassName> prefer = cls.getPreferMap();
+        for (MethodSignature dup : duplicateMethods) {
+            String simpleMethodName = dup.getMethodName();
+            if (prefer.containsKey(simpleMethodName)) {
+                ClassName preferTarget = prefer.get(simpleMethodName);
+                List<Pair<TraitElement, ExecutableElement>> allExecElems = methodToExecElements.get(dup);
+                int index = 0;
+                for (index = 0; index < allExecElems.size(); index++) {
+                    Pair<TraitElement, ExecutableElement> item = allExecElems.get(index);
+                    if (item.getLeft().getFullyQualifiedName().equals(preferTarget)) {
+                        break;
                     }
-                    if (index > 0) {
-                        Pair<TraitElement, ExecutableElement> item = allExecElems.remove(index);
-                        allExecElems.add(0, item);
-                    }
+                }
+                if (index > 0) {
+                    Pair<TraitElement, ExecutableElement> item = allExecElems.remove(index);
+                    allExecElems.add(0, item);
                 }
             }
         }
+    }
+    
+    private void emitMethodDefinition(TraitElement elem, ExecutableElement exec) throws IOException {
+        if (utils.isGetThis(elem, exec)) {
+            return;
+        }
 
-        for (List<Pair<TraitElement, ExecutableElement>> executablePairList : methodToExecElements.values()) {
-            Pair<TraitElement, ExecutableElement> executablePair = executablePairList.get(0);
-            TraitElement elem = executablePair.getLeft();
-            ExecutableElement exec = executablePair.getRight();
-            if (TraitProcessorUtils.isGetThis(utils, elem, exec)) {
-                continue;
-            }
+        Set<Modifier> modifiers = exec.getModifiers();
+        boolean isAbstract = modifiers.contains(Modifier.ABSTRACT);
+        List<String> argNames = utils.beginMethodDeclarationForExecutableElement(writer, exec, null, elem.getSimpleName(), modifiers.toArray(new Modifier[modifiers.size()]));
 
-            Set<Modifier> modifiers = exec.getModifiers();
-            boolean isAbstract = modifiers.contains(Modifier.ABSTRACT);
-            List<String> argNames = utils.beginMethodDeclarationForExecutableElement(writer, exec, null, elem.getSimpleName(), modifiers.toArray(new Modifier[modifiers.size()]));
-
-            if (!isAbstract) {
-                String delegateVariableName = getDelegateVariableName(elem);
-                StringBuilder statement = new StringBuilder();
-                if (exec.getReturnType().getKind() != TypeKind.VOID) {
-                    statement.append("return ");
-                }
-                statement.append(delegateVariableName)
-                .append(".").append("default__").append(exec.getSimpleName()).append("(");
-                for (int i = 0; i < argNames.size(); i++) {
-                    statement.append(argNames.get(i));
-                    if (i < argNames.size() - 1) {
-                        statement.append(", ");
-                    }
-                }
-                statement.append(");\n");
-                writer.writeStatement(statement.toString());
-                writer.finishMethodDefinition();
+        if (!isAbstract) {
+            emitMethodBody(elem, exec, argNames);
+        }
+    }
+    
+    private void emitMethodBody(TraitElement elem, ExecutableElement exec, List<String> argNames) throws IOException {
+        String delegateVariableName = getDelegateVariableName(elem);
+        StringBuilder statement = new StringBuilder();
+        if (exec.getReturnType().getKind() != TypeKind.VOID) {
+            statement.append("return ");
+        }
+        statement.append(delegateVariableName)
+        .append(".").append("default__").append(exec.getSimpleName()).append("(");
+        for (int i = 0; i < argNames.size(); i++) {
+            statement.append(argNames.get(i));
+            if (i < argNames.size() - 1) {
+                statement.append(", ");
             }
         }
+        statement.append(");\n");
+        writer.writeStatement(statement.toString());
+        writer.finishMethodDefinition();
     }
 }
