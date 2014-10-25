@@ -112,7 +112,7 @@ public class TraitDelegateWriter {
             .setArgumentNames(Arrays.asList("delegate"));
 
         writer.beginConstructorDeclaration(params);
-        writer.writeMethodBodyStatement("this.delegate = delegate;\n");
+        writer.writeStatement("this.delegate = delegate;\n");
         writer.finishMethodDefinition();
     }
 
@@ -143,7 +143,7 @@ public class TraitDelegateWriter {
             .setModifiers(Arrays.asList(Modifier.PUBLIC));
 
         writer.beginMethodDefinition(params);
-        writer.writeMethodBodyStatement("return delegate;\n");
+        writer.writeStatement("return delegate;\n");
         writer.finishMethodDefinition();
     }
 
@@ -167,7 +167,7 @@ public class TraitDelegateWriter {
             }
         }
         statement.append(");\n");
-        writer.writeMethodBodyStatement(statement.toString());
+        writer.writeStatement(statement.toString());
         writer.finishMethodDefinition();
     }
 

@@ -244,7 +244,7 @@ public class ClassWithTraitsSuperclassWriter {
             }
         }
         statement.append(");\n");
-        writer.writeMethodBodyStatement(statement.toString());
+        writer.writeStatement(statement.toString());
         writer.finishMethodDefinition();
     }
 }

@@ -283,8 +283,7 @@ public class JavaFileWriter {
         verifyArgumentTypesAndNames(params.getArgumentTypes(), params.getArgumentNames());
     }
 
-    public void writeMethodBodyStatement(String statement) throws IOException {
-        checkScope(Scope.METHOD_DEFINITION);
+    public void writeStatement(String statement) throws IOException {
         indent();
         out.append(statement);
     }
@@ -293,6 +292,11 @@ public class JavaFileWriter {
         out.append("\n");
     }
 
+    public void writeComment(String comment) throws IOException {
+        indent();
+        out.append("// ").append(comment).append("\n");
+    }
+    
     public void finishMethodDefinition() throws IOException {
         finishScope(Scope.METHOD_DEFINITION);
         indent();
@@ -301,6 +305,7 @@ public class JavaFileWriter {
 
     public void finishTypeDefinition() throws IOException {
         finishScope(Scope.TYPE_DEFINITION);
+        indent();
         out.append("}\n");
     }
 
