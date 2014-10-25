@@ -219,6 +219,16 @@ public class JavaFileWriter {
             moveToScope(Scope.METHOD_DEFINITION);
         }
     }
+    
+    public void beginInitializerBlock(boolean isStatic) throws IOException {
+        checkScope(Scope.TYPE_DEFINITION);
+        indent();
+        if (isStatic) {
+            out.append("static ");
+        }
+        out.append("{\n");
+        moveToScope(Scope.METHOD_DEFINITION);
+    }
 
     private void validateMethodDefinitionParams(MethodDeclarationParameters params) {
         if (Utils.isEmpty(params.getMethodName())) {
@@ -301,6 +311,10 @@ public class JavaFileWriter {
         finishScope(Scope.METHOD_DEFINITION);
         indent();
         out.append("}\n\n");
+    }
+    
+    public void finishInitializerBlock() throws IOException {
+        finishMethodDefinition();
     }
 
     public void finishTypeDefinition() throws IOException {
