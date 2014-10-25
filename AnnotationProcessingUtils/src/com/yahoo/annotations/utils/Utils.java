@@ -130,7 +130,7 @@ public class Utils {
             toReturn = getGenericName(genericName, genericQualifier, typeVariable, typeVariable.getUpperBound(), null);
         } else if (kind == TypeKind.WILDCARD) {
             WildcardType wildcardType = (WildcardType) mirror;
-            toReturn = getGenericName("?", genericQualifier, wildcardType, wildcardType.getExtendsBound(), wildcardType.getSuperBound());
+            toReturn = getGenericName(GenericName.WILDCARD_CHAR, genericQualifier, wildcardType, wildcardType.getExtendsBound(), wildcardType.getSuperBound());
         } else {
             List<TypeName> typeArgs = Collections.emptyList();
             if (mirror instanceof DeclaredType) {

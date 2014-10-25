@@ -12,7 +12,10 @@ import com.yahoo.annotations.utils.Utils;
 
 public class GenericName extends TypeName {
 
+    public static final String WILDCARD_CHAR = "?";
     public static final String GENERIC_QUALIFIER_SEPARATOR = "_";
+    
+    public static final GenericName DEFAULT_WILDCARD = new GenericName(WILDCARD_CHAR, null, null);
     
     private String qualifier;
     private String genericName;
@@ -42,7 +45,7 @@ public class GenericName extends TypeName {
 
     public String getGenericName() {
         StringBuilder result = new StringBuilder();
-        if (qualifier != null && !"?".equals(genericName)) {
+        if (qualifier != null && !WILDCARD_CHAR.equals(genericName)) {
             result.append(qualifier).append(GENERIC_QUALIFIER_SEPARATOR);
         }
         result.append(genericName);
@@ -50,7 +53,7 @@ public class GenericName extends TypeName {
     }
 
     public boolean isWildcard() {
-        return "?".equals(genericName);
+        return WILDCARD_CHAR.equals(genericName);
     }
 
     public boolean hasExtendsBound() {
