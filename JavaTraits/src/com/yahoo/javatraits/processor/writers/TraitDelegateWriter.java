@@ -149,13 +149,17 @@ public class TraitDelegateWriter {
 
     private void emitMethodDeclaration(ExecutableElement exec, boolean isDefault, Modifier... modifiers) throws IOException {
         String name = isDefault ? "default__" + exec.getSimpleName().toString() : null;
-        List<String> argNames = utils.beginMethodDeclarationForExecutableElement(writer, exec, name, traitElement.getSimpleName(), modifiers);
+        MethodDeclarationParams methodDeclaration = utils.methodDeclarationParamsFromExecutableElement(exec, name, traitElement.getSimpleName(), modifiers);
+        writer.beginMethodDefinition(methodDeclaration);
+        
         StringBuilder statement = new StringBuilder();
         if (exec.getReturnType().getKind() != TypeKind.VOID) {
             statement.append("return ");
         }
         String callTo = isDefault ? "super" : "delegate";
         statement.append(callTo).append(".").append(exec.getSimpleName().toString()).append("(");
+        
+        List<String> argNames = methodDeclaration.argumentNames;
         for (int i = 0; i < argNames.size(); i++) {
             statement.append(argNames.get(i));
             if (i < argNames.size() - 1) {

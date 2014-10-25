@@ -30,7 +30,7 @@ public abstract class TypeElementWrapper {
     
     private List<TypeName> initTypeParameters(TypeElement elem) {
         List<? extends TypeParameterElement> typeParams = elem.getTypeParameters();
-        return utils.mapTypeParameterElementsToTypeName(typeParams, getSimpleName());
+        return utils.typeParameterElementsToTypeNames(typeParams, getSimpleName());
     }
 
     public TypeElement getSourceElement() {

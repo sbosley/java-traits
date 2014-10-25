@@ -19,6 +19,7 @@ import javax.tools.JavaFileObject;
 
 import com.yahoo.annotations.model.ClassName;
 import com.yahoo.annotations.writer.JavaFileWriter;
+import com.yahoo.annotations.writer.JavaFileWriter.MethodDeclarationParams;
 import com.yahoo.annotations.writer.JavaFileWriter.Type;
 import com.yahoo.annotations.writer.JavaFileWriter.TypeDeclarationParameters;
 import com.yahoo.javatraits.processor.data.TraitElement;
@@ -88,7 +89,8 @@ public class TraitInterfaceWriter {
     }
 
     private void emitMethodDeclarationForExecutableElement(ExecutableElement exec) throws IOException {
-        utils.beginMethodDeclarationForExecutableElement(writer, exec, null, element.getSimpleName(), Modifier.PUBLIC);
+        MethodDeclarationParams methodDeclaration = utils.methodDeclarationParamsFromExecutableElement(exec, null, element.getSimpleName(), Modifier.PUBLIC);
+        writer.beginMethodDefinition(methodDeclaration);
     }
 
 }

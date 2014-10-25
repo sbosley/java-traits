@@ -5,7 +5,6 @@
  */
 package com.yahoo.annotations.utils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -35,7 +34,6 @@ import com.yahoo.annotations.model.GenericName;
 import com.yahoo.annotations.model.MethodSignature;
 import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.visitors.ImportGatheringTypeVisitor;
-import com.yahoo.annotations.writer.JavaFileWriter;
 import com.yahoo.annotations.writer.JavaFileWriter.MethodDeclarationParams;
 
 public class Utils {
@@ -65,13 +63,17 @@ public class Utils {
         }
     }
 
-    public MethodSignature getMethodSignature(ExecutableElement exec, String genericQualifier) {
+    public MethodSignature executableElementToMethodSignature(ExecutableElement exec) {
+        return executableElementToMethodSignature(exec, null);
+    }
+    
+    public MethodSignature executableElementToMethodSignature(ExecutableElement exec, String genericQualifier) {
         String name = exec.getSimpleName().toString();
         MethodSignature result = new MethodSignature(name);
 
-        List<TypeName> methodGenerics = mapTypeParameterElementsToTypeName(exec.getTypeParameters(), null);
+        List<TypeName> methodGenerics = typeParameterElementsToTypeNames(exec.getTypeParameters(), null);
         TypeName returnType = getTypeNameFromTypeMirror(exec.getReturnType(), null);
-        if (!methodGenerics.contains(returnType) && returnType instanceof GenericName) {
+        if (!methodGenerics.contains(returnType) && returnType instanceof GenericName && genericQualifier != null) {
             ((GenericName) returnType).addQualifier(genericQualifier);
         }
         result.setReturnType(returnType);
@@ -81,15 +83,31 @@ public class Utils {
         return result;
     }
 
-    public <T extends TypeParameterElement> List<TypeName> mapTypeParameterElementsToTypeName(List<T> params, final String genericQualifier) {
-        return map(params, new MapFunction<T, TypeName>() {
+    public TypeName typeParameterElementToTypeName(TypeParameterElement elem) {
+        return typeParameterElementToTypeName(elem, null);
+    }
+    
+    public TypeName typeParameterElementToTypeName(TypeParameterElement elem, String genericQualifier) {
+        return getTypeNameFromTypeMirror(elem.asType(), genericQualifier);
+    }
+    
+    public <T extends TypeParameterElement> List<TypeName> typeParameterElementsToTypeNames(List<T> params) {
+        return typeParameterElementsToTypeNames(params, null);
+    }
+    
+    public <T extends TypeParameterElement> List<TypeName> typeParameterElementsToTypeNames(List<T> params, final String genericQualifier) {
+        return map(params, new Mapper<T, TypeName>() {
             @Override
             public TypeName map(TypeParameterElement arg) {
-                return getTypeNameFromTypeMirror(arg.asType(), genericQualifier);
+                return typeParameterElementToTypeName(arg, genericQualifier);
             }
         });
     }
 
+    public TypeName getTypeNameFromTypeMirror(TypeMirror mirror) {
+        return getTypeNameFromTypeMirror(mirror, null);
+    }
+    
     public TypeName getTypeNameFromTypeMirror(TypeMirror mirror, final String genericQualifier) {
         TypeKind kind = mirror.getKind();
 
@@ -120,7 +138,7 @@ public class Utils {
                 List<? extends TypeMirror> declaredTypeArgs = declaredMirror.getTypeArguments();
                 if (declaredTypeArgs.size() > 0) {
                     mirrorString = mirrorString.replaceAll("<.*>", "");
-                    typeArgs = map(declaredTypeArgs, new MapFunction<TypeMirror, TypeName>() {
+                    typeArgs = map(declaredTypeArgs, new Mapper<TypeMirror, TypeName>() {
                         @Override
                         public TypeName map(TypeMirror arg) {
                             return getTypeNameFromTypeMirror(arg, genericQualifier);
@@ -149,7 +167,7 @@ public class Utils {
 
     private List<TypeName> getUpperBoundsFromTypeMirror(TypeMirror sourceMirror, TypeMirror extendsBoundMirror, final String genericQualifier) {
         List<? extends TypeMirror> upperBounds = getUpperBoundMirrors(sourceMirror, extendsBoundMirror);
-        return map(upperBounds, new MapFunction<TypeMirror, TypeName>() {
+        return map(upperBounds, new Mapper<TypeMirror, TypeName>() {
             @Override
             public TypeName map(TypeMirror arg) {
                 return getTypeNameFromTypeMirror(arg, genericQualifier);
@@ -185,11 +203,19 @@ public class Utils {
             }
         }
     }
-
-    public List<String> beginMethodDeclarationForExecutableElement(JavaFileWriter writer, ExecutableElement exec, String nameOverride,
-            String genericQualifier, Modifier... modifiers) throws IOException {
+    
+    public MethodDeclarationParams methodDeclarationParamsFromExecutableElement(ExecutableElement exec, Modifier... modifiers) {
+        return methodDeclarationParamsFromExecutableElement(exec, null, modifiers);
+    }
+    
+    public MethodDeclarationParams methodDeclarationParamsFromExecutableElement(ExecutableElement exec, String nameOverride, Modifier... modifiers) {
+        return methodDeclarationParamsFromExecutableElement(exec, nameOverride, null, modifiers);
+    }
+    
+    public MethodDeclarationParams methodDeclarationParamsFromExecutableElement(ExecutableElement exec, String nameOverride,
+            String genericQualifier, Modifier... modifiers) {
         String name = nameOverride != null ? nameOverride : exec.getSimpleName().toString();
-        List<TypeName> methodGenerics = mapTypeParameterElementsToTypeName(exec.getTypeParameters(), null);
+        List<TypeName> methodGenerics = typeParameterElementsToTypeNames(exec.getTypeParameters(), null);
         TypeName returnType = getTypeNameFromTypeMirror(exec.getReturnType(), null);
         qualifyReturnTypeGenerics(methodGenerics, returnType, genericQualifier);
 
@@ -203,12 +229,11 @@ public class Utils {
         params.argumentTypes = arguments.getLeft();
         params.argumentNames = arguments.getRight();
         params.throwsTypes = getThrownTypes(exec, genericQualifier, methodGenerics);
-        writer.beginMethodDefinition(params);
-
-        return arguments.getRight();
+        
+        return params;
     }
 
-    private static void qualifyReturnTypeGenerics(List<TypeName> methodGenerics, TypeName returnType, String genericQualifier) {
+    private void qualifyReturnTypeGenerics(List<TypeName> methodGenerics, TypeName returnType, String genericQualifier) {
         if (!methodGenerics.contains(returnType) && returnType instanceof GenericName) {
             ((GenericName) returnType).addQualifier(genericQualifier);
         }
@@ -221,13 +246,13 @@ public class Utils {
     }
 
     private List<TypeName> getArgumentTypeNames(ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) {
-        List<TypeName> typeNames = Utils.map(exec.getParameters(), new Utils.MapFunction<VariableElement, TypeName>() {
+        List<TypeName> typeNames = map(exec.getParameters(), new Mapper<VariableElement, TypeName>() {
             @Override
             public TypeName map(VariableElement arg) {
                 return getTypeNameFromTypeMirror(arg.asType(), null);
             }
         });
-        Utils.map(typeNames, new Utils.MapFunction<TypeName, Void>() {
+        map(typeNames, new Mapper<TypeName, Void>() {
             @Override
             public Void map(TypeName arg) {
                 if (!methodGenerics.contains(arg) && arg instanceof GenericName) {
@@ -239,10 +264,10 @@ public class Utils {
         return typeNames;
     }
 
-    private Pair<List<TypeName>, List<String>> getMethodArgumentsFromExecutableElement(ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) throws IOException {
+    private Pair<List<TypeName>, List<String>> getMethodArgumentsFromExecutableElement(ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) {
         List<? extends VariableElement> arguments = exec.getParameters();
         List<TypeName> typeNames = getArgumentTypeNames(exec, genericQualifier, methodGenerics);
-        List<String> argNames = Utils.map(arguments, new Utils.MapFunction<VariableElement, String>() {
+        List<String> argNames = map(arguments, new Mapper<VariableElement, String>() {
             @Override
             public String map(VariableElement arg) {
                 return arg.toString();
@@ -256,13 +281,13 @@ public class Utils {
 
     private List<TypeName> getThrownTypes(ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) {
         List<? extends TypeMirror> thrownTypeMirrors = exec.getThrownTypes();
-        List<TypeName> thrownTypes = Utils.map(thrownTypeMirrors, new Utils.MapFunction<TypeMirror, TypeName>() {
+        List<TypeName> thrownTypes = Utils.map(thrownTypeMirrors, new Utils.Mapper<TypeMirror, TypeName>() {
             @Override
             public TypeName map(TypeMirror arg) {
                 return getTypeNameFromTypeMirror(arg, null);
             }
         });
-        Utils.map(thrownTypes, new Utils.MapFunction<TypeName, Void>() {
+        Utils.map(thrownTypes, new Utils.Mapper<TypeName, Void>() {
             @Override
             public Void map(TypeName arg) {
                 if (!methodGenerics.contains(arg) && arg instanceof GenericName) {
@@ -303,11 +328,11 @@ public class Utils {
         return name.lastIndexOf('.');
     }
 
-    public static interface MapFunction<A, B> {
+    public static interface Mapper<A, B> {
         public B map(A arg);
     }
 
-    public static <A, B> List<B> map(List<? extends A> list, MapFunction<A, B> mapFunction) {
+    public static <A, B> List<B> map(List<? extends A> list, Mapper<A, B> mapFunction) {
         List<B> result = new ArrayList<B>();
         for (A elem : list) {
             result.add(mapFunction.map(elem));
@@ -340,7 +365,12 @@ public class Utils {
         return true;
     }
 
-    public static AnnotationMirror findAnnotationMirror(Element elem, Class<?> annotationClass) {
+    public AnnotationValue getAnnotationValue(Element elem, Class<?> annotationClass, String propertyName) {
+        AnnotationMirror mirror = getAnnotationMirror(elem, annotationClass);
+        return getAnnotationValueFromMirror(mirror, propertyName);
+    }
+    
+    public AnnotationMirror getAnnotationMirror(Element elem, Class<?> annotationClass) {
         List<? extends AnnotationMirror> annotationMirrors = elem.getAnnotationMirrors();
         String annotationClassName = annotationClass.getName();
         for (AnnotationMirror mirror : annotationMirrors) {
@@ -351,17 +381,60 @@ public class Utils {
         return null;
     }
 
-    public static AnnotationValue findAnnotationValue(AnnotationMirror mirror, String propertyName) {
-        for(Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : mirror.getElementValues().entrySet()) {
-            if (propertyName.equals(entry.getKey().getSimpleName().toString())) {
-                return entry.getValue();
+    public AnnotationValue getAnnotationValueFromMirror(AnnotationMirror mirror, String propertyName) {
+        if (mirror != null) {
+            for(Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : mirror.getElementValues().entrySet()) {
+                if (propertyName.equals(entry.getKey().getSimpleName().toString())) {
+                    return entry.getValue();
+                }
             }
         }
         return null;
     }
+    
+    public List<ClassName> getClassValuesFromAnnotation(Element elem, Class<?> annotationClass, String propertyName) {
+        AnnotationValue annotationValue = getAnnotationValue(elem, annotationClass, propertyName);
+        return getClassValuesFromAnnotationValue(annotationValue);
+    }
+    
+    public List<TypeMirror> getClassMirrorsFromAnnotation(Element elem, Class<?> annotationClass, String propertyName) {
+        AnnotationValue annotationValue = getAnnotationValue(elem, annotationClass, propertyName);
+        return getClassMirrorsFromAnnotationValue(annotationValue);
+    }
+    
+    public List<String> getStringValuesFromAnnotation(Element elem, Class<?> annotationClass, String propertyName) {
+        AnnotationValue annotationValue = getAnnotationValue(elem, annotationClass, propertyName);
+        return getStringValuesFromAnnotationValue(annotationValue);
+    }
 
+    public List<ClassName> getClassValuesFromAnnotationValue(AnnotationValue annotationValue) {
+        return mapValuesFromAnnotationValue(annotationValue, TypeMirror.class, new Mapper<TypeMirror, ClassName>() {
+            @Override
+            public ClassName map(TypeMirror arg) {
+                return new ClassName(arg.toString());
+            }
+        });
+    }
+    
+    public List<TypeMirror> getClassMirrorsFromAnnotationValue(AnnotationValue annotationValue) {
+        return getValuesFromAnnotationValue(annotationValue, TypeMirror.class);
+    }
+
+    public List<String> getStringValuesFromAnnotationValue(AnnotationValue annotationValue) {
+        return getValuesFromAnnotationValue(annotationValue, String.class);
+    }
+    
+    private <T> List<T> getValuesFromAnnotationValue(AnnotationValue annotationValue, Class<T> valueClass) {
+        return mapValuesFromAnnotationValue(annotationValue, valueClass, new Mapper<T, T>() {
+            @Override
+            public T map(T arg) {
+                return arg;
+            }
+        });
+    }
+    
     @SuppressWarnings("unchecked")
-    public static <V, T> List<T> getValuesFromAnnotationValue(AnnotationValue annotationValue, Class<V> valueClass, MapFunction<V, T> mapResult) {
+    private <V, T> List<T> mapValuesFromAnnotationValue(AnnotationValue annotationValue, Class<V> valueClass, Mapper<V, T> mapResult) {
         List<T> result = new ArrayList<T>();
         if (annotationValue != null) {
             Object value = annotationValue.getValue();
@@ -379,55 +452,4 @@ public class Utils {
         }
         return result;
     }
-
-    public static List<ClassName> getClassValuesFromAnnotationValue(AnnotationValue annotationValue) {
-        return getValuesFromAnnotationValue(annotationValue, TypeMirror.class, new MapFunction<TypeMirror, ClassName>() {
-            @Override
-            public ClassName map(TypeMirror arg) {
-                return new ClassName(arg.toString());
-            }
-        });
-    }
-    
-    public static List<TypeMirror> getClassMirrorsFromAnnotationValue(AnnotationValue annotationValue) {
-        return getValuesFromAnnotationValue(annotationValue, TypeMirror.class, new MapFunction<TypeMirror, TypeMirror>() {
-            @Override
-            public TypeMirror map(TypeMirror arg) {
-                return arg;
-            }
-        });
-    }
-
-    public static List<String> getStringValuesFromAnnotationValue(AnnotationValue annotationValue) {
-        return getValuesFromAnnotationValue(annotationValue, String.class, new MapFunction<String, String>() {
-            @Override
-            public String map(String arg) {
-                return arg;
-            }
-
-        });
-    }
-
-    public static List<ClassName> getClassValuesFromAnnotation(Class<?> annotationClass, Element elem, String propertyName) {
-        AnnotationMirror mirror = findAnnotationMirror(elem, annotationClass);
-        if (mirror != null) {
-            AnnotationValue annotationValue = findAnnotationValue(mirror, propertyName);
-            if (annotationValue != null) {
-                return getClassValuesFromAnnotationValue(annotationValue);
-            }
-        }
-        return new ArrayList<ClassName>();
-    }
-    
-    public static List<TypeMirror> getClassMirrorsFromAnnotation(Class<?> annotationClass, Element elem, String propertyName) {
-        AnnotationMirror mirror = findAnnotationMirror(elem, annotationClass);
-        if (mirror != null) {
-            AnnotationValue annotationValue = findAnnotationValue(mirror, propertyName);
-            if (annotationValue != null) {
-                return getClassMirrorsFromAnnotationValue(annotationValue);
-            }
-        }
-        return new ArrayList<TypeMirror>();
-    }
-
 }

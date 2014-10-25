@@ -29,6 +29,7 @@ import com.yahoo.annotations.utils.Pair;
 import com.yahoo.annotations.utils.Utils;
 import com.yahoo.annotations.writer.JavaFileWriter;
 import com.yahoo.annotations.writer.JavaFileWriter.ConstructorInitialization;
+import com.yahoo.annotations.writer.JavaFileWriter.MethodDeclarationParams;
 import com.yahoo.annotations.writer.JavaFileWriter.Type;
 import com.yahoo.annotations.writer.JavaFileWriter.TypeDeclarationParameters;
 import com.yahoo.javatraits.processor.data.ClassWithTraits;
@@ -178,7 +179,7 @@ public class ClassWithTraitsSuperclassWriter {
         for (TraitElement elem : allTraits) {
             List<? extends ExecutableElement> execElems = elem.getDeclaredMethods();
             for (ExecutableElement exec : execElems) {
-                MethodSignature signature = utils.getMethodSignature(exec, elem.getSimpleName());
+                MethodSignature signature = utils.executableElementToMethodSignature(exec, elem.getSimpleName());
                 List<Pair<TraitElement, ExecutableElement>> elements = methodToExecElements.get(signature);
                 if (elements == null) {
                     elements = new ArrayList<Pair<TraitElement, ExecutableElement>>();
@@ -222,10 +223,11 @@ public class ClassWithTraitsSuperclassWriter {
 
         Set<Modifier> modifiers = exec.getModifiers();
         boolean isAbstract = modifiers.contains(Modifier.ABSTRACT);
-        List<String> argNames = utils.beginMethodDeclarationForExecutableElement(writer, exec, null, elem.getSimpleName(), modifiers.toArray(new Modifier[modifiers.size()]));
-
+        MethodDeclarationParams methodDeclaration = utils.methodDeclarationParamsFromExecutableElement(exec, null, elem.getSimpleName(), modifiers.toArray(new Modifier[modifiers.size()]));
+        writer.beginMethodDefinition(methodDeclaration);
+        
         if (!isAbstract) {
-            emitMethodBody(elem, exec, argNames);
+            emitMethodBody(elem, exec, methodDeclaration.argumentNames);
         }
     }
     

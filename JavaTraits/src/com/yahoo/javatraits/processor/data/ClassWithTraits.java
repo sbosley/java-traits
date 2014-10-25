@@ -41,8 +41,8 @@ public class ClassWithTraits extends TypeElementWrapper {
     }
 
     private void initTraitClasses() {
-        List<TypeMirror> traitMirrors = Utils.getClassMirrorsFromAnnotation(HasTraits.class, elem, "traits");
-        traitClasses = Utils.map(traitMirrors, new Utils.MapFunction<TypeMirror, TraitElement>() {
+        List<TypeMirror> traitMirrors = utils.getClassMirrorsFromAnnotation(elem, HasTraits.class, "traits");
+        traitClasses = Utils.map(traitMirrors, new Utils.Mapper<TypeMirror, TraitElement>() {
             @Override
             public TraitElement map(TypeMirror arg) {
                 if (!(arg instanceof DeclaredType)) {
@@ -56,30 +56,30 @@ public class ClassWithTraits extends TypeElementWrapper {
     }
 
     private void initSuperclasses() {
-        AnnotationMirror hasTraits = Utils.findAnnotationMirror(elem, HasTraits.class);
-        AnnotationValue desiredSuperclassValue = Utils.findAnnotationValue(hasTraits, "desiredSuperclass");
+        AnnotationMirror hasTraits = utils.getAnnotationMirror(elem, HasTraits.class);
+        AnnotationValue desiredSuperclassValue = utils.getAnnotationValueFromMirror(hasTraits, "desiredSuperclass");
         if (desiredSuperclassValue != null) {
             Object value = desiredSuperclassValue.getValue();
             if (value instanceof AnnotationMirror) {
                 AnnotationMirror desiredSuperclassMirror = (AnnotationMirror) value;
-                AnnotationValue superclassValue = Utils.findAnnotationValue(desiredSuperclassMirror, "superclass");
+                AnnotationValue superclassValue = utils.getAnnotationValueFromMirror(desiredSuperclassMirror, "superclass");
 
-                List<ClassName> superclassNames = Utils.getClassValuesFromAnnotationValue(superclassValue);
+                List<ClassName> superclassNames = utils.getClassValuesFromAnnotationValue(superclassValue);
                 desiredSuperclass = superclassNames.size() > 0 ? superclassNames.get(0) : new ClassName(Utils.OBJECT_CLASS_NAME);
 
-                AnnotationValue typeArgClassesValue = Utils.findAnnotationValue(desiredSuperclassMirror, "typeArgClasses");
-                List<ClassName> superclassTypeArgs = Utils.getClassValuesFromAnnotationValue(typeArgClassesValue);
+                AnnotationValue typeArgClassesValue = utils.getAnnotationValueFromMirror(desiredSuperclassMirror, "typeArgClasses");
+                List<ClassName> superclassTypeArgs = utils.getClassValuesFromAnnotationValue(typeArgClassesValue);
 
-                AnnotationValue typeArgNames = Utils.findAnnotationValue(desiredSuperclassMirror, "typeArgNames");
-                List<String> superclassTypeArgNames = Utils.getStringValuesFromAnnotationValue(typeArgNames);
+                AnnotationValue typeArgNames = utils.getAnnotationValueFromMirror(desiredSuperclassMirror, "typeArgNames");
+                List<String> superclassTypeArgNames = utils.getStringValuesFromAnnotationValue(typeArgNames);
 
-                AnnotationValue numTypeArgs = Utils.findAnnotationValue(desiredSuperclassMirror, "numTypeArgs");
+                AnnotationValue numTypeArgs = utils.getAnnotationValueFromMirror(desiredSuperclassMirror, "numTypeArgs");
                 int superclassNumTypeArgs = numTypeArgs != null ? ((Integer) numTypeArgs.getValue()).intValue() : 0;
 
                 if (!Utils.isEmpty(superclassTypeArgs)) {
                     desiredSuperclass.setTypeArgs(superclassTypeArgs);
                 } else if (!Utils.isEmpty(superclassTypeArgNames)) {
-                    desiredSuperclass.setTypeArgs(Utils.map(superclassTypeArgNames, new Utils.MapFunction<String, GenericName>() {
+                    desiredSuperclass.setTypeArgs(Utils.map(superclassTypeArgNames, new Utils.Mapper<String, GenericName>() {
                         @Override
                         public GenericName map(String arg) {
                             return new GenericName(arg, null, null);
@@ -102,8 +102,8 @@ public class ClassWithTraits extends TypeElementWrapper {
 
     private void initPreferValues() {
         prefer = new HashMap<String, ClassName>();
-        AnnotationMirror hasTraits = Utils.findAnnotationMirror(elem, HasTraits.class);
-        AnnotationValue preferValue = Utils.findAnnotationValue(hasTraits, "prefer");
+        AnnotationMirror hasTraits = utils.getAnnotationMirror(elem, HasTraits.class);
+        AnnotationValue preferValue = utils.getAnnotationValueFromMirror(hasTraits, "prefer");
         if (preferValue != null && preferValue.getValue() instanceof List) {
             @SuppressWarnings("unchecked")
             List<? extends AnnotationValue> preferList = (List<? extends AnnotationValue>) preferValue.getValue();
@@ -111,10 +111,10 @@ public class ClassWithTraits extends TypeElementWrapper {
                 Object value = entry.getValue();
                 if (value instanceof AnnotationMirror) {
                     AnnotationMirror preferMirror = (AnnotationMirror) value;
-                    AnnotationValue targetValue = Utils.findAnnotationValue(preferMirror, "target");
-                    AnnotationValue methodValue = Utils.findAnnotationValue(preferMirror, "method");
+                    AnnotationValue targetValue = utils.getAnnotationValueFromMirror(preferMirror, "target");
+                    AnnotationValue methodValue = utils.getAnnotationValueFromMirror(preferMirror, "method");
 
-                    ClassName targetName = Utils.getClassValuesFromAnnotationValue(targetValue).get(0);
+                    ClassName targetName = utils.getClassValuesFromAnnotationValue(targetValue).get(0);
                     String method = (String) methodValue.getValue();
                     prefer.put(method, targetName);
                 }
