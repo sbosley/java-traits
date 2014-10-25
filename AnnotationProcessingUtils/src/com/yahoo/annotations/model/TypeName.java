@@ -52,7 +52,7 @@ public abstract class TypeName implements Cloneable {
     }
 
     public static interface TypeNameVisitor<RET, PARAM> {
-        public RET visitClassName(ClassName typeName, PARAM param);
+        public RET visitClassName(DeclaredTypeName typeName, PARAM param);
         public RET visitGenericName(GenericName genericName, PARAM param);
     }
 

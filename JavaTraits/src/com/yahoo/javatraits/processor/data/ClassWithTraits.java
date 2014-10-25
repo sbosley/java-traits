@@ -17,7 +17,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
 
-import com.yahoo.annotations.model.ClassName;
+import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.model.GenericName;
 import com.yahoo.annotations.utils.Utils;
 import com.yahoo.javatraits.annotations.HasTraits;
@@ -28,10 +28,10 @@ public class ClassWithTraits extends TypeElementWrapper {
 
     private List<TraitElement> traitClasses;
 
-    private ClassName desiredSuperclass;
+    private DeclaredTypeName desiredSuperclass;
 
-    private ClassName generatedSuperclass;
-    private Map<String, ClassName> prefer;
+    private DeclaredTypeName generatedSuperclass;
+    private Map<String, DeclaredTypeName> prefer;
 
     public ClassWithTraits(TypeElement elem, Utils utils) {
         super(elem, utils);
@@ -64,11 +64,11 @@ public class ClassWithTraits extends TypeElementWrapper {
                 AnnotationMirror desiredSuperclassMirror = (AnnotationMirror) value;
                 AnnotationValue superclassValue = utils.getAnnotationValueFromMirror(desiredSuperclassMirror, "superclass");
 
-                List<ClassName> superclassNames = utils.getClassValuesFromAnnotationValue(superclassValue);
-                desiredSuperclass = superclassNames.size() > 0 ? superclassNames.get(0) : new ClassName(Utils.OBJECT_CLASS_NAME);
+                List<DeclaredTypeName> superclassNames = utils.getClassValuesFromAnnotationValue(superclassValue);
+                desiredSuperclass = superclassNames.size() > 0 ? superclassNames.get(0) : new DeclaredTypeName(Utils.OBJECT_CLASS_NAME);
 
                 AnnotationValue typeArgClassesValue = utils.getAnnotationValueFromMirror(desiredSuperclassMirror, "typeArgClasses");
-                List<ClassName> superclassTypeArgs = utils.getClassValuesFromAnnotationValue(typeArgClassesValue);
+                List<DeclaredTypeName> superclassTypeArgs = utils.getClassValuesFromAnnotationValue(typeArgClassesValue);
 
                 AnnotationValue typeArgNames = utils.getAnnotationValueFromMirror(desiredSuperclassMirror, "typeArgNames");
                 List<String> superclassTypeArgNames = utils.getStringValuesFromAnnotationValue(typeArgNames);
@@ -94,14 +94,14 @@ public class ClassWithTraits extends TypeElementWrapper {
                 }
             }
         } else {
-            desiredSuperclass = new ClassName(Utils.OBJECT_CLASS_NAME);
+            desiredSuperclass = new DeclaredTypeName(Utils.OBJECT_CLASS_NAME);
         }
 
-        generatedSuperclass = new ClassName(fqn.toString() + GEN_SUFFIX);
+        generatedSuperclass = new DeclaredTypeName(fqn.toString() + GEN_SUFFIX);
     }
 
     private void initPreferValues() {
-        prefer = new HashMap<String, ClassName>();
+        prefer = new HashMap<String, DeclaredTypeName>();
         AnnotationMirror hasTraits = utils.getAnnotationMirror(elem, HasTraits.class);
         AnnotationValue preferValue = utils.getAnnotationValueFromMirror(hasTraits, "prefer");
         if (preferValue != null && preferValue.getValue() instanceof List) {
@@ -114,7 +114,7 @@ public class ClassWithTraits extends TypeElementWrapper {
                     AnnotationValue targetValue = utils.getAnnotationValueFromMirror(preferMirror, "target");
                     AnnotationValue methodValue = utils.getAnnotationValueFromMirror(preferMirror, "method");
 
-                    ClassName targetName = utils.getClassValuesFromAnnotationValue(targetValue).get(0);
+                    DeclaredTypeName targetName = utils.getClassValuesFromAnnotationValue(targetValue).get(0);
                     String method = (String) methodValue.getValue();
                     prefer.put(method, targetName);
                 }
@@ -122,7 +122,7 @@ public class ClassWithTraits extends TypeElementWrapper {
         }
     }
 
-    public ClassName getFullyQualifiedGeneratedSuperclassName() {
+    public DeclaredTypeName getFullyQualifiedGeneratedSuperclassName() {
         return generatedSuperclass;
     }
 
@@ -130,7 +130,7 @@ public class ClassWithTraits extends TypeElementWrapper {
         return traitClasses;
     }
 
-    public ClassName getDesiredSuperclass() {
+    public DeclaredTypeName getDesiredSuperclass() {
         return desiredSuperclass;
     }
 
@@ -138,7 +138,7 @@ public class ClassWithTraits extends TypeElementWrapper {
         return !Utils.isEmpty(desiredSuperclass.getTypeArgs());
     }
 
-    public Map<String, ClassName> getPreferMap() {
+    public Map<String, DeclaredTypeName> getPreferMap() {
         return prefer;
     }
 }

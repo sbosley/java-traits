@@ -29,12 +29,12 @@ import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.WildcardType;
 import javax.lang.model.util.Types;
 
-import com.yahoo.annotations.model.ClassName;
+import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.model.GenericName;
 import com.yahoo.annotations.model.MethodSignature;
 import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.visitors.ImportGatheringTypeVisitor;
-import com.yahoo.annotations.writer.JavaFileWriter.MethodDeclarationParams;
+import com.yahoo.annotations.writer.parameters.MethodDeclarationParameters;
 
 public class Utils {
 
@@ -56,7 +56,7 @@ public class Utils {
         return types;
     }
 
-    public void accumulateImportsFromExecutableElements(Set<ClassName> accumulate, List<? extends ExecutableElement> elems) {
+    public void accumulateImportsFromExecutableElements(Set<DeclaredTypeName> accumulate, List<? extends ExecutableElement> elems) {
         for (ExecutableElement exec : elems) {
             ImportGatheringTypeVisitor visitor = new ImportGatheringTypeVisitor(exec, messager, this);
             exec.asType().accept(visitor, accumulate);
@@ -146,8 +146,8 @@ public class Utils {
                     });
                 }
             }
-            toReturn = new ClassName(mirrorString);
-            ((ClassName) toReturn).setTypeArgs(typeArgs);
+            toReturn = new DeclaredTypeName(mirrorString);
+            ((DeclaredTypeName) toReturn).setTypeArgs(typeArgs);
         }
         toReturn.setArrayDepth(arrayDepth);
         return toReturn;
@@ -204,15 +204,15 @@ public class Utils {
         }
     }
     
-    public MethodDeclarationParams methodDeclarationParamsFromExecutableElement(ExecutableElement exec, Modifier... modifiers) {
+    public MethodDeclarationParameters methodDeclarationParamsFromExecutableElement(ExecutableElement exec, Modifier... modifiers) {
         return methodDeclarationParamsFromExecutableElement(exec, null, modifiers);
     }
     
-    public MethodDeclarationParams methodDeclarationParamsFromExecutableElement(ExecutableElement exec, String nameOverride, Modifier... modifiers) {
+    public MethodDeclarationParameters methodDeclarationParamsFromExecutableElement(ExecutableElement exec, String nameOverride, Modifier... modifiers) {
         return methodDeclarationParamsFromExecutableElement(exec, nameOverride, null, modifiers);
     }
     
-    public MethodDeclarationParams methodDeclarationParamsFromExecutableElement(ExecutableElement exec, String nameOverride,
+    public MethodDeclarationParameters methodDeclarationParamsFromExecutableElement(ExecutableElement exec, String nameOverride,
             String genericQualifier, Modifier... modifiers) {
         String name = nameOverride != null ? nameOverride : exec.getSimpleName().toString();
         List<TypeName> methodGenerics = typeParameterElementsToTypeNames(exec.getTypeParameters(), null);
@@ -221,14 +221,14 @@ public class Utils {
 
         Pair<List<TypeName>, List<String>> arguments = getMethodArgumentsFromExecutableElement(exec, genericQualifier, methodGenerics);
 
-        MethodDeclarationParams params = new MethodDeclarationParams();
-        params.name = name;
-        params.returnType = returnType;
-        params.modifiers = Arrays.asList(modifiers);
-        params.methodGenerics = methodGenerics;
-        params.argumentTypes = arguments.getLeft();
-        params.argumentNames = arguments.getRight();
-        params.throwsTypes = getThrownTypes(exec, genericQualifier, methodGenerics);
+        MethodDeclarationParameters params = new MethodDeclarationParameters()
+            .setMethodName(name)
+            .setReturnType(returnType)
+            .setModifiers(Arrays.asList(modifiers))
+            .setMethodGenerics(methodGenerics)
+            .setArgumentTypes(arguments.getLeft())
+            .setArgumentNames(arguments.getRight())
+            .setThrowsTypes(getThrownTypes(exec, genericQualifier, methodGenerics));
         
         return params;
     }
@@ -237,8 +237,8 @@ public class Utils {
         if (!methodGenerics.contains(returnType) && returnType instanceof GenericName) {
             ((GenericName) returnType).addQualifier(genericQualifier);
         }
-        if (returnType instanceof ClassName) {
-            ClassName returnClass = (ClassName) returnType;
+        if (returnType instanceof DeclaredTypeName) {
+            DeclaredTypeName returnClass = (DeclaredTypeName) returnType;
             for (TypeName nestedType : returnClass.getTypeArgs()) {
                 qualifyReturnTypeGenerics(methodGenerics, nestedType, genericQualifier);
             }
@@ -359,8 +359,8 @@ public class Utils {
         if (!(t1.getArrayDepth() == t2.getArrayDepth() && t1.isVarArgs() == t2.isVarArgs())) {
             return false;
         }
-        if (t1 instanceof ClassName && t2 instanceof ClassName) {
-            return deepCompareTypeList(((ClassName) t1).getTypeArgs(), ((ClassName) t2).getTypeArgs());
+        if (t1 instanceof DeclaredTypeName && t2 instanceof DeclaredTypeName) {
+            return deepCompareTypeList(((DeclaredTypeName) t1).getTypeArgs(), ((DeclaredTypeName) t2).getTypeArgs());
         }
         return true;
     }
@@ -392,7 +392,7 @@ public class Utils {
         return null;
     }
     
-    public List<ClassName> getClassValuesFromAnnotation(Element elem, Class<?> annotationClass, String propertyName) {
+    public List<DeclaredTypeName> getClassValuesFromAnnotation(Element elem, Class<?> annotationClass, String propertyName) {
         AnnotationValue annotationValue = getAnnotationValue(elem, annotationClass, propertyName);
         return getClassValuesFromAnnotationValue(annotationValue);
     }
@@ -407,11 +407,11 @@ public class Utils {
         return getStringValuesFromAnnotationValue(annotationValue);
     }
 
-    public List<ClassName> getClassValuesFromAnnotationValue(AnnotationValue annotationValue) {
-        return mapValuesFromAnnotationValue(annotationValue, TypeMirror.class, new Mapper<TypeMirror, ClassName>() {
+    public List<DeclaredTypeName> getClassValuesFromAnnotationValue(AnnotationValue annotationValue) {
+        return mapValuesFromAnnotationValue(annotationValue, TypeMirror.class, new Mapper<TypeMirror, DeclaredTypeName>() {
             @Override
-            public ClassName map(TypeMirror arg) {
-                return new ClassName(arg.toString());
+            public DeclaredTypeName map(TypeMirror arg) {
+                return new DeclaredTypeName(arg.toString());
             }
         });
     }

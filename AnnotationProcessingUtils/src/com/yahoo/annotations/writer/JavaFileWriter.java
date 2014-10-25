@@ -18,25 +18,26 @@ import java.util.TreeSet;
 
 import javax.lang.model.element.Modifier;
 
-import com.yahoo.annotations.model.ClassName;
+import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.model.GenericName;
 import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.model.TypeName.TypeNameVisitor;
 import com.yahoo.annotations.utils.Utils;
+import com.yahoo.annotations.writer.parameters.MethodDeclarationParameters;
+import com.yahoo.annotations.writer.parameters.TypeDeclarationParameters;
 
 public class JavaFileWriter {
 
     private static final String INDENT = "    ";
 
     private Writer out;
-    private Map<String, List<ClassName>> knownNames;
+    private Map<String, List<DeclaredTypeName>> knownNames;
     private Type kind = null;
     private Deque<Scope> scopeStack = new LinkedList<Scope>();
 
     public static enum Type {
         CLASS("class"),
         INTERFACE("interface");
-
 
         private String name;
         private Type(String name) {
@@ -56,7 +57,7 @@ public class JavaFileWriter {
             throw new IllegalArgumentException("Writer must be non-null");
         }
         this.out = out;
-        this.knownNames = new HashMap<String, List<ClassName>>();
+        this.knownNames = new HashMap<String, List<DeclaredTypeName>>();
         scopeStack.push(Scope.PACKAGE);
     }
 
@@ -71,14 +72,14 @@ public class JavaFileWriter {
         moveToScope(Scope.IMPORTS);
     }
 
-    public void writeImports(Collection<ClassName> imports) throws IOException {
+    public void writeImports(Collection<DeclaredTypeName> imports) throws IOException {
         checkScope(Scope.IMPORTS);
         TreeSet<String> sortedImports = new TreeSet<String>();
-        for (ClassName item : imports) {
+        for (DeclaredTypeName item : imports) {
             String simpleName = item.getSimpleName();
-            List<ClassName> allNames = knownNames.get(simpleName);
+            List<DeclaredTypeName> allNames = knownNames.get(simpleName);
             if (allNames == null) {
-                allNames = new ArrayList<ClassName>();
+                allNames = new ArrayList<DeclaredTypeName>();
                 knownNames.put(simpleName, allNames);
             }
 
@@ -95,47 +96,45 @@ public class JavaFileWriter {
             out.append("import ").append(item).append(";\n");
         }
         out.append("\n");
-    }
-
-    public static class TypeDeclarationParameters {
-        public ClassName name;
-        public Type kind;
-        public List<Modifier> modifiers;
-        public ClassName superclass;
-        public List<ClassName> interfaces;
+        finishScope(Scope.IMPORTS);
     }
 
     public void beginTypeDefinition(TypeDeclarationParameters typeDeclaration) throws IOException {
         validateTypeDeclarationParams(typeDeclaration);
-        checkScope(Scope.IMPORTS);
-        this.kind = typeDeclaration.kind;
-        writeModifierList(typeDeclaration.modifiers);
-        out.append(typeDeclaration.kind.name).append(" ").append(typeDeclaration.name.getSimpleName());
-        writeGenericsList(typeDeclaration.name.getTypeArgs(), true);
+        indent();
 
-        if (typeDeclaration.superclass != null && !Utils.OBJECT_CLASS_NAME.equals(typeDeclaration.superclass.toString())) {
-            out.append(" extends ").append(shortenName(typeDeclaration.superclass, false));
+        boolean isRootClass = Utils.isEmpty(scopeStack);
+        if (!isRootClass) {
+            checkScope(Scope.TYPE_DEFINITION); // Begin a new inner type definition 
+        }
+        
+        this.kind = typeDeclaration.getKind();
+        writeModifierList(typeDeclaration.getModifiers());
+        out.append(typeDeclaration.getKind().name).append(" ").append(typeDeclaration.getClassName().getSimpleName());
+        writeGenericsList(typeDeclaration.getClassName().getTypeArgs(), true);
+
+        if (typeDeclaration.getSuperclass() != null && !Utils.OBJECT_CLASS_NAME.equals(typeDeclaration.getSuperclass().toString())) {
+            out.append(" extends ").append(shortenName(typeDeclaration.getSuperclass(), false));
         }
 
-        if (!Utils.isEmpty(typeDeclaration.interfaces)) {
+        if (!Utils.isEmpty(typeDeclaration.getInterfaces())) {
             out.append(" implements ");
-            for (int i = 0; i < typeDeclaration.interfaces.size(); i++) {
-                out.append(shortenName(typeDeclaration.interfaces.get(i), false));
-                if (i < typeDeclaration.interfaces.size() - 1) {
+            for (int i = 0; i < typeDeclaration.getInterfaces().size(); i++) {
+                out.append(shortenName(typeDeclaration.getInterfaces().get(i), false));
+                if (i < typeDeclaration.getInterfaces().size() - 1) {
                     out.append(", ");
                 }
             }
         }
         out.append(" {\n\n");
-        finishScope(Scope.IMPORTS);
         moveToScope(Scope.TYPE_DEFINITION);
     }
 
     private void validateTypeDeclarationParams(TypeDeclarationParameters params) {
-        if (params.name == null) {
+        if (params.getClassName() == null) {
             throw new IllegalArgumentException("Must specify a class name for TypeDeclarationParameters");
         }
-        if (params.kind == null) {
+        if (params.getKind() == null) {
             throw new IllegalArgumentException("Must specify a type for TypeDeclarationParameters (one of Type.CLASS or Type.INTERFACE)");
         }
     }
@@ -145,12 +144,31 @@ public class JavaFileWriter {
     }
 
     public static class ConstructorInitialization implements FieldInitializationExpression {
-        public ClassName constructorType;
-        public List<String> argumentNames;
+        private final DeclaredTypeName constructorType;
+        private final List<String> argumentNames;
 
-        public final void writeInitializationString(JavaFileWriter writer) throws IOException {
+        public ConstructorInitialization(DeclaredTypeName constructorType, List<String> argumentNames) {
+            this.constructorType = constructorType;
+            this.argumentNames = argumentNames;
+        }
+        
+        public void writeInitializationString(JavaFileWriter writer) throws IOException {
             writer.out.append("new ").append(writer.shortenName(constructorType, false));
-            writer.writeTypelessArgumentList(argumentNames);;
+            writer.writeTypelessArgumentList(argumentNames);
+        }
+    }
+    
+    public static class AnonymousInnerClassInitialization extends ConstructorInitialization {
+        
+        public AnonymousInnerClassInitialization(DeclaredTypeName constructorType, List<String> argumentNames) {
+            super(constructorType, argumentNames);
+        }
+
+        @Override
+        public void writeInitializationString(JavaFileWriter writer) throws IOException {
+            super.writeInitializationString(writer);
+            writer.out.append(" {\n");
+            writer.moveToScope(Scope.TYPE_DEFINITION);
         }
     }
 
@@ -167,39 +185,29 @@ public class JavaFileWriter {
         out.append(";\n");
     }
 
-    public static class MethodDeclarationParams {
-        public String name;
-        public TypeName returnType;
-        public List<Modifier> modifiers;
-        public List<? extends TypeName> methodGenerics;
-        public List<? extends TypeName> argumentTypes;
-        public List<String> argumentNames;
-        public List<? extends TypeName> throwsTypes;
-    }
-
-    public void beginMethodDefinition(MethodDeclarationParams methodDeclaration) throws IOException {
+    public void beginMethodDefinition(MethodDeclarationParameters methodDeclaration) throws IOException {
         validateMethodDefinitionParams(methodDeclaration);
         checkScope(Scope.TYPE_DEFINITION);
         indent();
         boolean isAbstract = kind.equals(Type.INTERFACE) ||
-                (Utils.isEmpty(methodDeclaration.modifiers) ?
-                        false : methodDeclaration.modifiers.contains(Modifier.ABSTRACT));
-        writeModifierList(methodDeclaration.modifiers);
-        if (writeGenericsList(methodDeclaration.methodGenerics, true)) {
+                (Utils.isEmpty(methodDeclaration.getModifiers()) ?
+                        false : methodDeclaration.getModifiers().contains(Modifier.ABSTRACT));
+        writeModifierList(methodDeclaration.getModifiers());
+        if (writeGenericsList(methodDeclaration.getMethodGenerics(), true)) {
             out.append(" ");
         }
-        if (methodDeclaration.returnType == null) {
+        if (methodDeclaration.getReturnType() == null) {
             out.append("void");
         } else {
-            out.append(shortenName(methodDeclaration.returnType, false));
+            out.append(shortenName(methodDeclaration.getReturnType(), false));
         }
-        out.append(" ").append(methodDeclaration.name);
-        writeArgumentList(methodDeclaration.argumentTypes, methodDeclaration.argumentNames);
-        if (!Utils.isEmpty(methodDeclaration.throwsTypes)) {
+        out.append(" ").append(methodDeclaration.getMethodName());
+        writeArgumentList(methodDeclaration.getArgumentTypes(), methodDeclaration.getArgumentNames());
+        if (!Utils.isEmpty(methodDeclaration.getThrowsTypes())) {
             out.append(" throws ");
-            for (int i = 0; i < methodDeclaration.throwsTypes.size(); i++) {
-                out.append(shortenName(methodDeclaration.throwsTypes.get(i), false));
-                if (i < methodDeclaration.throwsTypes.size() - 1) {
+            for (int i = 0; i < methodDeclaration.getThrowsTypes().size(); i++) {
+                out.append(shortenName(methodDeclaration.getThrowsTypes().get(i), false));
+                if (i < methodDeclaration.getThrowsTypes().size() - 1) {
                     out.append(", ");
                 }
             }
@@ -212,11 +220,11 @@ public class JavaFileWriter {
         }
     }
 
-    private void validateMethodDefinitionParams(MethodDeclarationParams params) {
-        if (Utils.isEmpty(params.name)) {
+    private void validateMethodDefinitionParams(MethodDeclarationParameters params) {
+        if (Utils.isEmpty(params.getMethodName())) {
             throw new IllegalArgumentException("Must specify a method name for MethodDeclarationParams");
         }
-        verifyArgumentTypesAndNames(params.argumentTypes, params.argumentNames);
+        verifyArgumentTypesAndNames(params.getArgumentTypes(), params.getArgumentNames());
     }
 
     private void verifyArgumentTypesAndNames(List<? extends TypeName> argumentTypes, List<String> argumentNames) {
@@ -256,34 +264,26 @@ public class JavaFileWriter {
         writeArgumentList(null, argumentNames);
     }
 
-    public static class ConstructorDeclarationParams {
-        public ClassName name;
-        public List<Modifier> modifiers;
-        public List<? extends TypeName> methodGenerics;
-        public List<? extends TypeName> argumentTypes;
-        public List<String> argumentNames;
-    }
-
-    public void beginConstructorDeclaration(ConstructorDeclarationParams constructorDeclaration) throws IOException {
+    public void beginConstructorDeclaration(MethodDeclarationParameters constructorDeclaration) throws IOException {
         verifyConstructorDeclarationParams(constructorDeclaration);
         checkScope(Scope.TYPE_DEFINITION);
         indent();
-        writeModifierList(constructorDeclaration.modifiers);
-        out.append(constructorDeclaration.name.getSimpleName());
-        writeGenericsList(constructorDeclaration.methodGenerics, false);
-        writeArgumentList(constructorDeclaration.argumentTypes, constructorDeclaration.argumentNames);
+        writeModifierList(constructorDeclaration.getModifiers());
+        out.append(constructorDeclaration.getConstructorName().getSimpleName());
+        writeGenericsList(constructorDeclaration.getMethodGenerics(), false);
+        writeArgumentList(constructorDeclaration.getArgumentTypes(), constructorDeclaration.getArgumentNames());
         out.append(" {\n");
         moveToScope(Scope.METHOD_DEFINITION);
     }
 
-    private void verifyConstructorDeclarationParams(ConstructorDeclarationParams params) {
-        if (params.name == null) {
-            throw new IllegalArgumentException("Must specify a method name for ConstructorDeclarationParams");
+    private void verifyConstructorDeclarationParams(MethodDeclarationParameters params) {
+        if (!params.isConstructor()) {
+            throw new IllegalArgumentException("Must specify a class name for ConstructorDeclarationParams");
         }
-        verifyArgumentTypesAndNames(params.argumentTypes, params.argumentNames);
+        verifyArgumentTypesAndNames(params.getArgumentTypes(), params.getArgumentNames());
     }
 
-    public void writeStatement(String statement) throws IOException {
+    public void writeMethodBodyStatement(String statement) throws IOException {
         checkScope(Scope.METHOD_DEFINITION);
         indent();
         out.append(statement);
@@ -355,14 +355,14 @@ public class JavaFileWriter {
                     builder.append(" extends ");
                     String separator = " & ";
                     for (TypeName bound : genericName.getExtendsBound()) {
-                        boolean recursiveUpperBounds = includeGenericBounds && bound instanceof ClassName;
+                        boolean recursiveUpperBounds = includeGenericBounds && bound instanceof DeclaredTypeName;
                         builder.append(shortenName(bound, recursiveUpperBounds));
                         builder.append(separator);
                     }
                     builder.delete(builder.length() - separator.length(), builder.length());
                 }
                 if (genericName.hasSuperBound()) {
-                    boolean recursiveUpperBounds = includeGenericBounds && genericName.getSuperBound() instanceof ClassName;
+                    boolean recursiveUpperBounds = includeGenericBounds && genericName.getSuperBound() instanceof DeclaredTypeName;
                     builder.append(" super ").append(shortenName(genericName.getSuperBound(), recursiveUpperBounds));
                 }
             }
@@ -370,9 +370,9 @@ public class JavaFileWriter {
         }
 
         @Override
-        public String visitClassName(ClassName typeName, Boolean includeGenericBounds) {
+        public String visitClassName(DeclaredTypeName typeName, Boolean includeGenericBounds) {
             String simpleName = typeName.getSimpleName();
-            List<ClassName> allNames = knownNames.get(simpleName);
+            List<DeclaredTypeName> allNames = knownNames.get(simpleName);
             boolean simple;
             if (allNames == null || allNames.size() == 0) {
                 simple = false;

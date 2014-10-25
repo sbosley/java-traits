@@ -10,25 +10,25 @@ import java.util.List;
 import com.yahoo.annotations.utils.Utils;
 
 
-public class ClassName extends TypeName {
+public class DeclaredTypeName extends TypeName {
 
     private String packageName;
     private String simpleName;
     private List<? extends TypeName> typeArgs = null;
 
-    public ClassName(String packageName, String simpleName) {
+    public DeclaredTypeName(String packageName, String simpleName) {
         this.packageName = packageName;
         this.simpleName = simpleName;
     }
 
-    public ClassName(String fullyQualifiedName) {
+    public DeclaredTypeName(String fullyQualifiedName) {
         this.packageName = Utils.getPackageFromFullyQualifiedName(fullyQualifiedName);
         this.simpleName = Utils.getSimpleNameFromFullyQualifiedName(fullyQualifiedName);
     }
 
     @Override
-    public ClassName clone() {
-        ClassName clone = (ClassName) super.clone();
+    public DeclaredTypeName clone() {
+        DeclaredTypeName clone = (DeclaredTypeName) super.clone();
         clone.packageName = this.packageName;
         clone.simpleName = this.simpleName;
         clone.typeArgs = this.typeArgs;
@@ -84,7 +84,7 @@ public class ClassName extends TypeName {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        ClassName other = (ClassName) obj;
+        DeclaredTypeName other = (DeclaredTypeName) obj;
         if (packageName == null) {
             if (other.packageName != null) {
                 return false;

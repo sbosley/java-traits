@@ -14,7 +14,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 
-import com.yahoo.annotations.model.ClassName;
+import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.utils.Utils;
 
 public class TraitElement extends TypeElementWrapper {
@@ -23,8 +23,8 @@ public class TraitElement extends TypeElementWrapper {
     private static final String DELEGATE_SUFFIX = "DelegateWrapper";
 
     private List<ExecutableElement> declaredMethods;
-    private ClassName interfaceName;
-    private ClassName delegateName;
+    private DeclaredTypeName interfaceName;
+    private DeclaredTypeName delegateName;
 
     public TraitElement(TypeElement elem, Utils utils) {
         super(elem, utils);
@@ -51,18 +51,18 @@ public class TraitElement extends TypeElementWrapper {
                 declaredMethods.add(exec);
             }
         }
-        interfaceName = new ClassName(fqn.getPackageName(), INTERFACE_PREFIX + fqn.getSimpleName());
+        interfaceName = new DeclaredTypeName(fqn.getPackageName(), INTERFACE_PREFIX + fqn.getSimpleName());
         interfaceName.setTypeArgs(getTypeParameters());
 
-        delegateName = new ClassName(fqn.getPackageName(), fqn.getSimpleName() + DELEGATE_SUFFIX);
+        delegateName = new DeclaredTypeName(fqn.getPackageName(), fqn.getSimpleName() + DELEGATE_SUFFIX);
         delegateName.setTypeArgs(getTypeParameters());
     }
 
-    public ClassName getInterfaceName() {
+    public DeclaredTypeName getInterfaceName() {
         return interfaceName;
     }
 
-    public ClassName getDelegateName() {
+    public DeclaredTypeName getDelegateName() {
         return delegateName;
     }
 

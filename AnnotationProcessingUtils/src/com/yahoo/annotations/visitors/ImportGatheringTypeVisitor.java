@@ -23,10 +23,10 @@ import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.type.WildcardType;
 import javax.tools.Diagnostic.Kind;
 
-import com.yahoo.annotations.model.ClassName;
+import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.utils.Utils;
 
-public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<ClassName>> {
+public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<DeclaredTypeName>> {
 
     private Element elem;
     private Messager messager;
@@ -45,24 +45,24 @@ public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<ClassNa
     }
 
     @Override
-    public Void visit(TypeMirror t, Set<ClassName> p) {
+    public Void visit(TypeMirror t, Set<DeclaredTypeName> p) {
         t.accept(this, p);
         messager.printMessage(Kind.WARNING, "Generic visit() called accumulating imports", elem);
         return null;
     }
 
     @Override
-    public Void visitArray(ArrayType t, Set<ClassName> p) {
+    public Void visitArray(ArrayType t, Set<DeclaredTypeName> p) {
         t.getComponentType().accept(this, p);
         return null;
     }
 
     @Override
-    public Void visitDeclared(DeclaredType t, Set<ClassName> p) {
+    public Void visitDeclared(DeclaredType t, Set<DeclaredTypeName> p) {
         String toAdd = t.toString();
         if (!Utils.OBJECT_CLASS_NAME.equals(toAdd)) {
             String mirrorString = t.toString().replaceAll("<.*>", "");
-            p.add(new ClassName(mirrorString));
+            p.add(new DeclaredTypeName(mirrorString));
         }
         List<? extends TypeMirror> typeArgs = t.getTypeArguments();
         for (TypeMirror m : typeArgs) {
@@ -72,13 +72,13 @@ public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<ClassNa
     }
 
     @Override
-    public Void visitError(ErrorType t, Set<ClassName> p) {
+    public Void visitError(ErrorType t, Set<DeclaredTypeName> p) {
         messager.printMessage(Kind.WARNING, "Encountered ErrorType accumulating imports", t.asElement());
         return null;
     }
 
     @Override
-    public Void visitExecutable(ExecutableType t, Set<ClassName> p) {
+    public Void visitExecutable(ExecutableType t, Set<DeclaredTypeName> p) {
         TypeMirror returnType = t.getReturnType();
         returnType.accept(this, p);
         List<? extends TypeMirror> parameters = t.getParameterTypes();
@@ -93,22 +93,22 @@ public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<ClassNa
     }
 
     @Override
-    public Void visitNoType(NoType t, Set<ClassName> p) {
+    public Void visitNoType(NoType t, Set<DeclaredTypeName> p) {
         return null; // Nothing to do
     }
 
     @Override
-    public Void visitNull(NullType t, Set<ClassName> p) {
+    public Void visitNull(NullType t, Set<DeclaredTypeName> p) {
         return null; // Nothing to do
     }
 
     @Override
-    public Void visitPrimitive(PrimitiveType t, Set<ClassName> p) {
+    public Void visitPrimitive(PrimitiveType t, Set<DeclaredTypeName> p) {
         return null; // Nothing to do
     }
 
     @Override
-    public Void visitTypeVariable(TypeVariable t, Set<ClassName> p) {
+    public Void visitTypeVariable(TypeVariable t, Set<DeclaredTypeName> p) {
         List<? extends TypeMirror> upperBounds = utils.getUpperBoundMirrors(t, t.getUpperBound());
         for (TypeMirror upper : upperBounds) {
             upper.accept(this, p);
@@ -118,13 +118,13 @@ public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<ClassNa
     }
 
     @Override
-    public Void visitUnknown(TypeMirror t, Set<ClassName> p) {
+    public Void visitUnknown(TypeMirror t, Set<DeclaredTypeName> p) {
         messager.printMessage(Kind.WARNING, "Encountered unknown TypeMirror accumulating imports", elem);
         return null;
     }
 
     @Override
-    public Void visitWildcard(WildcardType t, Set<ClassName> p) {
+    public Void visitWildcard(WildcardType t, Set<DeclaredTypeName> p) {
         List<? extends TypeMirror> upperBounds = utils.getUpperBoundMirrors(t, t.getExtendsBound());
         for (TypeMirror upper : upperBounds) {
             upper.accept(this, p);

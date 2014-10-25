@@ -19,12 +19,11 @@ import javax.lang.model.type.TypeKind;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
-import com.yahoo.annotations.model.ClassName;
+import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.writer.JavaFileWriter;
-import com.yahoo.annotations.writer.JavaFileWriter.ConstructorDeclarationParams;
-import com.yahoo.annotations.writer.JavaFileWriter.MethodDeclarationParams;
 import com.yahoo.annotations.writer.JavaFileWriter.Type;
-import com.yahoo.annotations.writer.JavaFileWriter.TypeDeclarationParameters;
+import com.yahoo.annotations.writer.parameters.MethodDeclarationParameters;
+import com.yahoo.annotations.writer.parameters.TypeDeclarationParameters;
 import com.yahoo.javatraits.processor.data.TraitElement;
 import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
 
@@ -32,8 +31,8 @@ public class TraitDelegateWriter {
 
     private TraitElement traitElement;
     private TraitProcessorUtils utils;
-    private ClassName traitDelegateClass;
-    private ClassName delegateClass;
+    private DeclaredTypeName traitDelegateClass;
+    private DeclaredTypeName delegateClass;
     private JavaFileWriter writer;
 
     public TraitDelegateWriter(TraitElement traitElement, TraitProcessorUtils utils) {
@@ -69,7 +68,7 @@ public class TraitDelegateWriter {
     }
 
     private void emitImports() throws IOException {
-        Set<ClassName> imports = new HashSet<ClassName>();
+        Set<DeclaredTypeName> imports = new HashSet<DeclaredTypeName>();
         utils.accumulateImportsFromExecutableElements(imports, traitElement.getDeclaredMethods());
         for (ExecutableElement e : traitElement.getDeclaredMethods()) {
             if (utils.isGetThis(traitElement, e)) {
@@ -82,13 +81,14 @@ public class TraitDelegateWriter {
     }
 
     private void emitDelegateDeclaration() throws IOException {
-        ClassName superclass = traitElement.getFullyQualifiedName().clone();
+        DeclaredTypeName superclass = traitElement.getFullyQualifiedName().clone();
         superclass.setTypeArgs(traitElement.getTypeParameters());
-        TypeDeclarationParameters params = new TypeDeclarationParameters();
-        params.name = traitDelegateClass;
-        params.kind = Type.CLASS;
-        params.modifiers = Arrays.asList(Modifier.PUBLIC, Modifier.FINAL);
-        params.superclass = superclass;
+        
+        TypeDeclarationParameters params = new TypeDeclarationParameters()
+            .setName(traitDelegateClass)
+            .setKind(Type.CLASS)
+            .setModifiers(Arrays.asList(Modifier.PUBLIC, Modifier.FINAL))
+            .setSuperclass(superclass);
 
         writer.beginTypeDefinition(params);
 
@@ -105,14 +105,14 @@ public class TraitDelegateWriter {
     }
 
     private void emitConstructor() throws IOException {
-        ConstructorDeclarationParams params = new ConstructorDeclarationParams();
-        params.name = traitDelegateClass;
-        params.modifiers = Arrays.asList(Modifier.PUBLIC);
-        params.argumentTypes = Arrays.asList(delegateClass);
-        params.argumentNames = Arrays.asList("delegate");
+        MethodDeclarationParameters params = new MethodDeclarationParameters()
+            .setConstructorName(traitDelegateClass)
+            .setModifiers(Arrays.asList(Modifier.PUBLIC))
+            .setArgumentTypes(Arrays.asList(delegateClass))
+            .setArgumentNames(Arrays.asList("delegate"));
 
         writer.beginConstructorDeclaration(params);
-        writer.writeStatement("this.delegate = delegate;\n");
+        writer.writeMethodBodyStatement("this.delegate = delegate;\n");
         writer.finishMethodDefinition();
     }
 
@@ -137,19 +137,19 @@ public class TraitDelegateWriter {
     }
 
     private void emitGetThis() throws IOException {
-        MethodDeclarationParams params = new MethodDeclarationParams();
-        params.name = TraitProcessorUtils.GET_THIS;
-        params.returnType = delegateClass;
-        params.modifiers = Arrays.asList(Modifier.PUBLIC);
+        MethodDeclarationParameters params = new MethodDeclarationParameters()
+            .setMethodName(TraitProcessorUtils.GET_THIS)
+            .setReturnType(delegateClass)
+            .setModifiers(Arrays.asList(Modifier.PUBLIC));
 
         writer.beginMethodDefinition(params);
-        writer.writeStatement("return delegate;\n");
+        writer.writeMethodBodyStatement("return delegate;\n");
         writer.finishMethodDefinition();
     }
 
     private void emitMethodDeclaration(ExecutableElement exec, boolean isDefault, Modifier... modifiers) throws IOException {
         String name = isDefault ? "default__" + exec.getSimpleName().toString() : null;
-        MethodDeclarationParams methodDeclaration = utils.methodDeclarationParamsFromExecutableElement(exec, name, traitElement.getSimpleName(), modifiers);
+        MethodDeclarationParameters methodDeclaration = utils.methodDeclarationParamsFromExecutableElement(exec, name, traitElement.getSimpleName(), modifiers);
         writer.beginMethodDefinition(methodDeclaration);
         
         StringBuilder statement = new StringBuilder();
@@ -159,7 +159,7 @@ public class TraitDelegateWriter {
         String callTo = isDefault ? "super" : "delegate";
         statement.append(callTo).append(".").append(exec.getSimpleName().toString()).append("(");
         
-        List<String> argNames = methodDeclaration.argumentNames;
+        List<String> argNames = methodDeclaration.getArgumentNames();
         for (int i = 0; i < argNames.size(); i++) {
             statement.append(argNames.get(i));
             if (i < argNames.size() - 1) {
@@ -167,7 +167,7 @@ public class TraitDelegateWriter {
             }
         }
         statement.append(");\n");
-        writer.writeStatement(statement.toString());
+        writer.writeMethodBodyStatement(statement.toString());
         writer.finishMethodDefinition();
     }
 

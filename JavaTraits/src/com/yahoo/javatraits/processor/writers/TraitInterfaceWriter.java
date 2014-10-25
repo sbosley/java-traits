@@ -17,11 +17,11 @@ import javax.lang.model.element.Modifier;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
-import com.yahoo.annotations.model.ClassName;
+import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.writer.JavaFileWriter;
-import com.yahoo.annotations.writer.JavaFileWriter.MethodDeclarationParams;
 import com.yahoo.annotations.writer.JavaFileWriter.Type;
-import com.yahoo.annotations.writer.JavaFileWriter.TypeDeclarationParameters;
+import com.yahoo.annotations.writer.parameters.MethodDeclarationParameters;
+import com.yahoo.annotations.writer.parameters.TypeDeclarationParameters;
 import com.yahoo.javatraits.processor.data.TraitElement;
 import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
 
@@ -62,16 +62,16 @@ public class TraitInterfaceWriter {
     }
 
     private void emitImports() throws IOException {
-        Set<ClassName> imports = new HashSet<ClassName>();
+        Set<DeclaredTypeName> imports = new HashSet<DeclaredTypeName>();
         utils.accumulateImportsFromExecutableElements(imports, element.getDeclaredMethods());
         writer.writeImports(imports);
     }
 
     private void emitInterfaceDeclaration() throws IOException {
-        TypeDeclarationParameters params = new TypeDeclarationParameters();
-        params.name = element.getInterfaceName();
-        params.kind = Type.INTERFACE;
-        params.modifiers = Arrays.asList(Modifier.PUBLIC);
+        TypeDeclarationParameters params = new TypeDeclarationParameters()
+            .setName(element.getInterfaceName())
+            .setKind(Type.INTERFACE)
+            .setModifiers(Arrays.asList(Modifier.PUBLIC));
 
         writer.beginTypeDefinition(params);
         emitMethodDeclarations();
@@ -89,7 +89,7 @@ public class TraitInterfaceWriter {
     }
 
     private void emitMethodDeclarationForExecutableElement(ExecutableElement exec) throws IOException {
-        MethodDeclarationParams methodDeclaration = utils.methodDeclarationParamsFromExecutableElement(exec, null, element.getSimpleName(), Modifier.PUBLIC);
+        MethodDeclarationParameters methodDeclaration = utils.methodDeclarationParamsFromExecutableElement(exec, null, element.getSimpleName(), Modifier.PUBLIC);
         writer.beginMethodDefinition(methodDeclaration);
     }
 
