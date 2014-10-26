@@ -277,8 +277,10 @@ public class JavaFileWriter {
         return this;
     }
     
-    public JavaFileWriter appendString(String string) throws IOException {
-        out.append(string);
+    public JavaFileWriter writeStringStatement(String statement) throws IOException {
+        indent();
+        appendString(statement);
+        out.append(";").append("\n");
         return this;
     }
     
@@ -286,7 +288,13 @@ public class JavaFileWriter {
         expression.writeExpression(this);
         return this;
     }
-
+    
+    public JavaFileWriter appendString(String string) throws IOException {
+        out.append(string);
+        return this;
+    }
+    
+    
     public JavaFileWriter writeNewline() throws IOException {
         out.append("\n");
         return this;
