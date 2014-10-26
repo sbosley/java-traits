@@ -4,6 +4,7 @@ public class CoreTypes {
 
     public static final String JAVA_LANG = "java.lang";
     
+    public static final DeclaredTypeName JAVA_STRING = new DeclaredTypeName(JAVA_LANG, "String");
     public static final DeclaredTypeName JAVA_INTEGER = new DeclaredTypeName(JAVA_LANG, "Integer");
     public static final DeclaredTypeName JAVA_LONG = new DeclaredTypeName(JAVA_LANG, "Long");
     public static final DeclaredTypeName JAVA_DOUBLE = new DeclaredTypeName(JAVA_LANG, "Double");

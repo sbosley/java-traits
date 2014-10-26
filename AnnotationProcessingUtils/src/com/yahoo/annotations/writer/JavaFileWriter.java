@@ -300,6 +300,12 @@ public class JavaFileWriter {
         return this;
     }
     
+    public JavaFileWriter writeExpression(Expression expression) throws IOException {
+        indent();
+        expression.writeExpression(this);
+        return this;
+    }
+    
     public JavaFileWriter writeAnnotation(DeclaredTypeName annotationClass) throws IOException {
         indent();
         out.append("@").append(shortenName(annotationClass, false)).append("\n");
