@@ -414,6 +414,11 @@ public class JavaFileWriter {
     public String shortenName(TypeName name, boolean includeGenericBounds) {
         return name.accept(nameShorteningVisitor, includeGenericBounds);
     }
+    
+    public String shortenNameForStaticReference(TypeName name) {
+        String shortenedName = shortenName(name, false);
+        return shortenedName.replaceAll("<.*>", "");
+    }
 
     public Scope getCurrentScope() {
         return scopeStack.peek();

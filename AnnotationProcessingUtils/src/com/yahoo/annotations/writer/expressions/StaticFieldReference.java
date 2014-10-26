@@ -16,7 +16,7 @@ public class StaticFieldReference extends Reference {
     
     @Override
     protected void writeReferencedObject(JavaFileWriter writer) throws IOException {
-        writer.appendString(writer.shortenName(typeName, false)).appendString(".");
+        writer.appendString(writer.shortenNameForStaticReference(typeName)).appendString(".");
     }
     
 }
