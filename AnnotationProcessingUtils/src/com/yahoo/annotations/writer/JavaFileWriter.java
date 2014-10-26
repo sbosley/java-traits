@@ -302,7 +302,7 @@ public class JavaFileWriter {
     
     public JavaFileWriter writeAnnotation(DeclaredTypeName annotationClass) throws IOException {
         indent();
-        out.append(shortenName(annotationClass, false)).append("\n");
+        out.append("@").append(shortenName(annotationClass, false)).append("\n");
         return this;
     }
      
@@ -322,7 +322,6 @@ public class JavaFileWriter {
         out.append(string);
         return this;
     }
-    
     
     public JavaFileWriter writeNewline() throws IOException {
         out.append("\n");

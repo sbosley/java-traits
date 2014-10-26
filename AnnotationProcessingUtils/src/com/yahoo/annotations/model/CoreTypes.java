@@ -22,4 +22,6 @@ public class CoreTypes {
     public static final DeclaredTypeName PRIMITIVE_BOOLEAN = new DeclaredTypeName(null, "boolean");
     public static final DeclaredTypeName PRIMITIVE_CHAR = new DeclaredTypeName(null, "char");
     
+    public static final DeclaredTypeName OVERRIDE = new DeclaredTypeName(JAVA_LANG, "Override");
+    public static final DeclaredTypeName DEPRECATED = new DeclaredTypeName(JAVA_LANG, "Deprecated");
 }
