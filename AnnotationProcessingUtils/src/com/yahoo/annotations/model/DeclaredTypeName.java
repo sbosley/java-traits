@@ -36,7 +36,7 @@ public class DeclaredTypeName extends TypeName {
     }
 
     public boolean isJavaLangPackage() {
-        return "java.lang".equals(packageName);
+        return CoreTypes.JAVA_LANG.equals(packageName);
     }
 
     public List<? extends TypeName> getTypeArgs() {

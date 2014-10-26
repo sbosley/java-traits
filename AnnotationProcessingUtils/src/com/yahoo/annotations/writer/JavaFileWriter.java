@@ -78,19 +78,9 @@ public class JavaFileWriter {
     public JavaFileWriter writeImports(Collection<DeclaredTypeName> imports) throws IOException {
         checkScope(Scope.IMPORTS);
         TreeSet<String> sortedImports = new TreeSet<String>();
-        for (DeclaredTypeName item : imports) {
-            String simpleName = item.getSimpleName();
-            List<DeclaredTypeName> allNames = knownNames.get(simpleName);
-            if (allNames == null) {
-                allNames = new ArrayList<DeclaredTypeName>();
-                knownNames.put(simpleName, allNames);
-            }
-
-            if (!allNames.contains(item)) {
-                if (item.isJavaLangPackage()) {
-                    allNames.add(0, item);
-                } else {
-                    allNames.add(item);
+        if (!Utils.isEmpty(imports)) {
+            for (DeclaredTypeName item : imports) {
+                if (addToKnownNames(item, item.isJavaLangPackage())) {
                     sortedImports.add(item.toString());
                 }
             }
@@ -102,6 +92,37 @@ public class JavaFileWriter {
         finishScope(Scope.IMPORTS);
         return this;
     }
+    
+    // For names that can be shortened but don't need to be imported
+    public JavaFileWriter registerOtherKnownNames(Collection<DeclaredTypeName> otherKnownNames) throws IOException {
+        if (!Utils.isEmpty(otherKnownNames)) {
+            for (DeclaredTypeName item : otherKnownNames) {
+                addToKnownNames(item, false);
+            }
+        }
+        return this;
+    }
+    
+    // Returns true if item needs to be added to imports
+    private boolean addToKnownNames(DeclaredTypeName type, boolean highestPreference) {
+        String simpleName = type.getSimpleName();
+        List<DeclaredTypeName> allNames = knownNames.get(simpleName);
+        if (allNames == null) {
+            allNames = new ArrayList<DeclaredTypeName>();
+            knownNames.put(simpleName, allNames);
+        }
+
+        if (!allNames.contains(type)) {
+            if (highestPreference) {
+                allNames.add(0, type);
+                return false;
+            } else {
+                allNames.add(type);
+                return true;
+            }
+        }
+        return false;
+    }
 
     public JavaFileWriter beginTypeDefinition(TypeDeclarationParameters typeDeclaration) throws IOException {
         validateTypeDeclarationParams(typeDeclaration);
@@ -110,6 +131,8 @@ public class JavaFileWriter {
         boolean isRootClass = Utils.isEmpty(scopeStack);
         if (!isRootClass) {
             checkScope(Scope.TYPE_DEFINITION); // Begin a new inner type definition 
+        } else {
+            addToKnownNames(typeDeclaration.getClassName(), true);
         }
         
         this.kind = typeDeclaration.getKind();
@@ -145,7 +168,7 @@ public class JavaFileWriter {
     }
 
     public JavaFileWriter writeFieldDeclaration(TypeName type, String name, List<Modifier> modifiers, Expression initializer) throws IOException {
-        checkScope(Scope.TYPE_DEFINITION);
+        checkScope(Scope.TYPE_DEFINITION, Scope.METHOD_DEFINITION);
         indent();
         writeModifierList(modifiers);
         out.append(shortenName(type, false));
@@ -277,6 +300,12 @@ public class JavaFileWriter {
         return this;
     }
     
+    public JavaFileWriter writeAnnotation(DeclaredTypeName annotationClass) throws IOException {
+        indent();
+        out.append(shortenName(annotationClass, false)).append("\n");
+        return this;
+    }
+     
     public JavaFileWriter writeStringStatement(String statement) throws IOException {
         indent();
         appendString(statement);
@@ -395,7 +424,9 @@ public class JavaFileWriter {
             String simpleName = typeName.getSimpleName();
             List<DeclaredTypeName> allNames = knownNames.get(simpleName);
             boolean simple;
-            if (allNames == null || allNames.size() == 0) {
+            if (typeName.isJavaLangPackage()) {
+                simple = true;
+            } else if (allNames == null || allNames.size() == 0) {
                 simple = false;
             } else if (allNames.get(0).equals(typeName)) {
                 simple = true;
@@ -424,11 +455,15 @@ public class JavaFileWriter {
         return scopeStack.peek();
     }
 
-    public void checkScope(Scope expectedScope) {
+    public void checkScope(Scope... legalScopes) {
         Scope currentScope = getCurrentScope();
-        if (currentScope != expectedScope) {
-            throw new IllegalStateException("Expected scope " + expectedScope + ", current scope " + currentScope);
+        if (legalScopes == null || legalScopes.length == 0) {
+            throw new IllegalArgumentException("Must specify at least one legal scope");
         }
+        for (Scope s : legalScopes) {
+            if (currentScope == s) return;
+        }
+        throw new IllegalStateException("Expected one of scopes " + legalScopes + ", current scope " + currentScope);
     }
 
     public void moveToScope(Scope moveTo) {
