@@ -28,8 +28,11 @@ import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.utils.Pair;
 import com.yahoo.annotations.utils.Utils;
 import com.yahoo.annotations.writer.JavaFileWriter;
-import com.yahoo.annotations.writer.JavaFileWriter.ConstructorInitialization;
 import com.yahoo.annotations.writer.JavaFileWriter.Type;
+import com.yahoo.annotations.writer.expressions.ConstructorInvocation;
+import com.yahoo.annotations.writer.expressions.Expression;
+import com.yahoo.annotations.writer.expressions.MethodInvocation;
+import com.yahoo.annotations.writer.expressions.ReturnExpression;
 import com.yahoo.annotations.writer.parameters.MethodDeclarationParameters;
 import com.yahoo.annotations.writer.parameters.TypeDeclarationParameters;
 import com.yahoo.javatraits.processor.data.ClassWithTraits;
@@ -144,7 +147,7 @@ public class ClassWithTraitsSuperclassWriter {
     private void emitDelegateFields() throws IOException {
         for (TraitElement elem : allTraits) {
             DeclaredTypeName delegateClass = elem.getDelegateName();
-            ConstructorInitialization init = new ConstructorInitialization(delegateClass, Arrays.asList("this"));
+            ConstructorInvocation init = new ConstructorInvocation(delegateClass, Arrays.asList("this"));
             writer.writeFieldDeclaration(delegateClass, getDelegateVariableName(elem), Arrays.asList(Modifier.PRIVATE), init);
         }
         writer.writeNewline();
@@ -231,20 +234,12 @@ public class ClassWithTraitsSuperclassWriter {
     
     private void emitMethodBody(TraitElement elem, ExecutableElement exec, List<String> argNames) throws IOException {
         String delegateVariableName = getDelegateVariableName(elem);
-        StringBuilder statement = new StringBuilder();
+        
+        Expression body = new MethodInvocation(delegateVariableName, "default__" + exec.getSimpleName(), argNames);
         if (exec.getReturnType().getKind() != TypeKind.VOID) {
-            statement.append("return ");
+            body = new ReturnExpression(body);
         }
-        statement.append(delegateVariableName)
-        .append(".").append("default__").append(exec.getSimpleName()).append("(");
-        for (int i = 0; i < argNames.size(); i++) {
-            statement.append(argNames.get(i));
-            if (i < argNames.size() - 1) {
-                statement.append(", ");
-            }
-        }
-        statement.append(");\n");
-        writer.writeStatement(statement.toString());
+        writer.writeStatement(body);
         writer.finishMethodDefinition();
     }
 }

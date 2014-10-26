@@ -22,6 +22,11 @@ import javax.tools.JavaFileObject;
 import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.writer.JavaFileWriter;
 import com.yahoo.annotations.writer.JavaFileWriter.Type;
+import com.yahoo.annotations.writer.expressions.AssignmentExpression;
+import com.yahoo.annotations.writer.expressions.Expression;
+import com.yahoo.annotations.writer.expressions.MethodInvocation;
+import com.yahoo.annotations.writer.expressions.ObjectReference;
+import com.yahoo.annotations.writer.expressions.ReturnExpression;
 import com.yahoo.annotations.writer.parameters.MethodDeclarationParameters;
 import com.yahoo.annotations.writer.parameters.TypeDeclarationParameters;
 import com.yahoo.javatraits.processor.data.TraitElement;
@@ -112,7 +117,7 @@ public class TraitDelegateWriter {
             .setArgumentNames(Arrays.asList("delegate"));
 
         writer.beginConstructorDeclaration(params);
-        writer.writeStatement("this.delegate = delegate;\n");
+        writer.writeStatement(new AssignmentExpression(new ObjectReference("this", "delegate"), new ObjectReference(null, "delegate")));
         writer.finishMethodDefinition();
     }
 
@@ -143,7 +148,7 @@ public class TraitDelegateWriter {
             .setModifiers(Arrays.asList(Modifier.PUBLIC));
 
         writer.beginMethodDefinition(params);
-        writer.writeStatement("return delegate;\n");
+        writer.writeStatement(new ReturnExpression(new ObjectReference(null, "delegate")));
         writer.finishMethodDefinition();
     }
 
@@ -152,22 +157,13 @@ public class TraitDelegateWriter {
         MethodDeclarationParameters methodDeclaration = utils.methodDeclarationParamsFromExecutableElement(exec, name, traitElement.getSimpleName(), modifiers);
         writer.beginMethodDefinition(methodDeclaration);
         
-        StringBuilder statement = new StringBuilder();
-        if (exec.getReturnType().getKind() != TypeKind.VOID) {
-            statement.append("return ");
-        }
         String callTo = isDefault ? "super" : "delegate";
-        statement.append(callTo).append(".").append(exec.getSimpleName().toString()).append("(");
+        Expression methodInvocation = new MethodInvocation(callTo, exec.getSimpleName().toString(), methodDeclaration.getArgumentNames());
         
-        List<String> argNames = methodDeclaration.getArgumentNames();
-        for (int i = 0; i < argNames.size(); i++) {
-            statement.append(argNames.get(i));
-            if (i < argNames.size() - 1) {
-                statement.append(", ");
-            }
+        if (exec.getReturnType().getKind() != TypeKind.VOID) {
+            methodInvocation = new ReturnExpression(methodInvocation);
         }
-        statement.append(");\n");
-        writer.writeStatement(statement.toString());
+        writer.writeStatement(methodInvocation);
         writer.finishMethodDefinition();
     }
 
