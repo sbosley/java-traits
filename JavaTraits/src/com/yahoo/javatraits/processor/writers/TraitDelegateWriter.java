@@ -7,7 +7,6 @@ package com.yahoo.javatraits.processor.writers;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -89,7 +88,7 @@ public class TraitDelegateWriter {
         TypeDeclarationParameters params = new TypeDeclarationParameters()
             .setName(traitDelegateClass)
             .setKind(Type.CLASS)
-            .setModifiers(Arrays.asList(Modifier.PUBLIC, Modifier.FINAL))
+            .setModifiers(Modifier.PUBLIC, Modifier.FINAL)
             .setSuperclass(superclass);
 
         writer.beginTypeDefinition(params);
@@ -109,9 +108,9 @@ public class TraitDelegateWriter {
     private void emitConstructor() throws IOException {
         MethodDeclarationParameters params = new MethodDeclarationParameters()
             .setConstructorName(traitDelegateClass)
-            .setModifiers(Arrays.asList(Modifier.PUBLIC))
-            .setArgumentTypes(Arrays.asList(delegateClass))
-            .setArgumentNames(Arrays.asList("delegate"));
+            .setModifiers(Modifier.PUBLIC)
+            .setArgumentTypes(delegateClass)
+            .setArgumentNames("delegate");
 
         writer.beginConstructorDeclaration(params);
         writer.writeStatement(Expressions.assign(Expressions.reference("this", "delegate"), Expressions.reference("delegate")));
@@ -142,7 +141,7 @@ public class TraitDelegateWriter {
         MethodDeclarationParameters params = new MethodDeclarationParameters()
             .setMethodName(TraitProcessorUtils.GET_THIS)
             .setReturnType(delegateClass)
-            .setModifiers(Arrays.asList(Modifier.PUBLIC));
+            .setModifiers(Modifier.PUBLIC);
 
         writer.beginMethodDefinition(params);
         writer.writeStatement(Expressions.reference("delegate").returnExpr());

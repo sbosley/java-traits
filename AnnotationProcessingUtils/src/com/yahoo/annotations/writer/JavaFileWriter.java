@@ -8,7 +8,6 @@ package com.yahoo.annotations.writer;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
@@ -104,6 +103,10 @@ public class JavaFileWriter {
         return this;
     }
     
+    public JavaFileWriter registerOtherKnownNames(DeclaredTypeName... otherKnownNames) throws IOException {
+        return registerOtherKnownNames(Utils.asList(otherKnownNames));
+    }
+    
     // Returns true if item needs to be added to imports
     private boolean addToKnownNames(DeclaredTypeName type, boolean highestPreference) {
         String simpleName = type.getSimpleName();
@@ -169,7 +172,7 @@ public class JavaFileWriter {
     }
     
     public JavaFileWriter writeFieldDeclaration(TypeName type, String name, Expression initializer, Modifier... modifiers) throws IOException {
-        return writeFieldDeclaration(type, name, initializer, modifiers == null ? null : Arrays.asList(modifiers));
+        return writeFieldDeclaration(type, name, initializer, Utils.asList(modifiers));
     }
 
     public JavaFileWriter writeFieldDeclaration(TypeName type, String name, Expression initializer, List<Modifier> modifiers) throws IOException {

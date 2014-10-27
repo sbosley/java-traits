@@ -8,7 +8,6 @@ package com.yahoo.javatraits.processor.writers;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -130,7 +129,7 @@ public class ClassWithTraitsSuperclassWriter {
         TypeDeclarationParameters params = new TypeDeclarationParameters()
             .setName(superclassName)
             .setKind(Type.CLASS)
-            .setModifiers(Arrays.asList(Modifier.PUBLIC, Modifier.ABSTRACT))
+            .setModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
             .setSuperclass(cls.getDesiredSuperclass())
             .setInterfaces(interfaces);
 
@@ -145,7 +144,7 @@ public class ClassWithTraitsSuperclassWriter {
     private void emitDelegateFields() throws IOException {
         for (TraitElement elem : allTraits) {
             DeclaredTypeName delegateClass = elem.getDelegateName();
-            Expression init = Expressions.callConstructor(delegateClass, Arrays.asList("this"));
+            Expression init = Expressions.callConstructor(delegateClass, "this");
             writer.writeFieldDeclaration(delegateClass, getDelegateVariableName(elem), init, Modifier.PRIVATE);
         }
         writer.writeNewline();

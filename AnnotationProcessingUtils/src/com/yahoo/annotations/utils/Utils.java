@@ -219,12 +219,12 @@ public class Utils {
         TypeName returnType = getTypeNameFromTypeMirror(exec.getReturnType(), null);
         qualifyReturnTypeGenerics(methodGenerics, returnType, genericQualifier);
 
-        Pair<List<TypeName>, List<?>> arguments = getMethodArgumentsFromExecutableElement(exec, genericQualifier, methodGenerics);
+        Pair<List<TypeName>, List<String>> arguments = getMethodArgumentsFromExecutableElement(exec, genericQualifier, methodGenerics);
 
         MethodDeclarationParameters params = new MethodDeclarationParameters()
             .setMethodName(name)
             .setReturnType(returnType)
-            .setModifiers(Arrays.asList(modifiers))
+            .setModifiers(modifiers)
             .setMethodGenerics(methodGenerics)
             .setArgumentTypes(arguments.getLeft())
             .setArgumentNames(arguments.getRight())
@@ -264,7 +264,7 @@ public class Utils {
         return typeNames;
     }
 
-    private Pair<List<TypeName>, List<?>> getMethodArgumentsFromExecutableElement(ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) {
+    private Pair<List<TypeName>, List<String>> getMethodArgumentsFromExecutableElement(ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) {
         List<? extends VariableElement> arguments = exec.getParameters();
         List<TypeName> typeNames = getArgumentTypeNames(exec, genericQualifier, methodGenerics);
         List<String> args = map(arguments, new Mapper<VariableElement, String>() {
@@ -276,7 +276,7 @@ public class Utils {
         if (exec.isVarArgs()) {
             typeNames.get(typeNames.size() - 1).setIsVarArgs(true);
         }
-        return new Pair<List<TypeName>, List<?>>(typeNames, args);
+        return Pair.create(typeNames, args);
     }
 
     private List<TypeName> getThrownTypes(ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) {
@@ -306,6 +306,10 @@ public class Utils {
 
     public static boolean isEmpty(Collection<?> collection) {
         return collection == null || collection.isEmpty();
+    }
+    
+    public static <T> List<T> asList(T... args) {
+        return args == null ? null : Arrays.asList(args);
     }
 
     public static String getPackageFromFullyQualifiedName(String name) {

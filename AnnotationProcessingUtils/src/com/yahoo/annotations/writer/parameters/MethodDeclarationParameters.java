@@ -1,12 +1,12 @@
 package com.yahoo.annotations.writer.parameters;
 
-import java.util.Arrays;
 import java.util.List;
 
 import javax.lang.model.element.Modifier;
 
 import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.model.TypeName;
+import com.yahoo.annotations.utils.Utils;
 
 public class MethodDeclarationParameters {
 
@@ -55,7 +55,7 @@ public class MethodDeclarationParameters {
     }
     
     public MethodDeclarationParameters setModifiers(Modifier... modifiers) {
-        this.modifiers = modifiers == null ? null : Arrays.asList(modifiers);
+        this.modifiers = Utils.asList(modifiers);
         return this;
     }
     
@@ -77,6 +77,11 @@ public class MethodDeclarationParameters {
         return argumentTypes;
     }
     
+    public MethodDeclarationParameters setArgumentTypes(TypeName... argumentTypes) {
+        this.argumentTypes = Utils.asList(argumentTypes);
+        return this;
+    }
+    
     public MethodDeclarationParameters setArgumentTypes(List<? extends TypeName> argumentTypes) {
         this.argumentTypes = argumentTypes;
         return this;
@@ -86,7 +91,12 @@ public class MethodDeclarationParameters {
         return arguments;
     }
     
-    public MethodDeclarationParameters setArgumentNames(List<?> arguments) {
+    public MethodDeclarationParameters setArgumentNames(String... arguments) {
+        this.arguments = Utils.asList(arguments);
+        return this;
+    }
+    
+    public MethodDeclarationParameters setArgumentNames(List<String> arguments) {
         this.arguments = arguments;
         return this;
     }

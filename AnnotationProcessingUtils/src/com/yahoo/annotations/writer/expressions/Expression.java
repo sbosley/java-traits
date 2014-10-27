@@ -11,6 +11,10 @@ public abstract class Expression {
     // returns true if anything was written
     public abstract boolean writeExpression(JavaFileWriter writer) throws IOException;
     
+    public Expression callMethod(String methodName, Object... arguments) {
+        return Expressions.callMethod(this, methodName, arguments);
+    }
+    
     public Expression callMethod(String methodName, List<?> arguments) {
         return Expressions.callMethod(this, methodName, arguments);
     }

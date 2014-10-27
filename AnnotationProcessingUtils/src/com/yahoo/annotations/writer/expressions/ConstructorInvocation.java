@@ -1,10 +1,10 @@
 package com.yahoo.annotations.writer.expressions;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 import com.yahoo.annotations.model.DeclaredTypeName;
+import com.yahoo.annotations.utils.Utils;
 import com.yahoo.annotations.writer.JavaFileWriter;
 
 class ConstructorInvocation extends Expression {
@@ -14,7 +14,7 @@ class ConstructorInvocation extends Expression {
 
     public ConstructorInvocation(DeclaredTypeName constructorType, Object... arguments) {
         this.constructorType = constructorType;
-        this.arguments = arguments == null ? null : Arrays.asList(arguments);
+        this.arguments = Utils.asList(arguments);
     }
     
     public ConstructorInvocation(DeclaredTypeName constructorType, List<?> arguments) {

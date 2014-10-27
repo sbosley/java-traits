@@ -1,10 +1,10 @@
 package com.yahoo.annotations.writer.expressions;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 import com.yahoo.annotations.model.DeclaredTypeName;
+import com.yahoo.annotations.utils.Utils;
 import com.yahoo.annotations.writer.JavaFileWriter;
 
 class StaticMethodInvocation extends Expression {
@@ -14,7 +14,7 @@ class StaticMethodInvocation extends Expression {
     private final List<?> arguments;
     
     public StaticMethodInvocation(DeclaredTypeName calledType, String methodName, Object... arguments) {
-        this(calledType, methodName, arguments == null ? null : Arrays.asList(arguments));
+        this(calledType, methodName, Utils.asList(arguments));
     }
     
     public StaticMethodInvocation(DeclaredTypeName calledType, String methodName, List<?> arguments) {

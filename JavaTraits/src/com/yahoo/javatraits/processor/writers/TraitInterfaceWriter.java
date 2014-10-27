@@ -7,7 +7,6 @@ package com.yahoo.javatraits.processor.writers;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -71,7 +70,7 @@ public class TraitInterfaceWriter {
         TypeDeclarationParameters params = new TypeDeclarationParameters()
             .setName(element.getInterfaceName())
             .setKind(Type.INTERFACE)
-            .setModifiers(Arrays.asList(Modifier.PUBLIC));
+            .setModifiers(Modifier.PUBLIC);
 
         writer.beginTypeDefinition(params);
         emitMethodDeclarations();

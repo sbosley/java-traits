@@ -1,7 +1,6 @@
 package com.yahoo.annotations.writer.expressions;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 import com.yahoo.annotations.utils.Utils;
@@ -20,7 +19,7 @@ class MethodInvocation extends Expression {
     }
     
     public MethodInvocation(String methodName, Object... arguments) {
-        this(methodName, arguments == null ? null : Arrays.asList(arguments));
+        this(methodName, Utils.asList(arguments));
     }
     
     public MethodInvocation(String calledObjectString, String methodName, Object... arguments) {
