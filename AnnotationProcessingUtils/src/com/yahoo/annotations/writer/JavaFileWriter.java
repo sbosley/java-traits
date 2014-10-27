@@ -217,9 +217,11 @@ public class JavaFileWriter {
         return this;
     }
     
-    public JavaFileWriter beginInitializerBlock(boolean isStatic) throws IOException {
+    public JavaFileWriter beginInitializerBlock(boolean isStatic, boolean indentStart) throws IOException {
         checkScope(Scope.TYPE_DEFINITION);
-        indent();
+        if (indentStart) {
+            indent();
+        }
         if (isStatic) {
             out.append("static ");
         }
@@ -348,7 +350,9 @@ public class JavaFileWriter {
     }
     
     public JavaFileWriter finishInitializerBlock() throws IOException {
-        finishMethodDefinition();
+        finishScope(Scope.METHOD_DEFINITION);
+        indent();
+        out.append("}");
         return this;
     }
 
