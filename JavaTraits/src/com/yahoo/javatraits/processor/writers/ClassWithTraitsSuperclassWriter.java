@@ -232,7 +232,7 @@ public class ClassWithTraitsSuperclassWriter {
     private void emitMethodBody(TraitElement elem, ExecutableElement exec, List<?> arguments) throws IOException {
         String delegateVariableName = getDelegateVariableName(elem);
         
-        Expression body = Expressions.callMethod(delegateVariableName, "default__" + exec.getSimpleName(), arguments);
+        Expression body = Expressions.callMethodOn(delegateVariableName, "default__" + exec.getSimpleName(), arguments);
         if (exec.getReturnType().getKind() != TypeKind.VOID) {
             body = body.returnExpr();
         }

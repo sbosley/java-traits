@@ -51,20 +51,20 @@ public class Expressions {
         return new MethodInvocation(methodName, arguments);
     }
     
-    public static Expression callMethod(Expression calledObject, String methodName, Object... arguments) {
+    public static Expression callMethodOn(Expression calledObject, String methodName, Object... arguments) {
         return new MethodInvocation(calledObject, methodName, arguments);
     }
     
-    public static Expression callMethod(Expression calledObject, String methodName, List<?> arguments) {
+    public static Expression callMethodOn(Expression calledObject, String methodName, List<?> arguments) {
         return new MethodInvocation(calledObject, methodName, arguments);
     }
     
-    public static Expression callMethod(String calledObject, String methodName, Object... arguments) {
-        return new MethodInvocation(calledObject, methodName, arguments);
+    public static Expression callMethodOn(String calledObject, String methodName, Object... arguments) {
+        return reference(calledObject).callMethod(methodName, arguments);
     }
     
-    public static Expression callMethod(String calledObject, String methodName, List<?> arguments) {
-        return new MethodInvocation(calledObject, methodName, arguments);
+    public static Expression callMethodOn(String calledObject, String methodName, List<?> arguments) {
+        return reference(calledObject).callMethod(methodName, arguments);
     }
     
     public static Expression reference(String fieldName) {
