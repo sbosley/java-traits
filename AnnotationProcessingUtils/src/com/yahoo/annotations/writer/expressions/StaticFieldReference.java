@@ -5,7 +5,7 @@ import java.io.IOException;
 import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.writer.JavaFileWriter;
 
-public class StaticFieldReference extends Reference {
+class StaticFieldReference extends Reference {
 
     private final TypeName typeName;
     

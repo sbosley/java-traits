@@ -29,10 +29,8 @@ import com.yahoo.annotations.utils.Pair;
 import com.yahoo.annotations.utils.Utils;
 import com.yahoo.annotations.writer.JavaFileWriter;
 import com.yahoo.annotations.writer.JavaFileWriter.Type;
-import com.yahoo.annotations.writer.expressions.ConstructorInvocation;
 import com.yahoo.annotations.writer.expressions.Expression;
-import com.yahoo.annotations.writer.expressions.MethodInvocation;
-import com.yahoo.annotations.writer.expressions.ReturnExpression;
+import com.yahoo.annotations.writer.expressions.Expressions;
 import com.yahoo.annotations.writer.parameters.MethodDeclarationParameters;
 import com.yahoo.annotations.writer.parameters.TypeDeclarationParameters;
 import com.yahoo.javatraits.processor.data.ClassWithTraits;
@@ -147,7 +145,7 @@ public class ClassWithTraitsSuperclassWriter {
     private void emitDelegateFields() throws IOException {
         for (TraitElement elem : allTraits) {
             DeclaredTypeName delegateClass = elem.getDelegateName();
-            ConstructorInvocation init = new ConstructorInvocation(delegateClass, Arrays.asList("this"));
+            Expression init = Expressions.callConstructor(delegateClass, Arrays.asList("this"));
             writer.writeFieldDeclaration(delegateClass, getDelegateVariableName(elem), Arrays.asList(Modifier.PRIVATE), init);
         }
         writer.writeNewline();
@@ -228,16 +226,16 @@ public class ClassWithTraitsSuperclassWriter {
         writer.beginMethodDefinition(methodDeclaration);
         
         if (!isAbstract) {
-            emitMethodBody(elem, exec, methodDeclaration.getArgumentNames());
+            emitMethodBody(elem, exec, methodDeclaration.getArguments());
         }
     }
     
-    private void emitMethodBody(TraitElement elem, ExecutableElement exec, List<String> argNames) throws IOException {
+    private void emitMethodBody(TraitElement elem, ExecutableElement exec, List<?> arguments) throws IOException {
         String delegateVariableName = getDelegateVariableName(elem);
         
-        Expression body = new MethodInvocation(delegateVariableName, "default__" + exec.getSimpleName(), argNames);
+        Expression body = Expressions.callMethod(delegateVariableName, "default__" + exec.getSimpleName(), arguments);
         if (exec.getReturnType().getKind() != TypeKind.VOID) {
-            body = new ReturnExpression(body);
+            body = body.returnExpr();
         }
         writer.writeStatement(body);
         writer.finishMethodDefinition();

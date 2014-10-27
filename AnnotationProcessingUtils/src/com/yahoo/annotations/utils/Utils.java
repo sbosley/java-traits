@@ -219,7 +219,7 @@ public class Utils {
         TypeName returnType = getTypeNameFromTypeMirror(exec.getReturnType(), null);
         qualifyReturnTypeGenerics(methodGenerics, returnType, genericQualifier);
 
-        Pair<List<TypeName>, List<String>> arguments = getMethodArgumentsFromExecutableElement(exec, genericQualifier, methodGenerics);
+        Pair<List<TypeName>, List<?>> arguments = getMethodArgumentsFromExecutableElement(exec, genericQualifier, methodGenerics);
 
         MethodDeclarationParameters params = new MethodDeclarationParameters()
             .setMethodName(name)
@@ -264,10 +264,10 @@ public class Utils {
         return typeNames;
     }
 
-    private Pair<List<TypeName>, List<String>> getMethodArgumentsFromExecutableElement(ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) {
+    private Pair<List<TypeName>, List<?>> getMethodArgumentsFromExecutableElement(ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) {
         List<? extends VariableElement> arguments = exec.getParameters();
         List<TypeName> typeNames = getArgumentTypeNames(exec, genericQualifier, methodGenerics);
-        List<String> argNames = map(arguments, new Mapper<VariableElement, String>() {
+        List<String> args = map(arguments, new Mapper<VariableElement, String>() {
             @Override
             public String map(VariableElement arg) {
                 return arg.toString();
@@ -276,7 +276,7 @@ public class Utils {
         if (exec.isVarArgs()) {
             typeNames.get(typeNames.size() - 1).setIsVarArgs(true);
         }
-        return Pair.create(typeNames, argNames);
+        return new Pair<List<TypeName>, List<?>>(typeNames, args);
     }
 
     private List<TypeName> getThrownTypes(ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) {

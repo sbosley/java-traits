@@ -15,7 +15,7 @@ public class MethodDeclarationParameters {
     private List<Modifier> modifiers;
     private List<? extends TypeName> methodGenerics;
     private List<? extends TypeName> argumentTypes;
-    private List<String> argumentNames;
+    private List<?> arguments;
     private List<? extends TypeName> throwsTypes;
     
     public boolean isConstructor() {
@@ -76,12 +76,12 @@ public class MethodDeclarationParameters {
         return this;
     }
     
-    public List<String> getArgumentNames() {
-        return argumentNames;
+    public List<?> getArguments() {
+        return arguments;
     }
     
-    public MethodDeclarationParameters setArgumentNames(List<String> argumentNames) {
-        this.argumentNames = argumentNames;
+    public MethodDeclarationParameters setArgumentNames(List<?> arguments) {
+        this.arguments = arguments;
         return this;
     }
     

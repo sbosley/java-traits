@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import com.yahoo.annotations.writer.JavaFileWriter;
 
-public class InitializerBlock implements Expression {
+class InitializerBlock extends Expression {
 
     private final Expression blockInternals;
     private final boolean indentStart;
@@ -22,10 +22,11 @@ public class InitializerBlock implements Expression {
     }
     
     @Override
-    public void writeExpression(JavaFileWriter writer) throws IOException {
+    public boolean writeExpression(JavaFileWriter writer) throws IOException {
         writer.beginInitializerBlock(isStatic, indentStart);
         blockInternals.writeExpression(writer);
         writer.finishInitializerBlock(endWithSemicolon, endWithNewline);
+        return true;
     }
 
 }

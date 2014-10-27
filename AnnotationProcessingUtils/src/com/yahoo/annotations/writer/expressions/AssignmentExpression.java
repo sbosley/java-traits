@@ -4,21 +4,22 @@ import java.io.IOException;
 
 import com.yahoo.annotations.writer.JavaFileWriter;
 
-public class AssignmentExpression implements Expression {
+class AssignmentExpression extends Expression {
 
-    private Reference assignTo;
+    private Expression assignTo;
     private Expression assignFrom;
     
-    public AssignmentExpression(Reference assignTo, Expression assignFrom) {
+    public AssignmentExpression(Expression assignTo, Expression assignFrom) {
         this.assignTo = assignTo;
         this.assignFrom = assignFrom;
     }
     
     @Override
-    public void writeExpression(JavaFileWriter writer) throws IOException {
+    public boolean writeExpression(JavaFileWriter writer) throws IOException {
         assignTo.writeExpression(writer);
         writer.appendString(" = ");
         assignFrom.writeExpression(writer);
+        return true;
     }
     
 }

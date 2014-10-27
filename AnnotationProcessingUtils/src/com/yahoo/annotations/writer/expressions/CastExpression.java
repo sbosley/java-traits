@@ -5,7 +5,7 @@ import java.io.IOException;
 import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.writer.JavaFileWriter;
 
-public class CastExpression implements Expression {
+class CastExpression extends Expression {
 
     private final TypeName castTo;
     private final Expression toCast;
@@ -16,9 +16,10 @@ public class CastExpression implements Expression {
     }
     
     @Override
-    public void writeExpression(JavaFileWriter writer) throws IOException {
+    public boolean writeExpression(JavaFileWriter writer) throws IOException {
         writer.appendString("(").appendString(writer.shortenName(castTo, false)).appendString(") ");
         toCast.writeExpression(writer);
+        return true;
     }
     
 }

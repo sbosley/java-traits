@@ -6,24 +6,25 @@ import java.util.List;
 import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.writer.JavaFileWriter;
 
-public class StaticMethodInvocation implements Expression {
+class StaticMethodInvocation extends Expression {
 
     private final DeclaredTypeName calledType;
     private final String methodName;
-    private final List<String> argumentNames;
+    private final List<?> arguments;
     
-    public StaticMethodInvocation(DeclaredTypeName calledType, String methodName, List<String> argumentNames) {
+    public StaticMethodInvocation(DeclaredTypeName calledType, String methodName, List<?> arguments) {
         this.calledType = calledType;
         this.methodName = methodName;
-        this.argumentNames = argumentNames;
+        this.arguments = arguments;
     }
     
     @Override
-    public void writeExpression(JavaFileWriter writer) throws IOException {
+    public boolean writeExpression(JavaFileWriter writer) throws IOException {
         if (calledType != null) {
             writer.appendString(writer.shortenNameForStaticReference(calledType)).appendString(".");
         }
-        writer.appendString(methodName).writeArgumentNameList(argumentNames);
+        writer.appendString(methodName).writeArgumentNameList(arguments);
+        return true;
     }
     
 }

@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import com.yahoo.annotations.writer.JavaFileWriter;
 
-public class ReturnExpression implements Expression {
+class ReturnExpression extends Expression {
 
     private final Expression toReturn;
     
@@ -13,8 +13,9 @@ public class ReturnExpression implements Expression {
     }
     
     @Override
-    public void writeExpression(JavaFileWriter writer) throws IOException {
+    public boolean writeExpression(JavaFileWriter writer) throws IOException {
         writer.appendString("return ").appendExpression(toReturn);
+        return true;
     }
     
 }

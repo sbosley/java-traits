@@ -5,7 +5,7 @@ import java.io.IOException;
 import com.yahoo.annotations.utils.Utils;
 import com.yahoo.annotations.writer.JavaFileWriter;
 
-abstract class Reference implements Expression {
+abstract class Reference extends Expression {
 
     private final String fieldName;
     
@@ -17,9 +17,10 @@ abstract class Reference implements Expression {
     }
     
     @Override
-    public void writeExpression(JavaFileWriter writer) throws IOException {
+    public boolean writeExpression(JavaFileWriter writer) throws IOException {
         writeReferencedObject(writer);
         writer.appendString(fieldName);
+        return true;
     }
     
     protected abstract void writeReferencedObject(JavaFileWriter writer) throws IOException;

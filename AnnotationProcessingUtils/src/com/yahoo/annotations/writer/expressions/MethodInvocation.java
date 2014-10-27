@@ -6,24 +6,37 @@ import java.util.List;
 import com.yahoo.annotations.utils.Utils;
 import com.yahoo.annotations.writer.JavaFileWriter;
 
-public class MethodInvocation implements Expression {
+class MethodInvocation extends Expression {
 
-    private final String calledObject;
+    private String calledObjectString;
+    private Expression calledObject;
     private final String methodName;
-    private final List<String> argumentNames;
+    private final List<?> arguments;
     
-    public MethodInvocation(String calledObject, String methodName, List<String> argumentNames) {
-        this.calledObject = calledObject;
+    public MethodInvocation(String methodName, List<?> arguments) {
         this.methodName = methodName;
-        this.argumentNames = argumentNames;
+        this.arguments = arguments;
+    }
+    
+    public MethodInvocation(String calledObjectString, String methodName, List<?> arguments) {
+        this(methodName, arguments);
+        this.calledObjectString = calledObjectString;
+    }
+    
+    public MethodInvocation(Expression calledObject, String methodName, List<?> arguments) {
+        this(methodName, arguments);
+        this.calledObject = calledObject;
     }
     
     @Override
-    public void writeExpression(JavaFileWriter writer) throws IOException {
-        if (!Utils.isEmpty(calledObject)) {
-            writer.appendString(calledObject).appendString(".");
+    public boolean writeExpression(JavaFileWriter writer) throws IOException {
+        if (!Utils.isEmpty(calledObjectString)) {
+            writer.appendString(calledObjectString).appendString(".");
+        } else if (calledObject != null && calledObject.writeExpression(writer)) {
+            writer.appendString(".");
         }
-        writer.appendString(methodName).writeArgumentNameList(argumentNames);
+        writer.appendString(methodName).writeArgumentNameList(arguments);
+        return true;
     }
     
 }

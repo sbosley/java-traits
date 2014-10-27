@@ -198,7 +198,7 @@ public class JavaFileWriter {
             out.append(shortenName(methodDeclaration.getReturnType(), false));
         }
         out.append(" ").append(methodDeclaration.getMethodName());
-        writeArgumentList(methodDeclaration.getArgumentTypes(), methodDeclaration.getArgumentNames());
+        writeArgumentList(methodDeclaration.getArgumentTypes(), methodDeclaration.getArguments());
         if (!Utils.isEmpty(methodDeclaration.getThrowsTypes())) {
             out.append(" throws ");
             for (int i = 0; i < methodDeclaration.getThrowsTypes().size(); i++) {
@@ -234,35 +234,41 @@ public class JavaFileWriter {
         if (Utils.isEmpty(params.getMethodName())) {
             throw new IllegalArgumentException("Must specify a method name for MethodDeclarationParams");
         }
-        verifyArgumentTypesAndNames(params.getArgumentTypes(), params.getArgumentNames());
+        verifyArgumentTypesAndNames(params.getArgumentTypes(), params.getArguments());
     }
 
-    private void verifyArgumentTypesAndNames(List<? extends TypeName> argumentTypes, List<String> argumentNames) {
-        if (Utils.isEmpty(argumentTypes) && !Utils.isEmpty(argumentNames)) {
+    private void verifyArgumentTypesAndNames(List<? extends TypeName> argumentTypes, List<?> arguments) {
+        if (Utils.isEmpty(argumentTypes) && !Utils.isEmpty(arguments)) {
             throw new IllegalArgumentException("Must specify argument types for MethodDeclarationParams");
         }
-        if (!Utils.isEmpty(argumentTypes) && Utils.isEmpty(argumentNames)) {
+        if (!Utils.isEmpty(argumentTypes) && Utils.isEmpty(arguments)) {
             throw new IllegalArgumentException("Must specify argument names for MethodDeclarationParams");
         }
-        if (!Utils.isEmpty(argumentTypes) && !Utils.isEmpty(argumentNames)
-                && argumentTypes.size() != argumentNames.size()) {
+        if (!Utils.isEmpty(argumentTypes) && !Utils.isEmpty(arguments)
+                && argumentTypes.size() != arguments.size()) {
             String error = "Different number of argument types and names in MethodDeclarationParams. "
-                    + argumentTypes.size() + " types, " + argumentNames.size() + " names.";
+                    + argumentTypes.size() + " types, " + arguments.size() + " names.";
             throw new IllegalArgumentException(error);
         }
     }
 
-    public JavaFileWriter writeArgumentList(List<? extends TypeName> argumentTypes, List<String> argumentNames) throws IOException {
+    public JavaFileWriter writeArgumentList(List<? extends TypeName> argumentTypes, List<?> arguments) throws IOException {
         out.append("(");
-        if (argumentNames != null) {
-            for (int i = 0; i < argumentNames.size(); i++) {
+        if (arguments != null) {
+            for (int i = 0; i < arguments.size(); i++) {
                 TypeName argType = argumentTypes != null ? argumentTypes.get(i) : null;
-                String argName = argumentNames.get(i);
+                
                 if (argType != null) {
                     out.append(shortenName(argType, false)).append(" ");
                 }
-                out.append(argName);
-                if (i < argumentNames.size() - 1) {
+                
+                Object argument = arguments.get(i);
+                if (argument instanceof Expression) {
+                    ((Expression) argument).writeExpression(this);
+                } else {
+                    out.append(String.valueOf(argument));
+                }
+                if (i < arguments.size() - 1) {
                     out.append(", ");
                 }
             }
@@ -271,8 +277,8 @@ public class JavaFileWriter {
         return this;
     }
 
-    public JavaFileWriter writeArgumentNameList(List<String> argumentNames) throws IOException {
-        return writeArgumentList(null, argumentNames);
+    public JavaFileWriter writeArgumentNameList(List<?> arguments) throws IOException {
+        return writeArgumentList(null, arguments);
     }
 
     public JavaFileWriter beginConstructorDeclaration(MethodDeclarationParameters constructorDeclaration) throws IOException {
@@ -282,7 +288,7 @@ public class JavaFileWriter {
         writeModifierList(constructorDeclaration.getModifiers());
         out.append(constructorDeclaration.getConstructorName().getSimpleName());
         writeGenericsList(constructorDeclaration.getMethodGenerics(), false);
-        writeArgumentList(constructorDeclaration.getArgumentTypes(), constructorDeclaration.getArgumentNames());
+        writeArgumentList(constructorDeclaration.getArgumentTypes(), constructorDeclaration.getArguments());
         out.append(" {\n");
         moveToScope(Scope.METHOD_DEFINITION);
         return this;
@@ -292,7 +298,7 @@ public class JavaFileWriter {
         if (!params.isConstructor()) {
             throw new IllegalArgumentException("Must specify a class name for ConstructorDeclarationParams");
         }
-        verifyArgumentTypesAndNames(params.getArgumentTypes(), params.getArgumentNames());
+        verifyArgumentTypesAndNames(params.getArgumentTypes(), params.getArguments());
     }
 
     public JavaFileWriter writeStatement(Expression statement) throws IOException {

@@ -6,20 +6,21 @@ import java.util.List;
 import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.writer.JavaFileWriter;
 
-public class ConstructorInvocation implements Expression {
+class ConstructorInvocation extends Expression {
 
     private final DeclaredTypeName constructorType;
-    private final List<String> argumentNames;
+    private final List<?> arguments;
 
-    public ConstructorInvocation(DeclaredTypeName constructorType, List<String> argumentNames) {
+    public ConstructorInvocation(DeclaredTypeName constructorType, List<?> arguments) {
         this.constructorType = constructorType;
-        this.argumentNames = argumentNames;
+        this.arguments = arguments;
     }
     
     @Override
-    public void writeExpression(JavaFileWriter writer) throws IOException {
+    public boolean writeExpression(JavaFileWriter writer) throws IOException {
         writer.appendString("new ").appendString(writer.shortenName(constructorType, false));
-        writer.writeArgumentNameList(argumentNames);
+        writer.writeArgumentNameList(arguments);
+        return true;
     }
     
 }
