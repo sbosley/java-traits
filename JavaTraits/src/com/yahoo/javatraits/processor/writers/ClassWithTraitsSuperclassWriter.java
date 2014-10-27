@@ -146,7 +146,7 @@ public class ClassWithTraitsSuperclassWriter {
         for (TraitElement elem : allTraits) {
             DeclaredTypeName delegateClass = elem.getDelegateName();
             Expression init = Expressions.callConstructor(delegateClass, Arrays.asList("this"));
-            writer.writeFieldDeclaration(delegateClass, getDelegateVariableName(elem), Arrays.asList(Modifier.PRIVATE), init);
+            writer.writeFieldDeclaration(delegateClass, getDelegateVariableName(elem), init, Modifier.PRIVATE);
         }
         writer.writeNewline();
     }

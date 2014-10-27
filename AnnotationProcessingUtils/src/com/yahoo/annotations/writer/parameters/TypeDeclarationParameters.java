@@ -1,5 +1,6 @@
 package com.yahoo.annotations.writer.parameters;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.lang.model.element.Modifier;
@@ -37,6 +38,11 @@ public class TypeDeclarationParameters {
         return modifiers;
     }
 
+    public TypeDeclarationParameters setModifiers(Modifier... modifiers) {
+        this.modifiers = modifiers == null ? null : Arrays.asList(modifiers);
+        return this;
+    }
+    
     public TypeDeclarationParameters setModifiers(List<Modifier> modifiers) {
         this.modifiers = modifiers;
         return this;

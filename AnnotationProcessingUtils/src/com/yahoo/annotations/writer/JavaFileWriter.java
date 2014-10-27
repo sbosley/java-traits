@@ -8,6 +8,7 @@ package com.yahoo.annotations.writer;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
@@ -166,8 +167,12 @@ public class JavaFileWriter {
             throw new IllegalArgumentException("Must specify a type for TypeDeclarationParameters (one of Type.CLASS or Type.INTERFACE)");
         }
     }
+    
+    public JavaFileWriter writeFieldDeclaration(TypeName type, String name, Expression initializer, Modifier... modifiers) throws IOException {
+        return writeFieldDeclaration(type, name, initializer, modifiers == null ? null : Arrays.asList(modifiers));
+    }
 
-    public JavaFileWriter writeFieldDeclaration(TypeName type, String name, List<Modifier> modifiers, Expression initializer) throws IOException {
+    public JavaFileWriter writeFieldDeclaration(TypeName type, String name, Expression initializer, List<Modifier> modifiers) throws IOException {
         checkScope(Scope.TYPE_DEFINITION, Scope.METHOD_DEFINITION);
         indent();
         writeModifierList(modifiers);

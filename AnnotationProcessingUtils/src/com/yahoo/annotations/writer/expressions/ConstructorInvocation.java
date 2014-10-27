@@ -1,6 +1,7 @@
 package com.yahoo.annotations.writer.expressions;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import com.yahoo.annotations.model.DeclaredTypeName;
@@ -11,6 +12,11 @@ class ConstructorInvocation extends Expression {
     private final DeclaredTypeName constructorType;
     private final List<?> arguments;
 
+    public ConstructorInvocation(DeclaredTypeName constructorType, Object... arguments) {
+        this.constructorType = constructorType;
+        this.arguments = arguments == null ? null : Arrays.asList(arguments);
+    }
+    
     public ConstructorInvocation(DeclaredTypeName constructorType, List<?> arguments) {
         this.constructorType = constructorType;
         this.arguments = arguments;

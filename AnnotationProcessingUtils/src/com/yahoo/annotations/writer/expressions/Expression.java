@@ -3,7 +3,7 @@ package com.yahoo.annotations.writer.expressions;
 import java.io.IOException;
 import java.util.List;
 
-import com.yahoo.annotations.utils.Utils;
+import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.writer.JavaFileWriter;
 
 public abstract class Expression {
@@ -23,17 +23,8 @@ public abstract class Expression {
         return Expressions.returnExpr(this);
     }
     
-    public static Expression fromString(final String str) {
-        return new Expression() {
-            @Override
-            public boolean writeExpression(JavaFileWriter writer) throws IOException {
-                if (!Utils.isEmpty(str)) {
-                    writer.appendString(str);
-                    return true;
-                }
-                return false;
-            }
-        };
+    public Expression cast(TypeName castTo) {
+        return Expressions.cast(castTo, this);
     }
     
 }
