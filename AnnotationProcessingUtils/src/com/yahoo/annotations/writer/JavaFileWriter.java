@@ -349,10 +349,16 @@ public class JavaFileWriter {
         return this;
     }
     
-    public JavaFileWriter finishInitializerBlock() throws IOException {
+    public JavaFileWriter finishInitializerBlock(boolean semicolon, boolean newline) throws IOException {
         finishScope(Scope.METHOD_DEFINITION);
         indent();
         out.append("}");
+        if (semicolon) {
+            out.append(";");
+        }
+        if (newline) {
+            out.append("\n");
+        }
         return this;
     }
 

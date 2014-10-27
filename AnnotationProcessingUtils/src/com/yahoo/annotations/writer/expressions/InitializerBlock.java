@@ -7,16 +7,25 @@ import com.yahoo.annotations.writer.JavaFileWriter;
 public class InitializerBlock implements Expression {
 
     private final Expression blockInternals;
+    private final boolean indentStart;
+    private final boolean isStatic;
+    private final boolean endWithSemicolon;
+    private final boolean endWithNewline;
     
-    public InitializerBlock(Expression blockInternals) {
+    public InitializerBlock(Expression blockInternals, boolean indentStart, 
+            boolean isStatic, boolean endWithSemicolon, boolean endWithNewline) {
         this.blockInternals = blockInternals;
+        this.indentStart = indentStart;
+        this.isStatic = isStatic;
+        this.endWithSemicolon = endWithSemicolon;
+        this.endWithNewline = endWithNewline;
     }
     
     @Override
     public void writeExpression(JavaFileWriter writer) throws IOException {
-        writer.beginInitializerBlock(false, false);
+        writer.beginInitializerBlock(isStatic, indentStart);
         blockInternals.writeExpression(writer);
-        writer.finishInitializerBlock();
+        writer.finishInitializerBlock(endWithSemicolon, endWithNewline);
     }
 
 }
