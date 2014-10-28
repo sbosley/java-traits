@@ -64,14 +64,14 @@ public class ClassWithTraits extends TypeElementWrapper {
                 AnnotationMirror desiredSuperclassMirror = (AnnotationMirror) value;
                 AnnotationValue superclassValue = utils.getAnnotationValueFromMirror(desiredSuperclassMirror, "superclass");
 
-                List<DeclaredTypeName> superclassNames = utils.getClassValuesFromAnnotationValue(superclassValue);
+                List<DeclaredTypeName> superclassNames = utils.getTypeNamesFromAnnotationValue(superclassValue);
                 desiredSuperclass = superclassNames.size() > 0 ? superclassNames.get(0) : new DeclaredTypeName(Utils.OBJECT_CLASS_NAME);
 
                 AnnotationValue typeArgClassesValue = utils.getAnnotationValueFromMirror(desiredSuperclassMirror, "typeArgClasses");
-                List<DeclaredTypeName> superclassTypeArgs = utils.getClassValuesFromAnnotationValue(typeArgClassesValue);
+                List<DeclaredTypeName> superclassTypeArgs = utils.getTypeNamesFromAnnotationValue(typeArgClassesValue);
 
                 AnnotationValue typeArgNames = utils.getAnnotationValueFromMirror(desiredSuperclassMirror, "typeArgNames");
-                List<String> superclassTypeArgNames = utils.getStringValuesFromAnnotationValue(typeArgNames);
+                List<String> superclassTypeArgNames = utils.getValuesFromAnnotationValue(typeArgNames, String.class);
 
                 AnnotationValue numTypeArgs = utils.getAnnotationValueFromMirror(desiredSuperclassMirror, "numTypeArgs");
                 int superclassNumTypeArgs = numTypeArgs != null ? ((Integer) numTypeArgs.getValue()).intValue() : 0;
@@ -114,7 +114,7 @@ public class ClassWithTraits extends TypeElementWrapper {
                     AnnotationValue targetValue = utils.getAnnotationValueFromMirror(preferMirror, "target");
                     AnnotationValue methodValue = utils.getAnnotationValueFromMirror(preferMirror, "method");
 
-                    DeclaredTypeName targetName = utils.getClassValuesFromAnnotationValue(targetValue).get(0);
+                    DeclaredTypeName targetName = utils.getTypeNamesFromAnnotationValue(targetValue).get(0);
                     String method = (String) methodValue.getValue();
                     prefer.put(method, targetName);
                 }

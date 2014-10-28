@@ -398,20 +398,15 @@ public class Utils {
     
     public List<DeclaredTypeName> getClassValuesFromAnnotation(Element elem, Class<?> annotationClass, String propertyName) {
         AnnotationValue annotationValue = getAnnotationValue(elem, annotationClass, propertyName);
-        return getClassValuesFromAnnotationValue(annotationValue);
+        return getTypeNamesFromAnnotationValue(annotationValue);
     }
     
     public List<TypeMirror> getClassMirrorsFromAnnotation(Element elem, Class<?> annotationClass, String propertyName) {
         AnnotationValue annotationValue = getAnnotationValue(elem, annotationClass, propertyName);
-        return getClassMirrorsFromAnnotationValue(annotationValue);
-    }
-    
-    public List<String> getStringValuesFromAnnotation(Element elem, Class<?> annotationClass, String propertyName) {
-        AnnotationValue annotationValue = getAnnotationValue(elem, annotationClass, propertyName);
-        return getStringValuesFromAnnotationValue(annotationValue);
+        return getTypeMirrorsFromAnnotationValue(annotationValue);
     }
 
-    public List<DeclaredTypeName> getClassValuesFromAnnotationValue(AnnotationValue annotationValue) {
+    public List<DeclaredTypeName> getTypeNamesFromAnnotationValue(AnnotationValue annotationValue) {
         return mapValuesFromAnnotationValue(annotationValue, TypeMirror.class, new Mapper<TypeMirror, DeclaredTypeName>() {
             @Override
             public DeclaredTypeName map(TypeMirror arg) {
@@ -420,15 +415,11 @@ public class Utils {
         });
     }
     
-    public List<TypeMirror> getClassMirrorsFromAnnotationValue(AnnotationValue annotationValue) {
+    public List<TypeMirror> getTypeMirrorsFromAnnotationValue(AnnotationValue annotationValue) {
         return getValuesFromAnnotationValue(annotationValue, TypeMirror.class);
     }
-
-    public List<String> getStringValuesFromAnnotationValue(AnnotationValue annotationValue) {
-        return getValuesFromAnnotationValue(annotationValue, String.class);
-    }
     
-    private <T> List<T> getValuesFromAnnotationValue(AnnotationValue annotationValue, Class<T> valueClass) {
+    public <T> List<T> getValuesFromAnnotationValue(AnnotationValue annotationValue, Class<T> valueClass) {
         return mapValuesFromAnnotationValue(annotationValue, valueClass, new Mapper<T, T>() {
             @Override
             public T map(T arg) {
