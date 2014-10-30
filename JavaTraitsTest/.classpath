@@ -7,7 +7,7 @@
 			<attribute name="optional" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="libs/javatraits.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="libs/java-traits.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

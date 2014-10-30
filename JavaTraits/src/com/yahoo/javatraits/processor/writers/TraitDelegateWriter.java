@@ -70,19 +70,19 @@ public class TraitDelegateWriter {
 
     private void emitImports() throws IOException {
         Set<DeclaredTypeName> imports = new HashSet<DeclaredTypeName>();
-        utils.accumulateImportsFromExecutableElements(imports, traitElement.getDeclaredMethods());
+        utils.accumulateImportsFromElements(imports, traitElement.getDeclaredMethods());
         for (ExecutableElement e : traitElement.getDeclaredMethods()) {
             if (utils.isGetThis(traitElement, e)) {
                 imports.add(traitElement.getInterfaceName());
             }
         }
         imports.add(delegateClass);
-        imports.add(traitElement.getFullyQualifiedName());
+        imports.add(traitElement.getElementName());
         writer.writeImports(imports);
     }
 
     private void emitDelegateDeclaration() throws IOException {
-        DeclaredTypeName superclass = traitElement.getFullyQualifiedName().clone();
+        DeclaredTypeName superclass = traitElement.getElementName().clone();
         superclass.setTypeArgs(traitElement.getTypeParameters());
         
         TypeDeclarationParameters params = new TypeDeclarationParameters()

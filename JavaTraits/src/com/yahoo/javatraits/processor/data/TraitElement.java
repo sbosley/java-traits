@@ -51,10 +51,10 @@ public class TraitElement extends TypeElementWrapper {
                 declaredMethods.add(exec);
             }
         }
-        interfaceName = new DeclaredTypeName(fqn.getPackageName(), INTERFACE_PREFIX + fqn.getSimpleName());
+        interfaceName = new DeclaredTypeName(elementName.getPackageName(), INTERFACE_PREFIX + elementName.getSimpleName());
         interfaceName.setTypeArgs(getTypeParameters());
 
-        delegateName = new DeclaredTypeName(fqn.getPackageName(), fqn.getSimpleName() + DELEGATE_SUFFIX);
+        delegateName = new DeclaredTypeName(elementName.getPackageName(), elementName.getSimpleName() + DELEGATE_SUFFIX);
         delegateName.setTypeArgs(getTypeParameters());
     }
 

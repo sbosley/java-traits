@@ -97,7 +97,7 @@ public class ClassWithTraits extends TypeElementWrapper {
             desiredSuperclass = new DeclaredTypeName(Utils.OBJECT_CLASS_NAME);
         }
 
-        generatedSuperclass = new DeclaredTypeName(fqn.toString() + GEN_SUFFIX);
+        generatedSuperclass = new DeclaredTypeName(elementName.toString() + GEN_SUFFIX);
     }
 
     private void initPreferValues() {

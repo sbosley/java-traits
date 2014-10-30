@@ -56,10 +56,10 @@ public class Utils {
         return types;
     }
 
-    public void accumulateImportsFromExecutableElements(Set<DeclaredTypeName> accumulate, List<? extends ExecutableElement> elems) {
-        for (ExecutableElement exec : elems) {
-            ImportGatheringTypeVisitor visitor = new ImportGatheringTypeVisitor(exec, messager, this);
-            exec.asType().accept(visitor, accumulate);
+    public void accumulateImportsFromElements(Set<DeclaredTypeName> accumulate, List<? extends Element> elems) {
+        for (Element elem : elems) {
+            ImportGatheringTypeVisitor visitor = new ImportGatheringTypeVisitor(elem, messager, this);
+            elem.asType().accept(visitor, accumulate);
         }
     }
 

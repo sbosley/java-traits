@@ -18,13 +18,13 @@ public abstract class TypeElementWrapper {
 
     protected TypeElement elem;
     protected Utils utils;
-    protected DeclaredTypeName fqn;
+    protected DeclaredTypeName elementName;
     protected List<TypeName> typeParameters;
     
     public TypeElementWrapper(TypeElement elem, Utils utils) {
         this.elem = elem;
         this.utils = utils;
-        this.fqn = new DeclaredTypeName(elem.getQualifiedName().toString());
+        this.elementName = new DeclaredTypeName(elem.getQualifiedName().toString());
         this.typeParameters = initTypeParameters(elem);
     }
     
@@ -37,20 +37,16 @@ public abstract class TypeElementWrapper {
         return elem;
     }
 
-    public DeclaredTypeName getFullyQualifiedName() {
-        return fqn;
-    }
-
-    public String getFullyQualifiedNameAsString() {
-        return fqn.toString();
+    public DeclaredTypeName getElementName() {
+        return elementName;
     }
 
     public String getPackageName() {
-        return fqn.getPackageName();
+        return elementName.getPackageName();
     }
 
     public String getSimpleName() {
-        return fqn.getSimpleName();
+        return elementName.getSimpleName();
     }
     
     public List<TypeName> getTypeParameters() {

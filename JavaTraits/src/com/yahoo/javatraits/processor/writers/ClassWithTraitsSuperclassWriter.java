@@ -80,7 +80,7 @@ public class ClassWithTraitsSuperclassWriter {
         Set<DeclaredTypeName> imports = new HashSet<DeclaredTypeName>();
         for (TraitElement elem : allTraits) {
             List<? extends ExecutableElement> declaredMethods = elem.getDeclaredMethods();
-            utils.accumulateImportsFromExecutableElements(imports, declaredMethods);
+            utils.accumulateImportsFromElements(imports, declaredMethods);
             imports.add(elem.getDelegateName());
             imports.add(elem.getInterfaceName());
         }
@@ -202,7 +202,7 @@ public class ClassWithTraitsSuperclassWriter {
                 int index = 0;
                 for (index = 0; index < allExecElems.size(); index++) {
                     Pair<TraitElement, ExecutableElement> item = allExecElems.get(index);
-                    if (item.getLeft().getFullyQualifiedName().equals(preferTarget)) {
+                    if (item.getLeft().getElementName().equals(preferTarget)) {
                         break;
                     }
                 }

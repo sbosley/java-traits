@@ -62,7 +62,7 @@ public class TraitInterfaceWriter {
 
     private void emitImports() throws IOException {
         Set<DeclaredTypeName> imports = new HashSet<DeclaredTypeName>();
-        utils.accumulateImportsFromExecutableElements(imports, element.getDeclaredMethods());
+        utils.accumulateImportsFromElements(imports, element.getDeclaredMethods());
         writer.writeImports(imports);
     }
 
