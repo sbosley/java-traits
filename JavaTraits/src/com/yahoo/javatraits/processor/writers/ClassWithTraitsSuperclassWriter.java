@@ -52,9 +52,9 @@ public class ClassWithTraitsSuperclassWriter {
     public void writeClass(Filer filer) {
         try {
             if (writer != null) {
-                throw new IllegalStateException("Already created source file for " + cls.getFullyQualifiedGeneratedSuperclassName().toString());
+                throw new IllegalStateException("Already created source file for " + cls.getGeneratedSuperclassName().toString());
             }
-            JavaFileObject jfo = filer.createSourceFile(cls.getFullyQualifiedGeneratedSuperclassName().toString(),
+            JavaFileObject jfo = filer.createSourceFile(cls.getGeneratedSuperclassName().toString(),
                     cls.getSourceElement());
             Writer out = jfo.openWriter();
             writer = new JavaFileWriter(out);
@@ -114,7 +114,7 @@ public class ClassWithTraitsSuperclassWriter {
                 generics.addAll(elem.getTypeParameters());
             }
         }
-        DeclaredTypeName superclassName = cls.getFullyQualifiedGeneratedSuperclassName().clone();
+        DeclaredTypeName superclassName = cls.getGeneratedSuperclassName().clone();
         superclassName.setTypeArgs(generics);
 
         List<DeclaredTypeName> interfaces = null;
@@ -129,7 +129,7 @@ public class ClassWithTraitsSuperclassWriter {
         TypeDeclarationParameters params = new TypeDeclarationParameters()
             .setName(superclassName)
             .setKind(Type.CLASS)
-            .setModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+            .setModifiers(Modifier.ABSTRACT)
             .setSuperclass(cls.getDesiredSuperclass())
             .setInterfaces(interfaces);
 

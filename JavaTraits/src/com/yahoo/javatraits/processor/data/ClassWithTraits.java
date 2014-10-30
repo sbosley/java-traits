@@ -29,8 +29,8 @@ public class ClassWithTraits extends TypeElementWrapper {
     private List<TraitElement> traitClasses;
 
     private DeclaredTypeName desiredSuperclass;
-
     private DeclaredTypeName generatedSuperclass;
+
     private Map<String, DeclaredTypeName> prefer;
 
     public ClassWithTraits(TypeElement elem, Utils utils) {
@@ -122,7 +122,7 @@ public class ClassWithTraits extends TypeElementWrapper {
         }
     }
 
-    public DeclaredTypeName getFullyQualifiedGeneratedSuperclassName() {
+    public DeclaredTypeName getGeneratedSuperclassName() {
         return generatedSuperclass;
     }
 
