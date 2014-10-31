@@ -55,7 +55,7 @@ public class TraitDelegateWriter {
             emitDelegate();
             writer.close();
         } catch (FilerException e) {
-            utils.getMessager().printMessage(Kind.WARNING, "FilerException creating trait delegate file " + traitDelegateClass + ": " + e.getMessage(), traitElement.getSourceElement());
+            utils.getMessager().printMessage(Kind.ERROR, "FilerException creating trait delegate file " + traitDelegateClass + ": " + e.getMessage(), traitElement.getSourceElement());
         } catch (IOException e) {
             utils.getMessager().printMessage(Kind.ERROR, "IOException writing trait delegate class " + traitDelegateClass + ": " + e.getMessage(), traitElement.getSourceElement());
         }

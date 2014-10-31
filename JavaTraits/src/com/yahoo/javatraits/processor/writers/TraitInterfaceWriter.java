@@ -47,7 +47,7 @@ public class TraitInterfaceWriter {
             emitInterface();
             writer.close();
         } catch (FilerException e) {
-            utils.getMessager().printMessage(Kind.WARNING, "FilerException creating trait interface file " + element.getInterfaceName() + ": " + e.getMessage(), element.getSourceElement());
+            utils.getMessager().printMessage(Kind.ERROR, "FilerException creating trait interface file " + element.getInterfaceName() + ": " + e.getMessage(), element.getSourceElement());
         } catch (IOException e) {
             utils.getMessager().printMessage(Kind.ERROR, "IOException writing trait interface " + element.getInterfaceName() + ": " + e.getMessage(), element.getSourceElement());
         }

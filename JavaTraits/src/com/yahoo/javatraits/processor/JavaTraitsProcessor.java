@@ -19,10 +19,8 @@ public abstract class JavaTraitsProcessor extends AbstractProcessor {
     protected TraitProcessorUtils utils;
     protected Filer filer;
     
-    protected Set<? extends Element> elements = null;
-    
     protected abstract Class<? extends Annotation> getAnnotationClass();
-    protected abstract void processElements();
+    protected abstract void processElements(Set<? extends Element> elements);
     
     @Override
     public synchronized void init(ProcessingEnvironment env) {
@@ -35,22 +33,8 @@ public abstract class JavaTraitsProcessor extends AbstractProcessor {
     
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
-        initializeElements(env);
-        
-        if (elements != null) {
-            processElements();
-        }
-        
+        processElements(env.getElementsAnnotatedWith(getAnnotationClass()));
         return true;
-    }
-    
-    private void initializeElements(RoundEnvironment env) {
-        if (elements == null) {
-            Set<? extends Element> foundElements = env.getElementsAnnotatedWith(getAnnotationClass());
-            if (foundElements.size() > 0) {
-                this.elements = foundElements;
-            }
-        }
     }
 
 }

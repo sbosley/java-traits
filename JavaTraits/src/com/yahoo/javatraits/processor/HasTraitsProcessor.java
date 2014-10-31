@@ -3,6 +3,7 @@ package com.yahoo.javatraits.processor;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
@@ -26,13 +27,13 @@ public class HasTraitsProcessor extends JavaTraitsProcessor {
     }
     
     @Override
-    protected void processElements() {
-        List<ClassWithTraits> classesWithTraits = getClassesWithTraits();
+    protected void processElements(Set<? extends Element> elements) {
+        List<ClassWithTraits> classesWithTraits = getClassesWithTraits(elements);
         
         generateTraitImplementingSuperclasses(classesWithTraits);
     }
     
-    private List<ClassWithTraits> getClassesWithTraits() {
+    private List<ClassWithTraits> getClassesWithTraits(Set<? extends Element> elements) {
         List<ClassWithTraits> result = new ArrayList<ClassWithTraits>();
         for (Element e : elements) {
             if (e.getKind() != ElementKind.CLASS) {

@@ -62,7 +62,7 @@ public class ClassWithTraitsSuperclassWriter {
             emitClassDefinition();
             writer.close();
         } catch (FilerException e) {
-            utils.getMessager().printMessage(Kind.WARNING, "FilerException creating superclass " + cls.getGeneratedSuperclassName() + ": " + e.getMessage(), cls.getSourceElement());
+            utils.getMessager().printMessage(Kind.ERROR, "FilerException creating superclass " + cls.getGeneratedSuperclassName() + ": " + e.getMessage(), cls.getSourceElement());
         } catch (IOException e) {
             utils.getMessager().printMessage(Kind.ERROR, "IOException writing superclass " + cls.getGeneratedSuperclassName() + " for trait: " + e.getMessage(), cls.getSourceElement());
         }

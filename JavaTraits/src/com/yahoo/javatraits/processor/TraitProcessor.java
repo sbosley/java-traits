@@ -8,6 +8,7 @@ package com.yahoo.javatraits.processor;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
@@ -32,14 +33,14 @@ public class TraitProcessor extends JavaTraitsProcessor {
     }
 
     @Override
-    protected void processElements() {
-        List<TraitElement> traitMap = getTraitElements();
+    protected void processElements(Set<? extends Element> elements) {
+        List<TraitElement> traitMap = getTraitElements(elements);
         
         generateTraitInterfaces(traitMap);
         generateTraitDelegates(traitMap);
     }
 
-    private List<TraitElement> getTraitElements() {
+    private List<TraitElement> getTraitElements(Set<? extends Element> elements) {
         List<TraitElement> result = new ArrayList<TraitElement>();
 
         for (Element e : elements) {
