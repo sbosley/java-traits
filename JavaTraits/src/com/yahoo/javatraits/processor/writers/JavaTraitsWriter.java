@@ -10,13 +10,9 @@ import javax.annotation.processing.FilerException;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
-import java.io.Writer;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Created by Sam on 10/31/14.
- */
 public abstract class JavaTraitsWriter<T extends TypeElementWrapper> {
 
     protected final T element;
@@ -34,8 +30,7 @@ public abstract class JavaTraitsWriter<T extends TypeElementWrapper> {
                 throw new IllegalStateException("Already created source file for " + getClassNameToGenerate());
             }
             JavaFileObject jfo = filer.createSourceFile(getClassNameToGenerate().toString(), element.getSourceElement());
-            Writer out = jfo.openWriter();
-            writer = new JavaFileWriter(out);
+            writer = new JavaFileWriter(jfo.openWriter());
             writeFile();
             writer.close();
         } catch (FilerException e) {

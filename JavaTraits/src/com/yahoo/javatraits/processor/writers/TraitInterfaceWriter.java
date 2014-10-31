@@ -5,25 +5,17 @@
  */
 package com.yahoo.javatraits.processor.writers;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.annotation.processing.Filer;
-import javax.annotation.processing.FilerException;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.tools.Diagnostic.Kind;
-import javax.tools.JavaFileObject;
-
 import com.yahoo.annotations.model.DeclaredTypeName;
-import com.yahoo.annotations.writer.JavaFileWriter;
 import com.yahoo.annotations.writer.JavaFileWriter.Type;
 import com.yahoo.annotations.writer.parameters.MethodDeclarationParameters;
 import com.yahoo.annotations.writer.parameters.TypeDeclarationParameters;
 import com.yahoo.javatraits.processor.data.TraitElement;
 import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
+
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import java.io.IOException;
+import java.util.Set;
 
 public class TraitInterfaceWriter extends JavaTraitsWriter<TraitElement> {
 

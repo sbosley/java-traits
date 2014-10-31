@@ -42,8 +42,7 @@ public class ClassWithTraitsSuperclassWriter extends JavaTraitsWriter<ClassWithT
     @Override
     protected void gatherImports(Set<DeclaredTypeName> imports) {
         for (TraitElement elem : allTraits) {
-            List<? extends ExecutableElement> declaredMethods = elem.getDeclaredMethods();
-            utils.accumulateImportsFromElements(imports, declaredMethods);
+            utils.accumulateImportsFromElements(imports, elem.getDeclaredMethods());
             imports.add(elem.getDelegateName());
             imports.add(elem.getInterfaceName());
         }
@@ -196,7 +195,7 @@ public class ClassWithTraitsSuperclassWriter extends JavaTraitsWriter<ClassWithT
         if (exec.getReturnType().getKind() != TypeKind.VOID) {
             body = body.returnExpr();
         }
-        writer.writeStatement(body);
-        writer.finishMethodDefinition();
+        writer.writeStatement(body)
+            .finishMethodDefinition();
     }
 }

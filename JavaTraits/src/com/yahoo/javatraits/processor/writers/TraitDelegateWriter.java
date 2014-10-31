@@ -24,12 +24,12 @@ import java.util.Set;
 public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
 
     private DeclaredTypeName traitDelegateClass;
-    private DeclaredTypeName delegateClass;
+    private DeclaredTypeName delegateInterface;
 
     public TraitDelegateWriter(TraitElement traitElement, TraitProcessorUtils utils) {
         super(traitElement, utils);
         this.traitDelegateClass = traitElement.getDelegateName();
-        this.delegateClass = traitElement.getInterfaceName();
+        this.delegateInterface = traitElement.getInterfaceName();
     }
 
     @Override
@@ -40,13 +40,6 @@ public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
     @Override
     protected void gatherImports(Set<DeclaredTypeName> imports) {
         utils.accumulateImportsFromElements(imports, element.getDeclaredMethods());
-        for (ExecutableElement e : element.getDeclaredMethods()) {
-            if (utils.isGetThis(element, e)) {
-                imports.add(element.getInterfaceName());
-            }
-        }
-        imports.add(delegateClass);
-        imports.add(element.getElementName());
     }
 
     protected void writeClassDefinition() throws IOException {
@@ -59,6 +52,7 @@ public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
             .setModifiers(Modifier.PUBLIC, Modifier.FINAL)
             .setSuperclass(superclass);
 
+        writer.registerOtherKnownNames(delegateInterface, element.getElementName());
         writer.beginTypeDefinition(params);
 
         emitDelegateInstance();
@@ -70,19 +64,20 @@ public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
     }
 
     private void emitDelegateInstance() throws IOException {
-        writer.writeFieldDeclaration(delegateClass, "delegate", null, Modifier.PRIVATE);
+        writer.writeFieldDeclaration(delegateInterface, "delegate", null, Modifier.PRIVATE);
     }
 
     private void emitConstructor() throws IOException {
         MethodDeclarationParameters params = new MethodDeclarationParameters()
             .setConstructorName(traitDelegateClass)
             .setModifiers(Modifier.PUBLIC)
-            .setArgumentTypes(delegateClass)
+            .setArgumentTypes(delegateInterface)
             .setArgumentNames("delegate");
 
-        writer.beginConstructorDeclaration(params);
-        writer.writeStatement(Expressions.assign(Expressions.reference("this", "delegate"), Expressions.reference("delegate")));
-        writer.finishMethodDefinition();
+        writer.beginConstructorDeclaration(params)
+            .writeStringStatement("super()")
+            .writeStatement(Expressions.assign(Expressions.reference("this", "delegate"), Expressions.reference("delegate")))
+            .finishMethodDefinition();
     }
 
     private void emitDefaultMethodImplementations() throws IOException {
@@ -108,12 +103,12 @@ public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
     private void emitGetThis() throws IOException {
         MethodDeclarationParameters params = new MethodDeclarationParameters()
             .setMethodName(TraitProcessorUtils.GET_THIS)
-            .setReturnType(delegateClass)
+            .setReturnType(delegateInterface)
             .setModifiers(Modifier.PUBLIC);
 
-        writer.beginMethodDefinition(params);
-        writer.writeStatement(Expressions.reference("delegate").returnExpr());
-        writer.finishMethodDefinition();
+        writer.beginMethodDefinition(params)
+            .writeStatement(Expressions.reference("delegate").returnExpr())
+            .finishMethodDefinition();
     }
 
     private void emitMethodDeclaration(ExecutableElement exec, boolean isDefault, Modifier... modifiers) throws IOException {
@@ -127,8 +122,8 @@ public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
         if (exec.getReturnType().getKind() != TypeKind.VOID) {
             methodInvocation = methodInvocation.returnExpr();
         }
-        writer.writeStatement(methodInvocation);
-        writer.finishMethodDefinition();
+        writer.writeStatement(methodInvocation)
+            .finishMethodDefinition();
     }
 
 }

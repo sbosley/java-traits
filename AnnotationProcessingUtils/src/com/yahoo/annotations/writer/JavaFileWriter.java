@@ -85,10 +85,12 @@ public class JavaFileWriter {
                 }
             }
         }
-        for (String item : sortedImports) {
-            out.append("import ").append(item).append(";\n");
+        if (!Utils.isEmpty(sortedImports)) {
+            for (String item : sortedImports) {
+                out.append("import ").append(item).append(";\n");
+            }
+            out.append("\n");
         }
-        out.append("\n");
         finishScope(Scope.IMPORTS);
         return this;
     }
