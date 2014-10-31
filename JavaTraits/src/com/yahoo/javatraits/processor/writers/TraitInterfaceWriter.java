@@ -25,51 +25,23 @@ import com.yahoo.annotations.writer.parameters.TypeDeclarationParameters;
 import com.yahoo.javatraits.processor.data.TraitElement;
 import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
 
-public class TraitInterfaceWriter {
-
-    private final TraitElement element;
-    private TraitProcessorUtils utils;
-    private JavaFileWriter writer = null;
+public class TraitInterfaceWriter extends JavaTraitsWriter<TraitElement> {
 
     public TraitInterfaceWriter(TraitElement element, TraitProcessorUtils utils) {
-        this.element = element;
-        this.utils = utils;
+        super(element, utils);
     }
 
-    public void writeInterface(Filer filer) {
-        try {
-            if (writer != null) {
-                throw new IllegalStateException("Already created source file for " + element.getInterfaceName());
-            }
-            JavaFileObject jfo = filer.createSourceFile(element.getInterfaceName().toString(), element.getSourceElement());
-            Writer out = jfo.openWriter();
-            writer = new JavaFileWriter(out);
-            emitInterface();
-            writer.close();
-        } catch (FilerException e) {
-            utils.getMessager().printMessage(Kind.ERROR, "FilerException creating trait interface file " + element.getInterfaceName() + ": " + e.getMessage(), element.getSourceElement());
-        } catch (IOException e) {
-            utils.getMessager().printMessage(Kind.ERROR, "IOException writing trait interface " + element.getInterfaceName() + ": " + e.getMessage(), element.getSourceElement());
-        }
+    @Override
+    protected DeclaredTypeName getClassNameToGenerate() {
+        return element.getInterfaceName();
     }
 
-    private void emitInterface() throws IOException {
-        emitPackage();
-        emitImports();
-        emitInterfaceDeclaration();
-    }
-
-    private void emitPackage() throws IOException {
-        writer.writePackage(element.getPackageName());
-    }
-
-    private void emitImports() throws IOException {
-        Set<DeclaredTypeName> imports = new HashSet<DeclaredTypeName>();
+    @Override
+    protected void gatherImports(Set<DeclaredTypeName> imports) {
         utils.accumulateImportsFromElements(imports, element.getDeclaredMethods());
-        writer.writeImports(imports);
     }
 
-    private void emitInterfaceDeclaration() throws IOException {
+    protected void writeClassDefinition() throws IOException {
         TypeDeclarationParameters params = new TypeDeclarationParameters()
             .setName(element.getInterfaceName())
             .setKind(Type.INTERFACE)

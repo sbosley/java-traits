@@ -8,6 +8,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="libs/java-traits.jar"/>
+	<classpathentry kind="lib" path="/Users/Sam/Code/java-traits/out/artifacts/JavaTraits_jar/java-traits.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

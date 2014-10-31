@@ -34,10 +34,9 @@ public class TraitProcessor extends JavaTraitsProcessor {
 
     @Override
     protected void processElements(Set<? extends Element> elements) {
-        List<TraitElement> traitMap = getTraitElements(elements);
+        List<TraitElement> traitElements = getTraitElements(elements);
         
-        generateTraitInterfaces(traitMap);
-        generateTraitDelegates(traitMap);
+        generateTraitInterfacesAndDelegates(traitElements);
     }
 
     private List<TraitElement> getTraitElements(Set<? extends Element> elements) {
@@ -55,15 +54,10 @@ public class TraitProcessor extends JavaTraitsProcessor {
         return result;
     }
 
-    private void generateTraitInterfaces(List<TraitElement> traitElements) {
-        for (TraitElement te : traitElements) {
-            new TraitInterfaceWriter(te, utils).writeInterface(filer);
-        }
-    }
-
-    private void generateTraitDelegates(List<TraitElement> traitElements) {
+    private void generateTraitInterfacesAndDelegates(List<TraitElement> traitElements) {
         for (TraitElement trait : traitElements) {
-            new TraitDelegateWriter(trait, utils).writeDelegate(filer);
+            new TraitInterfaceWriter(trait, utils).writeClass(filer);
+            new TraitDelegateWriter(trait, utils).writeClass(filer);
         }
     }
 }

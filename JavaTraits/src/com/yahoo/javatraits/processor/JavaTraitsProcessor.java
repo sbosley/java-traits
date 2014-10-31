@@ -21,7 +21,7 @@ public abstract class JavaTraitsProcessor extends AbstractProcessor {
     
     protected abstract Class<? extends Annotation> getAnnotationClass();
     protected abstract void processElements(Set<? extends Element> elements);
-    
+
     @Override
     public synchronized void init(ProcessingEnvironment env) {
         super.init(env);

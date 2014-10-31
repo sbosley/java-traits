@@ -5,22 +5,7 @@
  */
 package com.yahoo.javatraits.processor.writers;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.annotation.processing.Filer;
-import javax.annotation.processing.FilerException;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.type.TypeKind;
-import javax.tools.Diagnostic.Kind;
-import javax.tools.JavaFileObject;
-
 import com.yahoo.annotations.model.DeclaredTypeName;
-import com.yahoo.annotations.writer.JavaFileWriter;
 import com.yahoo.annotations.writer.JavaFileWriter.Type;
 import com.yahoo.annotations.writer.expressions.Expression;
 import com.yahoo.annotations.writer.expressions.Expressions;
@@ -29,64 +14,44 @@ import com.yahoo.annotations.writer.parameters.TypeDeclarationParameters;
 import com.yahoo.javatraits.processor.data.TraitElement;
 import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
 
-public class TraitDelegateWriter {
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.type.TypeKind;
+import java.io.IOException;
+import java.util.List;
+import java.util.Set;
 
-    private TraitElement traitElement;
-    private TraitProcessorUtils utils;
+public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
+
     private DeclaredTypeName traitDelegateClass;
     private DeclaredTypeName delegateClass;
-    private JavaFileWriter writer;
 
     public TraitDelegateWriter(TraitElement traitElement, TraitProcessorUtils utils) {
-        this.traitElement = traitElement;
-        this.utils = utils;
+        super(traitElement, utils);
         this.traitDelegateClass = traitElement.getDelegateName();
         this.delegateClass = traitElement.getInterfaceName();
     }
 
-    public void writeDelegate(Filer filer) {
-        try {
-            if (writer != null) {
-                throw new IllegalStateException("Already created source file for " + traitDelegateClass.toString());
-            }
-            JavaFileObject jfo = filer.createSourceFile(traitDelegateClass.toString(), traitElement.getSourceElement());
-            Writer out = jfo.openWriter();
-            writer = new JavaFileWriter(out);
-            emitDelegate();
-            writer.close();
-        } catch (FilerException e) {
-            utils.getMessager().printMessage(Kind.ERROR, "FilerException creating trait delegate file " + traitDelegateClass + ": " + e.getMessage(), traitElement.getSourceElement());
-        } catch (IOException e) {
-            utils.getMessager().printMessage(Kind.ERROR, "IOException writing trait delegate class " + traitDelegateClass + ": " + e.getMessage(), traitElement.getSourceElement());
-        }
+    @Override
+    protected DeclaredTypeName getClassNameToGenerate() {
+        return traitDelegateClass;
     }
 
-    private void emitDelegate() throws IOException {
-        emitPackage();
-        emitImports();
-        emitDelegateDeclaration();
-    }
-
-    private void emitPackage() throws IOException {
-        writer.writePackage(traitDelegateClass.getPackageName());
-    }
-
-    private void emitImports() throws IOException {
-        Set<DeclaredTypeName> imports = new HashSet<DeclaredTypeName>();
-        utils.accumulateImportsFromElements(imports, traitElement.getDeclaredMethods());
-        for (ExecutableElement e : traitElement.getDeclaredMethods()) {
-            if (utils.isGetThis(traitElement, e)) {
-                imports.add(traitElement.getInterfaceName());
+    @Override
+    protected void gatherImports(Set<DeclaredTypeName> imports) {
+        utils.accumulateImportsFromElements(imports, element.getDeclaredMethods());
+        for (ExecutableElement e : element.getDeclaredMethods()) {
+            if (utils.isGetThis(element, e)) {
+                imports.add(element.getInterfaceName());
             }
         }
         imports.add(delegateClass);
-        imports.add(traitElement.getElementName());
-        writer.writeImports(imports);
+        imports.add(element.getElementName());
     }
 
-    private void emitDelegateDeclaration() throws IOException {
-        DeclaredTypeName superclass = traitElement.getElementName().clone();
-        superclass.setTypeArgs(traitElement.getTypeParameters());
+    protected void writeClassDefinition() throws IOException {
+        DeclaredTypeName superclass = element.getElementName().clone();
+        superclass.setTypeArgs(element.getTypeParameters());
         
         TypeDeclarationParameters params = new TypeDeclarationParameters()
             .setName(traitDelegateClass)
@@ -121,7 +86,7 @@ public class TraitDelegateWriter {
     }
 
     private void emitDefaultMethodImplementations() throws IOException {
-        List<? extends ExecutableElement> allMethods = traitElement.getDeclaredMethods();
+        List<? extends ExecutableElement> allMethods = element.getDeclaredMethods();
         for (ExecutableElement exec : allMethods) {
             if (!exec.getModifiers().contains(Modifier.ABSTRACT)) {
                 emitMethodDeclaration(exec, true, Modifier.PUBLIC, Modifier.FINAL);
@@ -130,9 +95,9 @@ public class TraitDelegateWriter {
     }
 
     private void emitDelegateMethodImplementations() throws IOException {
-        List<? extends ExecutableElement> allMethods = traitElement.getDeclaredMethods();
+        List<? extends ExecutableElement> allMethods = element.getDeclaredMethods();
         for (ExecutableElement exec : allMethods) {
-            if (utils.isGetThis(traitElement, exec)) {
+            if (utils.isGetThis(element, exec)) {
                 emitGetThis();
             } else {
                 emitMethodDeclaration(exec, false, Modifier.PUBLIC);
@@ -153,7 +118,7 @@ public class TraitDelegateWriter {
 
     private void emitMethodDeclaration(ExecutableElement exec, boolean isDefault, Modifier... modifiers) throws IOException {
         String name = isDefault ? "default__" + exec.getSimpleName().toString() : null;
-        MethodDeclarationParameters methodDeclaration = utils.methodDeclarationParamsFromExecutableElement(exec, name, traitElement.getSimpleName(), modifiers);
+        MethodDeclarationParameters methodDeclaration = utils.methodDeclarationParamsFromExecutableElement(exec, name, element.getSimpleName(), modifiers);
         writer.beginMethodDefinition(methodDeclaration);
         
         String callTo = isDefault ? "super" : "delegate";

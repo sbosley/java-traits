@@ -5,29 +5,11 @@
  */
 package com.yahoo.javatraits.processor.writers;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.processing.Filer;
-import javax.annotation.processing.FilerException;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.type.TypeKind;
-import javax.tools.Diagnostic.Kind;
-import javax.tools.JavaFileObject;
-
 import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.model.MethodSignature;
 import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.utils.Pair;
 import com.yahoo.annotations.utils.Utils;
-import com.yahoo.annotations.writer.JavaFileWriter;
 import com.yahoo.annotations.writer.JavaFileWriter.Type;
 import com.yahoo.annotations.writer.expressions.Expression;
 import com.yahoo.annotations.writer.expressions.Expressions;
@@ -37,60 +19,39 @@ import com.yahoo.javatraits.processor.data.ClassWithTraits;
 import com.yahoo.javatraits.processor.data.TraitElement;
 import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
 
-public class ClassWithTraitsSuperclassWriter {
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.type.TypeKind;
+import java.io.IOException;
+import java.util.*;
 
-    private ClassWithTraits cls;
-    private TraitProcessorUtils utils;
+public class ClassWithTraitsSuperclassWriter extends JavaTraitsWriter<ClassWithTraits> {
+
     private List<TraitElement> allTraits;
-    private JavaFileWriter writer;
 
     public ClassWithTraitsSuperclassWriter(ClassWithTraits cls, TraitProcessorUtils utils) {
-        this.cls = cls;
-        this.utils = utils;
+        super(cls, utils);
         this.allTraits = cls.getTraitClasses();
     }
 
-    public void writeClass(Filer filer) {
-        try {
-            if (writer != null) {
-                throw new IllegalStateException("Already created source file for " + cls.getGeneratedSuperclassName().toString());
-            }
-            JavaFileObject jfo = filer.createSourceFile(cls.getGeneratedSuperclassName().toString(),
-                    cls.getSourceElement());
-            Writer out = jfo.openWriter();
-            writer = new JavaFileWriter(out);
-            emitClassDefinition();
-            writer.close();
-        } catch (FilerException e) {
-            utils.getMessager().printMessage(Kind.ERROR, "FilerException creating superclass " + cls.getGeneratedSuperclassName() + ": " + e.getMessage(), cls.getSourceElement());
-        } catch (IOException e) {
-            utils.getMessager().printMessage(Kind.ERROR, "IOException writing superclass " + cls.getGeneratedSuperclassName() + " for trait: " + e.getMessage(), cls.getSourceElement());
-        }
+    @Override
+    protected DeclaredTypeName getClassNameToGenerate() {
+        return element.getGeneratedSuperclassName();
     }
 
-    private void emitClassDefinition() throws IOException {
-        emitPackage();
-        emitImports();
-        emitClassDeclaration();
-    }
-
-    private void emitPackage() throws IOException {
-        writer.writePackage(cls.getPackageName());
-    }
-
-    private void emitImports() throws IOException {
-        Set<DeclaredTypeName> imports = new HashSet<DeclaredTypeName>();
+    @Override
+    protected void gatherImports(Set<DeclaredTypeName> imports) {
         for (TraitElement elem : allTraits) {
             List<? extends ExecutableElement> declaredMethods = elem.getDeclaredMethods();
             utils.accumulateImportsFromElements(imports, declaredMethods);
             imports.add(elem.getDelegateName());
             imports.add(elem.getInterfaceName());
         }
-        DeclaredTypeName desiredSuperclass = cls.getDesiredSuperclass();
+        DeclaredTypeName desiredSuperclass = element.getDesiredSuperclass();
         if (!Utils.OBJECT_CLASS_NAME.equals(desiredSuperclass.toString())) {
             imports.add(desiredSuperclass);
-            if (cls.superclassHasTypeArgs()) {
-                List<? extends TypeName> superclassTypeArgs = cls.getDesiredSuperclass().getTypeArgs();
+            if (element.superclassHasTypeArgs()) {
+                List<? extends TypeName> superclassTypeArgs = element.getDesiredSuperclass().getTypeArgs();
                 for (TypeName t : superclassTypeArgs) {
                     if (t instanceof DeclaredTypeName) {
                         imports.add((DeclaredTypeName) t);
@@ -98,14 +59,12 @@ public class ClassWithTraitsSuperclassWriter {
                 }
             }
         }
-
-        writer.writeImports(imports);
     }
 
-    private void emitClassDeclaration() throws IOException {
+    protected void writeClassDefinition() throws IOException {
         List<TypeName> generics = new ArrayList<TypeName>();
-        if (cls.superclassHasTypeArgs()) {
-            for (TypeName t : cls.getDesiredSuperclass().getTypeArgs()) {
+        if (element.superclassHasTypeArgs()) {
+            for (TypeName t : element.getDesiredSuperclass().getTypeArgs()) {
                 if (!(t instanceof DeclaredTypeName)) {
                     generics.add(t);
                 }
@@ -116,14 +75,13 @@ public class ClassWithTraitsSuperclassWriter {
                 generics.addAll(elem.getTypeParameters());
             }
         }
-        DeclaredTypeName superclassName = cls.getGeneratedSuperclassName().clone();
+        DeclaredTypeName superclassName = element.getGeneratedSuperclassName().clone();
         superclassName.setTypeArgs(generics);
 
         List<DeclaredTypeName> interfaces = null;
         if (allTraits.size() > 0) {
             interfaces = new ArrayList<DeclaredTypeName>();
-            for (int i = 0; i < allTraits.size(); i++) {
-                TraitElement elem = allTraits.get(i);
+            for (TraitElement elem : allTraits) {
                 interfaces.add(elem.getInterfaceName());
             }
         }
@@ -132,7 +90,7 @@ public class ClassWithTraitsSuperclassWriter {
             .setName(superclassName)
             .setKind(Type.CLASS)
             .setModifiers(Modifier.ABSTRACT)
-            .setSuperclass(cls.getDesiredSuperclass())
+            .setSuperclass(element.getDesiredSuperclass())
             .setInterfaces(interfaces);
 
         writer.beginTypeDefinition(params);
@@ -195,13 +153,13 @@ public class ClassWithTraitsSuperclassWriter {
     private void reorderDuplicatesForPreferValues(Set<MethodSignature> duplicateMethods,
             Map<MethodSignature, List<Pair<TraitElement, ExecutableElement>>> methodToExecElements) {
         
-        Map<String, DeclaredTypeName> prefer = cls.getPreferMap();
+        Map<String, DeclaredTypeName> prefer = element.getPreferMap();
         for (MethodSignature dup : duplicateMethods) {
             String simpleMethodName = dup.getMethodName();
             if (prefer.containsKey(simpleMethodName)) {
                 DeclaredTypeName preferTarget = prefer.get(simpleMethodName);
                 List<Pair<TraitElement, ExecutableElement>> allExecElems = methodToExecElements.get(dup);
-                int index = 0;
+                int index;
                 for (index = 0; index < allExecElems.size(); index++) {
                     Pair<TraitElement, ExecutableElement> item = allExecElems.get(index);
                     if (item.getLeft().getElementName().equals(preferTarget)) {

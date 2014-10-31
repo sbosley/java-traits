@@ -20,8 +20,8 @@ public class BasicTraitsTest {
     public void testBasicTraitFunctions() {
         FootballField field = new FootballField();
         
-        int expectedPerimiter = 2 * (FootballField.WIDTH + FootballField.HEIGHT);
-        assertEquals(expectedPerimiter, field.getPerimeter());
+        int expectedPerimeter = 2 * (FootballField.WIDTH + FootballField.HEIGHT);
+        assertEquals(expectedPerimeter, field.getPerimeter());
         
         int expectedArea = FootballField.WIDTH * FootballField.HEIGHT;
         assertEquals(expectedArea, field.getArea());
