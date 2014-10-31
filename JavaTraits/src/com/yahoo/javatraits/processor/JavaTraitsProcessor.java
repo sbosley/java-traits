@@ -1,6 +1,7 @@
 package com.yahoo.javatraits.processor;
 
 import java.lang.annotation.Annotation;
+import java.util.Collections;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -10,6 +11,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.tools.Diagnostic;
 
 import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
 
@@ -21,6 +23,11 @@ public abstract class JavaTraitsProcessor extends AbstractProcessor {
     
     protected abstract Class<? extends Annotation> getAnnotationClass();
     protected abstract void processElements(Set<? extends Element> elements);
+
+    @Override
+    public Set<String> getSupportedAnnotationTypes() {
+        return Collections.singleton(getAnnotationClass().getCanonicalName());
+    }
 
     @Override
     public synchronized void init(ProcessingEnvironment env) {

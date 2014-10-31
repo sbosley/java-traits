@@ -24,7 +24,6 @@ import com.yahoo.javatraits.processor.writers.TraitDelegateWriter;
 import com.yahoo.javatraits.processor.writers.TraitInterfaceWriter;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
-@SupportedAnnotationTypes(value="com.yahoo.javatraits.annotations.Trait")
 public class TraitProcessor extends JavaTraitsProcessor {
 
     @Override

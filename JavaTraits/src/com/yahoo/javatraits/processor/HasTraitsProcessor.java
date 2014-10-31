@@ -18,7 +18,6 @@ import com.yahoo.javatraits.processor.data.ClassWithTraits;
 import com.yahoo.javatraits.processor.writers.ClassWithTraitsSuperclassWriter;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
-@SupportedAnnotationTypes(value="com.yahoo.javatraits.annotations.HasTraits")
 public class HasTraitsProcessor extends JavaTraitsProcessor {
 
     @Override
