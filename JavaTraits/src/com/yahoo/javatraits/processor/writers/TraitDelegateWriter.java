@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.annotation.processing.Filer;
+import javax.annotation.processing.FilerException;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeKind;
@@ -53,8 +54,10 @@ public class TraitDelegateWriter {
             writer = new JavaFileWriter(out);
             emitDelegate();
             writer.close();
+        } catch (FilerException e) {
+            utils.getMessager().printMessage(Kind.WARNING, "FilerException creating trait delegate file " + traitDelegateClass + ": " + e.getMessage(), traitElement.getSourceElement());
         } catch (IOException e) {
-            utils.getMessager().printMessage(Kind.ERROR, "IOException writing delegate class for trait", traitElement.getSourceElement());
+            utils.getMessager().printMessage(Kind.ERROR, "IOException writing trait delegate class " + traitDelegateClass + ": " + e.getMessage(), traitElement.getSourceElement());
         }
     }
 

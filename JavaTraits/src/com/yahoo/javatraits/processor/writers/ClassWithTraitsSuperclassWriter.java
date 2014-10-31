@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.processing.Filer;
+import javax.annotation.processing.FilerException;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeKind;
@@ -60,9 +61,10 @@ public class ClassWithTraitsSuperclassWriter {
             writer = new JavaFileWriter(out);
             emitClassDefinition();
             writer.close();
+        } catch (FilerException e) {
+            utils.getMessager().printMessage(Kind.WARNING, "FilerException creating superclass " + cls.getGeneratedSuperclassName() + ": " + e.getMessage(), cls.getSourceElement());
         } catch (IOException e) {
-            utils.getMessager().printMessage(Kind.ERROR, "IOException writing delegate class with delegate " +
-                    cls.getSimpleName() + " for trait", cls.getSourceElement());
+            utils.getMessager().printMessage(Kind.ERROR, "IOException writing superclass " + cls.getGeneratedSuperclassName() + " for trait: " + e.getMessage(), cls.getSourceElement());
         }
     }
 

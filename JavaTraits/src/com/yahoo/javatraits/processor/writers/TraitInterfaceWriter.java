@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.processing.Filer;
+import javax.annotation.processing.FilerException;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.tools.Diagnostic.Kind;
@@ -45,8 +46,10 @@ public class TraitInterfaceWriter {
             writer = new JavaFileWriter(out);
             emitInterface();
             writer.close();
+        } catch (FilerException e) {
+            utils.getMessager().printMessage(Kind.WARNING, "FilerException creating trait interface file " + element.getInterfaceName() + ": " + e.getMessage(), element.getSourceElement());
         } catch (IOException e) {
-            utils.getMessager().printMessage(Kind.ERROR, "IOException writing interface for trait", element.getSourceElement());
+            utils.getMessager().printMessage(Kind.ERROR, "IOException writing trait interface " + element.getInterfaceName() + ": " + e.getMessage(), element.getSourceElement());
         }
     }
 
