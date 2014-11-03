@@ -63,6 +63,11 @@ public class DeclaredTypeName extends TypeName {
     }
 
     @Override
+    public <RET, PARAM> RET accept(TypeNameVisitor<RET, PARAM> visitor, PARAM data) {
+        return visitor.visitClassName(this, data);
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
@@ -101,11 +106,4 @@ public class DeclaredTypeName extends TypeName {
         }
         return true;
     }
-
-    @Override
-    public <RETURN, PARAMETER> RETURN accept(
-            TypeNameVisitor<RETURN, PARAMETER> visitor, PARAMETER data) {
-        return visitor.visitClassName(this, data);
-    }
-
 }

@@ -80,8 +80,7 @@ public class GenericName extends TypeName {
     }
 
     @Override
-    public <RETURN, PARAMETER> RETURN accept(
-            TypeNameVisitor<RETURN, PARAMETER> visitor, PARAMETER data) {
+    public <RET, PARAM> RET accept(TypeNameVisitor<RET, PARAM> visitor, PARAM data) {
         return visitor.visitGenericName(this, data);
     }
 

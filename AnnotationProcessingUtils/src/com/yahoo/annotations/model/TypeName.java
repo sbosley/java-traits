@@ -56,6 +56,6 @@ public abstract class TypeName implements Cloneable {
         public RET visitGenericName(GenericName genericName, PARAM param);
     }
 
-    public abstract <RETURN, PARAMETER> RETURN accept(TypeNameVisitor<RETURN, PARAMETER> visitor, PARAMETER data);
+    public abstract <RET, PARAM> RET accept(TypeNameVisitor<RET, PARAM> visitor, PARAM data);
 
 }

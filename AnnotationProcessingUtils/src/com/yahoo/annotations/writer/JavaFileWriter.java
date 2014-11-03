@@ -80,8 +80,9 @@ public class JavaFileWriter {
         TreeSet<String> sortedImports = new TreeSet<String>();
         if (!Utils.isEmpty(imports)) {
             for (DeclaredTypeName item : imports) {
-                if (addToKnownNames(item, item.isJavaLangPackage())) {
-                    sortedImports.add(item.toString());
+                DeclaredTypeName toImport = addToKnownNames(item, item.isJavaLangPackage());
+                if (toImport != null) {
+                    sortedImports.add(toImport.toString());
                 }
             }
         }
@@ -109,8 +110,8 @@ public class JavaFileWriter {
         return registerOtherKnownNames(Utils.asList(otherKnownNames));
     }
     
-    // Returns true if item needs to be added to imports
-    private boolean addToKnownNames(DeclaredTypeName type, boolean highestPreference) {
+    // Returns a type name that needs to be added to the imports
+    private DeclaredTypeName addToKnownNames(DeclaredTypeName type, boolean highestPreference) {
         String simpleName = type.getSimpleName();
         List<DeclaredTypeName> allNames = knownNames.get(simpleName);
         if (allNames == null) {
@@ -120,14 +121,15 @@ public class JavaFileWriter {
 
         if (!allNames.contains(type)) {
             if (highestPreference) {
+                DeclaredTypeName toReturn = allNames.size() > 0 ? allNames.get(0) : null;
                 allNames.add(0, type);
-                return false;
+                return toReturn;
             } else {
                 allNames.add(type);
-                return true;
+                return type;
             }
         }
-        return false;
+        return null;
     }
 
     public JavaFileWriter beginTypeDefinition(TypeDeclarationParameters typeDeclaration) throws IOException {
