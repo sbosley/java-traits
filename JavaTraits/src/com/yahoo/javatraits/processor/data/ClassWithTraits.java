@@ -5,10 +5,10 @@
  */
 package com.yahoo.javatraits.processor.data;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.yahoo.annotations.model.DeclaredTypeName;
+import com.yahoo.annotations.model.GenericName;
+import com.yahoo.annotations.utils.Utils;
+import com.yahoo.javatraits.annotations.HasTraits;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -16,11 +16,10 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
-
-import com.yahoo.annotations.model.DeclaredTypeName;
-import com.yahoo.annotations.model.GenericName;
-import com.yahoo.annotations.utils.Utils;
-import com.yahoo.javatraits.annotations.HasTraits;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ClassWithTraits extends TypeElementWrapper {
 

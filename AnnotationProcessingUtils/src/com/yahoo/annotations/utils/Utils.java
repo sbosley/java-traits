@@ -5,13 +5,8 @@
  */
 package com.yahoo.annotations.utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.AnnotationMirror;
@@ -244,6 +239,62 @@ public class Utils {
         
         return params;
     }
+
+    public List<TypeName> remapGenericNames(List<? extends TypeName> types, Map<String, Object> genericNameMap) {
+        List<TypeName> newTypeNames = new ArrayList<TypeName>();
+        for (TypeName type : types) {
+            newTypeNames.add(remapGenericNames(type, genericNameMap));
+        }
+        return newTypeNames;
+    }
+
+    public TypeName remapGenericNames(TypeName type, Map<String, Object> genericNameMap) {
+        if (type != null && genericNameMap != null) {
+            return type.accept(genericNameRemappingVisitor, genericNameMap);
+        }
+        return type;
+    }
+
+    private TypeName.TypeNameVisitor<TypeName, Map<String, Object>> genericNameRemappingVisitor = new TypeName.TypeNameVisitor<TypeName, Map<String, Object>>() {
+        @Override
+        public TypeName visitClassName(DeclaredTypeName typeName, Map<String, Object> genericNameMap) {
+            List<? extends TypeName> typeArgs = typeName.getTypeArgs();
+            List<TypeName> newTypeArgs = new ArrayList<TypeName>();
+            if (typeArgs != null) {
+                for (TypeName nestedType : typeArgs) {
+                    newTypeArgs.add(nestedType.accept(this, genericNameMap));
+                }
+            }
+            typeName.setTypeArgs(newTypeArgs);
+            return typeName;
+        }
+
+        @Override
+        public TypeName visitGenericName(GenericName genericName, Map<String, Object> genericNameMap) {
+            String genericNameString = genericName.getGenericName();
+            if (genericNameMap.containsKey(genericNameString)) {
+                Object renameTo = genericNameMap.get(genericNameString);
+                if (renameTo instanceof DeclaredTypeName) {
+                    return (DeclaredTypeName) renameTo;
+                } else if (renameTo instanceof String) {
+                    genericName.renameTo((String) renameTo);
+                }
+            }
+            List<TypeName> extendsBounds = genericName.getExtendsBound();
+            if (extendsBounds != null) {
+                List<TypeName> newExtendsBounds = new ArrayList<TypeName>();
+                for (TypeName extendsType : extendsBounds) {
+                    newExtendsBounds.add(extendsType.accept(this, genericNameMap));
+                }
+                genericName.setExtendsBound(newExtendsBounds);
+            }
+            TypeName superBound = genericName.getSuperBound();
+            if (superBound != null) {
+                genericName.setSuperBound(superBound.accept(this, genericNameMap));
+            }
+            return genericName;
+        }
+    };
 
     private void qualifyTypeArgGenerics(List<TypeName> methodGenerics, TypeName type, String genericQualifier) {
         type.accept(genericQualifyingVisitor, Pair.create(methodGenerics, genericQualifier));

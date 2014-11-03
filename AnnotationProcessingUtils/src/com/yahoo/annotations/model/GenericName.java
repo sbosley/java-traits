@@ -39,7 +39,7 @@ public class GenericName extends TypeName {
                 clone.extendsBound.add(t);
             }
         }
-        clone.superBound = (TypeName) superBound.clone();
+        clone.superBound = superBound.clone();
         return clone;
     }
 
@@ -50,6 +50,11 @@ public class GenericName extends TypeName {
         }
         result.append(genericName);
         return result.toString();
+    }
+
+    public void renameTo(String newName) {
+        this.genericName = newName;
+        this.qualifier = null;
     }
 
     public boolean isWildcard() {
@@ -64,12 +69,20 @@ public class GenericName extends TypeName {
         return extendsBound;
     }
 
+    public void setExtendsBound(List<TypeName> newExtendsBound) {
+        this.extendsBound = newExtendsBound;
+    }
+
     public boolean hasSuperBound() {
         return superBound != null;
     }
 
     public TypeName getSuperBound() {
         return superBound;
+    }
+
+    public void setSuperBound(TypeName newSuperBound) {
+        this.superBound = newSuperBound;
     }
 
     public void addQualifier(String qualifier) {
@@ -89,7 +102,7 @@ public class GenericName extends TypeName {
         final int prime = 31;
         int result = 1;
         result = prime * result
-                + ((genericName == null) ? 0 : genericName.hashCode());
+                + ((getGenericName() == null) ? 0 : getGenericName().hashCode());
         result = prime * result
                 + ((extendsBound == null) ? 0 : extendsBound.hashCode());
         result = prime * result
@@ -109,11 +122,11 @@ public class GenericName extends TypeName {
             return false;
         }
         GenericName other = (GenericName) obj;
-        if (genericName == null) {
-            if (other.genericName != null) {
+        if (getGenericName() == null) {
+            if (other.getGenericName() != null) {
                 return false;
             }
-        } else if (!genericName.equals(other.genericName)) {
+        } else if (!getGenericName().equals(other.getGenericName())) {
             return false;
         }
         if (extendsBound == null) {

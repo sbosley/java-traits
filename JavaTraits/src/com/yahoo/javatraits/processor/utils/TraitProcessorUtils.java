@@ -1,14 +1,14 @@
 package com.yahoo.javatraits.processor.utils;
 
+import com.yahoo.annotations.utils.Utils;
+import com.yahoo.javatraits.processor.data.TraitElement;
+
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.ErrorType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
-
-import com.yahoo.annotations.utils.Utils;
-import com.yahoo.javatraits.processor.data.TraitElement;
 
 public class TraitProcessorUtils extends Utils {
 
@@ -33,5 +33,4 @@ public class TraitProcessorUtils extends Utils {
             return element.getGeneratedInterfaceName().equals(getTypeNameFromTypeMirror(returnType, null));
         }
     }
-
 }

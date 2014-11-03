@@ -5,14 +5,13 @@
  */
 package com.yahoo.javatraits.processor.data;
 
-import java.util.List;
-
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.TypeParameterElement;
-
 import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.utils.Utils;
+
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
+import java.util.List;
 
 public abstract class TypeElementWrapper {
 

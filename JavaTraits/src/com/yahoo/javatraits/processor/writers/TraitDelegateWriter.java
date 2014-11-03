@@ -19,6 +19,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeKind;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
@@ -40,7 +41,9 @@ public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
     @Override
     protected void gatherImports(Set<DeclaredTypeName> imports) {
         utils.accumulateImportsFromElements(imports, element.getDeclaredMethods());
-        utils.accumulateImportsFromElements(imports, element.getInterfaceMethods());
+        for (int i = 0; i < element.getNumSuperinterfaces(); i++) {
+            utils.accumulateImportsFromElements(imports, element.getExecutableElementsForInterface(i));
+        }
     }
 
     protected void writeClassDefinition() throws IOException {
@@ -85,21 +88,22 @@ public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
         List<? extends ExecutableElement> allMethods = element.getDeclaredMethods();
         for (ExecutableElement exec : allMethods) {
             if (!exec.getModifiers().contains(Modifier.ABSTRACT)) {
-                emitMethodDeclaration(exec, true, Modifier.PUBLIC, Modifier.FINAL);
+                emitMethodDeclaration(exec, null, true, Modifier.PUBLIC, Modifier.FINAL);
             }
         }
     }
 
     private void emitDelegateMethodImplementations() throws IOException {
         List<ExecutableElement> allMethods = element.getDeclaredMethods();
-        allMethods.addAll(element.getInterfaceMethods());
         for (ExecutableElement exec : allMethods) {
             if (utils.isGetThis(element, exec)) {
                 emitGetThis();
             } else {
-                emitMethodDeclaration(exec, false, Modifier.PUBLIC);
+                emitMethodDeclaration(exec, null, false, Modifier.PUBLIC);
             }
         }
+
+        emitInterfaceMethods();
     }
 
     private void emitGetThis() throws IOException {
@@ -113,9 +117,10 @@ public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
             .finishMethodDefinition();
     }
 
-    private void emitMethodDeclaration(ExecutableElement exec, boolean isDefault, Modifier... modifiers) throws IOException {
+    private void emitMethodDeclaration(ExecutableElement exec, Map<String, Object> genericNameMap, boolean isDefault, Modifier... modifiers) throws IOException {
         String name = isDefault ? "default__" + exec.getSimpleName().toString() : null;
         MethodDeclarationParameters methodDeclaration = utils.methodDeclarationParamsFromExecutableElement(exec, name, element.getSimpleName(), modifiers);
+        remapMethodDeclarationGenerics(methodDeclaration, genericNameMap);
         writer.beginMethodDefinition(methodDeclaration);
         
         String callTo = isDefault ? "super" : "delegate";
@@ -126,6 +131,23 @@ public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
         }
         writer.writeStatement(methodInvocation)
             .finishMethodDefinition();
+    }
+
+    private void emitInterfaceMethods() throws IOException {
+        for (int i = 0; i < element.getNumSuperinterfaces(); i++) {
+            List<ExecutableElement> interfaceMethods = element.getExecutableElementsForInterface(i);
+            for (ExecutableElement exec : interfaceMethods) {
+                emitMethodDeclaration(exec, element.getGenericNameMapForInterface(i), false, Modifier.PUBLIC);
+            }
+        }
+    }
+
+    private void remapMethodDeclarationGenerics(MethodDeclarationParameters params, Map<String, Object> genericNameMap) {
+        if (genericNameMap != null) {
+            params.setReturnType(utils.remapGenericNames(params.getReturnType(), genericNameMap));
+            params.setArgumentTypes(utils.remapGenericNames(params.getArgumentTypes(), genericNameMap));
+            params.setThrowsTypes(utils.remapGenericNames(params.getThrowsTypes(), genericNameMap));
+        }
     }
 
 }

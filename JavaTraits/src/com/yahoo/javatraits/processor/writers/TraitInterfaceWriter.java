@@ -6,7 +6,6 @@
 package com.yahoo.javatraits.processor.writers;
 
 import com.yahoo.annotations.model.DeclaredTypeName;
-import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.writer.JavaFileWriter.Type;
 import com.yahoo.annotations.writer.parameters.MethodDeclarationParameters;
 import com.yahoo.annotations.writer.parameters.TypeDeclarationParameters;

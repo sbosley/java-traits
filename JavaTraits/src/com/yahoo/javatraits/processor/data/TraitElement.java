@@ -6,6 +6,7 @@
 package com.yahoo.javatraits.processor.data;
 
 import com.yahoo.annotations.model.DeclaredTypeName;
+import com.yahoo.annotations.model.GenericName;
 import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.utils.Utils;
 
@@ -17,7 +18,9 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TraitElement extends TypeElementWrapper {
 
@@ -25,8 +28,9 @@ public class TraitElement extends TypeElementWrapper {
     private static final String DELEGATE_SUFFIX = "DelegateWrapper";
 
     private List<ExecutableElement> declaredMethods = new ArrayList<ExecutableElement>();
-    private List<ExecutableElement> interfaceMethods = new ArrayList<ExecutableElement>();
     private List<TypeName> interfaceNames;
+    private List<List<ExecutableElement>> interfaceMethods = new ArrayList<List<ExecutableElement>>();
+    private List<Map<String, Object>> interfaceGenericNameMaps;
 
     private DeclaredTypeName generatedInterfaceName;
     private DeclaredTypeName delegateName;
@@ -52,14 +56,48 @@ public class TraitElement extends TypeElementWrapper {
 
     private void initializeInterfaces() {
         List<? extends TypeMirror> interfaces = elem.getInterfaces();
-        interfaceNames = utils.getTypeNamesFromTypeMirrors(interfaces, getSimpleName());
-        for (TypeMirror i : interfaces) {
-            if (i instanceof DeclaredType) {
-                Element interfaceElement = ((DeclaredType) i).asElement();
-                accumulateMethods(interfaceElement, interfaceMethods);
+        if (!Utils.isEmpty(interfaces)) {
+            interfaceGenericNameMaps = new ArrayList<Map<String, Object>>();
+            interfaceNames = utils.getTypeNamesFromTypeMirrors(interfaces, getSimpleName());
+            for (int i = 0; i < interfaces.size(); i++) {
+                TypeMirror interfaceMirror = interfaces.get(i);
+                if (interfaceMirror instanceof DeclaredType) {
+                    DeclaredTypeName interfaceName = (DeclaredTypeName) interfaceNames.get(i);
+                    TypeElement interfaceElement = (TypeElement) ((DeclaredType) interfaceMirror).asElement();
+                    List<ExecutableElement> methods = new ArrayList<ExecutableElement>();
+                    accumulateMethods(interfaceElement, methods);
+                    interfaceMethods.add(methods);
+
+                    List<? extends TypeName> args = interfaceName.getTypeArgs();
+                    List<TypeName> interfaceTypeParams = utils.typeParameterElementsToTypeNames(interfaceElement.getTypeParameters());
+                    Map<String, Object> genericNameMap = new HashMap<String, Object>();
+                    if (!Utils.isEmpty(args)) {
+                        for (int j = 0; j < args.size(); j++) {
+                            TypeName argName = args.get(i);
+                            TypeName interfaceArgName = interfaceTypeParams.get(i);
+                            if (interfaceArgName instanceof GenericName) {
+                                genericNameMap.put(getSimpleName() + GenericName.GENERIC_QUALIFIER_SEPARATOR + ((GenericName) interfaceArgName).getGenericName(),
+                                        argName.accept(genericNameMappingVisitor, null));
+                            }
+                        }
+                    }
+                    interfaceGenericNameMaps.add(genericNameMap);
+                }
             }
         }
     }
+
+    private TypeName.TypeNameVisitor<Object, Void> genericNameMappingVisitor = new TypeName.TypeNameVisitor<Object, Void>() {
+        @Override
+        public Object visitClassName(DeclaredTypeName typeName, Void aVoid) {
+            return typeName;
+        }
+
+        @Override
+        public Object visitGenericName(GenericName genericName, Void aVoid) {
+            return genericName.getGenericName();
+        }
+    };
 
     public DeclaredTypeName getGeneratedInterfaceName() {
         return generatedInterfaceName;
@@ -73,12 +111,20 @@ public class TraitElement extends TypeElementWrapper {
         return declaredMethods;
     }
 
-    public List<ExecutableElement> getInterfaceMethods() {
-        return interfaceMethods;
-    }
-
     public List<TypeName> getInterfaceNames() {
         return interfaceNames;
+    }
+
+    public int getNumSuperinterfaces() {
+        return interfaceNames != null ? interfaceNames.size() : 0;
+    }
+
+    public List<ExecutableElement> getExecutableElementsForInterface(int ith) {
+        return interfaceMethods.get(ith);
+    }
+
+    public Map<String, Object> getGenericNameMapForInterface(int ith) {
+        return interfaceGenericNameMaps.get(ith);
     }
 
     private void accumulateMethods(Element element, List<ExecutableElement> methods) {
