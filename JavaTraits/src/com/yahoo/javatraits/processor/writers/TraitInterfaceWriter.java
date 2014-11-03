@@ -30,6 +30,7 @@ public class TraitInterfaceWriter extends JavaTraitsWriter<TraitElement> {
 
     @Override
     protected void gatherImports(Set<DeclaredTypeName> imports) {
+        utils.accumulateImportsFromTypeNames(imports, element.getInterfaceNames());
         utils.accumulateImportsFromElements(imports, element.getDeclaredMethods());
     }
 

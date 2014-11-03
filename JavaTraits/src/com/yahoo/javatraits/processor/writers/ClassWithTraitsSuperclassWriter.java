@@ -61,7 +61,7 @@ public class ClassWithTraitsSuperclassWriter extends JavaTraitsWriter<ClassWithT
     }
 
     protected void writeClassDefinition() throws IOException {
-        List<TypeName> generics = new ArrayList<TypeName>();
+        Set<TypeName> generics = new LinkedHashSet<TypeName>();
         if (element.superclassHasTypeArgs()) {
             for (TypeName t : element.getDesiredSuperclass().getTypeArgs()) {
                 if (!(t instanceof DeclaredTypeName)) {
@@ -75,7 +75,7 @@ public class ClassWithTraitsSuperclassWriter extends JavaTraitsWriter<ClassWithT
             }
         }
         DeclaredTypeName superclassName = element.getGeneratedSuperclassName().clone();
-        superclassName.setTypeArgs(generics);
+        superclassName.setTypeArgs(Utils.asList(generics.toArray(new TypeName[generics.size()])));
 
         List<DeclaredTypeName> interfaces = null;
         if (allTraits.size() > 0) {

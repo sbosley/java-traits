@@ -3,14 +3,10 @@ package com.yahoo.javatraits.test;
 import static org.junit.Assert.*;
 
 import java.util.HashMap;
+import java.util.List;
 
+import com.yahoo.javatraits.test.traits.*;
 import org.junit.Test;
-
-import com.yahoo.javatraits.test.traits.FootballField;
-import com.yahoo.javatraits.test.traits.IAnotherTrait;
-import com.yahoo.javatraits.test.traits.IMathTrait;
-import com.yahoo.javatraits.test.traits.LyingRectangle;
-import com.yahoo.javatraits.test.traits.SomeClass;
 
 public class BasicTraitsTest {
 
@@ -65,6 +61,13 @@ public class BasicTraitsTest {
         int hexInt = 0xabc;
         String binaryString = instance.intToStringV2(hexInt);
         assertEquals("101010111100", binaryString);
+    }
+
+    @Test
+    public void testTraitExtendingInterface() {
+        IBetterList<String> list = new BetterArrayList<String>();
+        assertTrue(list instanceof List);
+        assertTrue(list instanceof IBetterList);
     }
 
 }

@@ -28,9 +28,9 @@ import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.model.GenericName;
 import com.yahoo.annotations.model.MethodSignature;
 import com.yahoo.annotations.model.TypeName;
-import com.yahoo.annotations.visitors.ImportGatheringTypeVisitor;
+import com.yahoo.annotations.visitors.ImportGatheringTypeMirrorVisitor;
+import com.yahoo.annotations.visitors.ImportGatheringTypeNameVisitor;
 import com.yahoo.annotations.writer.parameters.MethodDeclarationParameters;
-import sun.net.www.content.text.Generic;
 
 public class Utils {
 
@@ -52,10 +52,20 @@ public class Utils {
         return types;
     }
 
-    public void accumulateImportsFromElements(Set<DeclaredTypeName> accumulate, List<? extends Element> elems) {
-        for (Element elem : elems) {
-            ImportGatheringTypeVisitor visitor = new ImportGatheringTypeVisitor(elem, messager, this);
-            elem.asType().accept(visitor, accumulate);
+    public void accumulateImportsFromElements(Set<DeclaredTypeName> accumulate, Collection<? extends Element> elems) {
+        if (!isEmpty(elems)) {
+            for (Element elem : elems) {
+                elem.asType().accept(new ImportGatheringTypeMirrorVisitor(elem, messager, this), accumulate);
+            }
+        }
+    }
+
+    public void accumulateImportsFromTypeNames(Set<DeclaredTypeName> accumulate, Collection<? extends TypeName> typeNames) {
+        if (!isEmpty(typeNames)) {
+            ImportGatheringTypeNameVisitor visitor = new ImportGatheringTypeNameVisitor();
+            for (TypeName typeName : typeNames) {
+                typeName.accept(visitor, accumulate);
+            }
         }
     }
 

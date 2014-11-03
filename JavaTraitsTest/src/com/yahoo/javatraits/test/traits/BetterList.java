@@ -4,16 +4,13 @@ import com.yahoo.javatraits.annotations.Trait;
 
 import java.util.List;
 
-/**
- * Created by Sam on 11/3/14.
- */
 @Trait
-public abstract class BetterList implements List<String> {
+public abstract class BetterList<T> implements List<T> {
 
-    public void forEach(Runnable run) {
+    public void printAll() {
         for (int i = 0; i < size(); i++) {
-            String item = get(i);
-            run.run();
+            T item = get(i);
+            System.out.println("Item " + item);
         }
     }
 }

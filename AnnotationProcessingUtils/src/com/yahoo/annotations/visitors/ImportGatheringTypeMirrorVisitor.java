@@ -26,13 +26,13 @@ import javax.tools.Diagnostic.Kind;
 import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.utils.Utils;
 
-public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<DeclaredTypeName>> {
+public class ImportGatheringTypeMirrorVisitor implements TypeVisitor<Void, Set<DeclaredTypeName>> {
 
     private Element elem;
     private Messager messager;
     private Utils utils;
 
-    public ImportGatheringTypeVisitor(Element elem, Messager messager, Utils utils) {
+    public ImportGatheringTypeMirrorVisitor(Element elem, Messager messager, Utils utils) {
         this.elem = elem;
         this.messager = messager;
         this.utils = utils;
