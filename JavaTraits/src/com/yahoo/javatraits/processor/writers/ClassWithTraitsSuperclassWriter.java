@@ -44,7 +44,7 @@ public class ClassWithTraitsSuperclassWriter extends JavaTraitsWriter<ClassWithT
         for (TraitElement elem : allTraits) {
             utils.accumulateImportsFromElements(imports, elem.getDeclaredMethods());
             imports.add(elem.getDelegateName());
-            imports.add(elem.getInterfaceName());
+            imports.add(elem.getGeneratedInterfaceName());
         }
         DeclaredTypeName desiredSuperclass = element.getDesiredSuperclass();
         if (!Utils.OBJECT_CLASS_NAME.equals(desiredSuperclass.toString())) {
@@ -81,7 +81,7 @@ public class ClassWithTraitsSuperclassWriter extends JavaTraitsWriter<ClassWithT
         if (allTraits.size() > 0) {
             interfaces = new ArrayList<DeclaredTypeName>();
             for (TraitElement elem : allTraits) {
-                interfaces.add(elem.getInterfaceName());
+                interfaces.add(elem.getGeneratedInterfaceName());
             }
         }
 

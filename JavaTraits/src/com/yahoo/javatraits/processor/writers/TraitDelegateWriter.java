@@ -29,7 +29,7 @@ public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
     public TraitDelegateWriter(TraitElement traitElement, TraitProcessorUtils utils) {
         super(traitElement, utils);
         this.traitDelegateClass = traitElement.getDelegateName();
-        this.delegateInterface = traitElement.getInterfaceName();
+        this.delegateInterface = traitElement.getGeneratedInterfaceName();
     }
 
     @Override
@@ -40,6 +40,7 @@ public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
     @Override
     protected void gatherImports(Set<DeclaredTypeName> imports) {
         utils.accumulateImportsFromElements(imports, element.getDeclaredMethods());
+        utils.accumulateImportsFromElements(imports, element.getInterfaceMethods());
     }
 
     protected void writeClassDefinition() throws IOException {
@@ -90,7 +91,8 @@ public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
     }
 
     private void emitDelegateMethodImplementations() throws IOException {
-        List<? extends ExecutableElement> allMethods = element.getDeclaredMethods();
+        List<ExecutableElement> allMethods = element.getDeclaredMethods();
+        allMethods.addAll(element.getInterfaceMethods());
         for (ExecutableElement exec : allMethods) {
             if (utils.isGetThis(element, exec)) {
                 emitGetThis();

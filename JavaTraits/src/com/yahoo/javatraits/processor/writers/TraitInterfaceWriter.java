@@ -6,6 +6,7 @@
 package com.yahoo.javatraits.processor.writers;
 
 import com.yahoo.annotations.model.DeclaredTypeName;
+import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.writer.JavaFileWriter.Type;
 import com.yahoo.annotations.writer.parameters.MethodDeclarationParameters;
 import com.yahoo.annotations.writer.parameters.TypeDeclarationParameters;
@@ -25,7 +26,7 @@ public class TraitInterfaceWriter extends JavaTraitsWriter<TraitElement> {
 
     @Override
     protected DeclaredTypeName getClassNameToGenerate() {
-        return element.getInterfaceName();
+        return element.getGeneratedInterfaceName();
     }
 
     @Override
@@ -35,8 +36,9 @@ public class TraitInterfaceWriter extends JavaTraitsWriter<TraitElement> {
 
     protected void writeClassDefinition() throws IOException {
         TypeDeclarationParameters params = new TypeDeclarationParameters()
-            .setName(element.getInterfaceName())
+            .setName(element.getGeneratedInterfaceName())
             .setKind(Type.INTERFACE)
+            .setInterfaces(element.getInterfaceNames())
             .setModifiers(Modifier.PUBLIC);
 
         writer.beginTypeDefinition(params);

@@ -1,12 +1,12 @@
 package com.yahoo.annotations.writer.parameters;
 
-import java.util.List;
-
-import javax.lang.model.element.Modifier;
-
 import com.yahoo.annotations.model.DeclaredTypeName;
+import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.utils.Utils;
 import com.yahoo.annotations.writer.JavaFileWriter.Type;
+
+import javax.lang.model.element.Modifier;
+import java.util.List;
 
 public class TypeDeclarationParameters {
 
@@ -14,7 +14,7 @@ public class TypeDeclarationParameters {
     private Type kind;
     private List<Modifier> modifiers;
     private DeclaredTypeName superclass;
-    private List<DeclaredTypeName> interfaces;
+    private List<? extends TypeName> interfaces;
     
     public DeclaredTypeName getClassName() {
         return className;
@@ -57,11 +57,11 @@ public class TypeDeclarationParameters {
         return this;
     }
 
-    public List<DeclaredTypeName> getInterfaces() {
+    public List<? extends TypeName> getInterfaces() {
         return interfaces;
     }
 
-    public TypeDeclarationParameters setInterfaces(List<DeclaredTypeName> interfaces) {
+    public TypeDeclarationParameters setInterfaces(List<? extends TypeName> interfaces) {
         this.interfaces = interfaces;
         return this;
     }

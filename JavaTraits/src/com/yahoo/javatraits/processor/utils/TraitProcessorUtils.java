@@ -30,7 +30,7 @@ public class TraitProcessorUtils extends Utils {
         if (returnType instanceof ErrorType) { // It may not exist yet
             return true;
         } else {
-            return element.getInterfaceName().equals(getTypeNameFromTypeMirror(returnType, null));
+            return element.getGeneratedInterfaceName().equals(getTypeNameFromTypeMirror(returnType, null));
         }
     }
 

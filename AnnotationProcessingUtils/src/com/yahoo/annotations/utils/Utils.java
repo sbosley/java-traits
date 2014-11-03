@@ -35,6 +35,7 @@ import com.yahoo.annotations.model.MethodSignature;
 import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.visitors.ImportGatheringTypeVisitor;
 import com.yahoo.annotations.writer.parameters.MethodDeclarationParameters;
+import sun.net.www.content.text.Generic;
 
 public class Utils {
 
@@ -71,11 +72,9 @@ public class Utils {
         String name = exec.getSimpleName().toString();
         MethodSignature result = new MethodSignature(name);
 
-        List<TypeName> methodGenerics = typeParameterElementsToTypeNames(exec.getTypeParameters(), null);
-        TypeName returnType = getTypeNameFromTypeMirror(exec.getReturnType(), null);
-        if (!methodGenerics.contains(returnType) && returnType instanceof GenericName && genericQualifier != null) {
-            ((GenericName) returnType).addQualifier(genericQualifier);
-        }
+        List<TypeName> methodGenerics = typeParameterElementsToTypeNames(exec.getTypeParameters());
+        TypeName returnType = getTypeNameFromTypeMirror(exec.getReturnType());
+        qualifyTypeArgGenerics(methodGenerics, returnType, genericQualifier);
         result.setReturnType(returnType);
 
         List<TypeName> argTypeNames = getArgumentTypeNames(exec, genericQualifier, methodGenerics);
@@ -153,6 +152,19 @@ public class Utils {
         return toReturn;
     }
 
+    public List<TypeName> getTypeNamesFromTypeMirrors(List<? extends TypeMirror> mirrors) {
+        return getTypeNamesFromTypeMirrors(mirrors, null);
+    }
+
+    public List<TypeName> getTypeNamesFromTypeMirrors(List<? extends TypeMirror> mirrors, final String genericQualifier) {
+        return map(mirrors, new Mapper<TypeMirror, TypeName>() {
+            @Override
+            public TypeName map(TypeMirror arg) {
+                return getTypeNameFromTypeMirror(arg, genericQualifier);
+            }
+        });
+    }
+
     private GenericName getGenericName(String genericName, String genericQualifier, TypeMirror fromMirror, TypeMirror extendsBoundMirror, TypeMirror superBoundMirror) {
         List<TypeName> extendsBound = null;
         if (extendsBoundMirror != null && !OBJECT_CLASS_NAME.equals(extendsBoundMirror.toString())) {
@@ -216,8 +228,8 @@ public class Utils {
             String genericQualifier, Modifier... modifiers) {
         String name = nameOverride != null ? nameOverride : exec.getSimpleName().toString();
         List<TypeName> methodGenerics = typeParameterElementsToTypeNames(exec.getTypeParameters(), null);
-        TypeName returnType = getTypeNameFromTypeMirror(exec.getReturnType(), null);
-        qualifyReturnTypeGenerics(methodGenerics, returnType, genericQualifier);
+        TypeName returnType = getTypeNameFromTypeMirror(exec.getReturnType());
+        qualifyTypeArgGenerics(methodGenerics, returnType, genericQualifier);
 
         Pair<List<TypeName>, List<String>> arguments = getMethodArgumentsFromExecutableElement(exec, genericQualifier, methodGenerics);
 
@@ -233,31 +245,53 @@ public class Utils {
         return params;
     }
 
-    private void qualifyReturnTypeGenerics(List<TypeName> methodGenerics, TypeName returnType, String genericQualifier) {
-        if (!methodGenerics.contains(returnType) && returnType instanceof GenericName) {
-            ((GenericName) returnType).addQualifier(genericQualifier);
-        }
-        if (returnType instanceof DeclaredTypeName) {
-            DeclaredTypeName returnClass = (DeclaredTypeName) returnType;
-            for (TypeName nestedType : returnClass.getTypeArgs()) {
-                qualifyReturnTypeGenerics(methodGenerics, nestedType, genericQualifier);
-            }
-        }
+    private void qualifyTypeArgGenerics(List<TypeName> methodGenerics, TypeName type, String genericQualifier) {
+        type.accept(genericQualifyingVisitor, Pair.create(methodGenerics, genericQualifier));
     }
+
+    private TypeName.TypeNameVisitor genericQualifyingVisitor = new TypeName.TypeNameVisitor<Void, Pair<List<TypeName>, String>>() {
+
+        @Override
+        public Void visitClassName(DeclaredTypeName typeName, Pair<List<TypeName>, String> params) {
+            List<? extends TypeName> typeArgs = typeName.getTypeArgs();
+            if (typeArgs != null) {
+                for (TypeName nestedType : typeArgs) {
+                    nestedType.accept(this, params);
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public Void visitGenericName(GenericName genericName, Pair<List<TypeName>, String> params) {
+            if (!params.getLeft().contains(genericName)) {
+                genericName.addQualifier(params.getRight());
+                List<TypeName> extendsBounds = genericName.getExtendsBound();
+                if (extendsBounds != null) {
+                    for (TypeName extendsType : extendsBounds) {
+                        extendsType.accept(this, params);
+                    }
+                }
+                TypeName superBound = genericName.getSuperBound();
+                if (superBound != null) {
+                    superBound.accept(this, params);
+                }
+            }
+            return null;
+        }
+    };
 
     private List<TypeName> getArgumentTypeNames(ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) {
         List<TypeName> typeNames = map(exec.getParameters(), new Mapper<VariableElement, TypeName>() {
             @Override
             public TypeName map(VariableElement arg) {
-                return getTypeNameFromTypeMirror(arg.asType(), null);
+                return getTypeNameFromTypeMirror(arg.asType());
             }
         });
         map(typeNames, new Mapper<TypeName, Void>() {
             @Override
             public Void map(TypeName arg) {
-                if (!methodGenerics.contains(arg) && arg instanceof GenericName) {
-                    ((GenericName) arg).addQualifier(genericQualifier);
-                }
+                qualifyTypeArgGenerics(methodGenerics, arg, genericQualifier);
                 return null;
             }
         });
@@ -284,15 +318,13 @@ public class Utils {
         List<TypeName> thrownTypes = Utils.map(thrownTypeMirrors, new Utils.Mapper<TypeMirror, TypeName>() {
             @Override
             public TypeName map(TypeMirror arg) {
-                return getTypeNameFromTypeMirror(arg, null);
+                return getTypeNameFromTypeMirror(arg);
             }
         });
         Utils.map(thrownTypes, new Utils.Mapper<TypeName, Void>() {
             @Override
             public Void map(TypeName arg) {
-                if (!methodGenerics.contains(arg) && arg instanceof GenericName) {
-                    ((GenericName) arg).addQualifier(genericQualifier);
-                }
+                qualifyTypeArgGenerics(methodGenerics, arg, genericQualifier);
                 return null;
             }
         });

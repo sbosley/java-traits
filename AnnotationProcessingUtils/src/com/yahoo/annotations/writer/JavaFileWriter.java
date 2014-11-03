@@ -148,12 +148,16 @@ public class JavaFileWriter {
         out.append(typeDeclaration.getKind().name).append(" ").append(typeDeclaration.getClassName().getSimpleName());
         writeGenericsList(typeDeclaration.getClassName().getTypeArgs(), true);
 
-        if (typeDeclaration.getSuperclass() != null && !Utils.OBJECT_CLASS_NAME.equals(typeDeclaration.getSuperclass().toString())) {
+        if (kind == Type.CLASS && typeDeclaration.getSuperclass() != null && !Utils.OBJECT_CLASS_NAME.equals(typeDeclaration.getSuperclass().toString())) {
             out.append(" extends ").append(shortenName(typeDeclaration.getSuperclass(), false));
         }
 
         if (!Utils.isEmpty(typeDeclaration.getInterfaces())) {
-            out.append(" implements ");
+            if (kind == Type.INTERFACE) {
+                out.append(" extends ");
+            } else {
+                out.append(" implements ");
+            }
             for (int i = 0; i < typeDeclaration.getInterfaces().size(); i++) {
                 out.append(shortenName(typeDeclaration.getInterfaces().get(i), false));
                 if (i < typeDeclaration.getInterfaces().size() - 1) {
