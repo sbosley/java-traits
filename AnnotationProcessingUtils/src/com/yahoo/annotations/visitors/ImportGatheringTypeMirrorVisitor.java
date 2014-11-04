@@ -5,26 +5,15 @@
  */
 package com.yahoo.annotations.visitors;
 
-import java.util.List;
-import java.util.Set;
+import com.yahoo.annotations.model.DeclaredTypeName;
+import com.yahoo.annotations.utils.Utils;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
-import javax.lang.model.type.ArrayType;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.ErrorType;
-import javax.lang.model.type.ExecutableType;
-import javax.lang.model.type.NoType;
-import javax.lang.model.type.NullType;
-import javax.lang.model.type.PrimitiveType;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.TypeVariable;
-import javax.lang.model.type.TypeVisitor;
-import javax.lang.model.type.WildcardType;
+import javax.lang.model.type.*;
 import javax.tools.Diagnostic.Kind;
-
-import com.yahoo.annotations.model.DeclaredTypeName;
-import com.yahoo.annotations.utils.Utils;
+import java.util.List;
+import java.util.Set;
 
 public class ImportGatheringTypeMirrorVisitor implements TypeVisitor<Void, Set<DeclaredTypeName>> {
 

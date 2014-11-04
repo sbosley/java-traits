@@ -1,9 +1,9 @@
 package com.yahoo.annotations.writer.expressions;
 
-import java.io.IOException;
-
 import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.writer.JavaFileWriter;
+
+import java.io.IOException;
 
 class CastExpression extends Expression {
 

@@ -5,19 +5,6 @@
  */
 package com.yahoo.annotations.writer;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
-
-import javax.lang.model.element.Modifier;
-
 import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.model.GenericName;
 import com.yahoo.annotations.model.TypeName;
@@ -26,6 +13,11 @@ import com.yahoo.annotations.utils.Utils;
 import com.yahoo.annotations.writer.expressions.Expression;
 import com.yahoo.annotations.writer.parameters.MethodDeclarationParameters;
 import com.yahoo.annotations.writer.parameters.TypeDeclarationParameters;
+
+import javax.lang.model.element.Modifier;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.*;
 
 public class JavaFileWriter {
 
@@ -202,8 +194,8 @@ public class JavaFileWriter {
         checkScope(Scope.TYPE_DEFINITION);
         indent();
         boolean isAbstract = kind.equals(Type.INTERFACE) ||
-                (Utils.isEmpty(methodDeclaration.getModifiers()) ?
-                        false : methodDeclaration.getModifiers().contains(Modifier.ABSTRACT));
+                (!Utils.isEmpty(methodDeclaration.getModifiers())
+                        && methodDeclaration.getModifiers().contains(Modifier.ABSTRACT));
         writeModifierList(methodDeclaration.getModifiers());
         if (writeGenericsList(methodDeclaration.getMethodGenerics(), true)) {
             out.append(" ");

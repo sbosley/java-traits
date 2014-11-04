@@ -1,12 +1,13 @@
 package com.yahoo.javatraits.test;
 
-import static org.junit.Assert.*;
+import com.yahoo.javatraits.test.traits.*;
+import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.List;
 
-import com.yahoo.javatraits.test.traits.*;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class BasicTraitsTest {
 

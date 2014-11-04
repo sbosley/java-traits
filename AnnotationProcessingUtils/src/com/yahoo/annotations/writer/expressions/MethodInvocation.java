@@ -1,10 +1,10 @@
 package com.yahoo.annotations.writer.expressions;
 
-import java.io.IOException;
-import java.util.List;
-
 import com.yahoo.annotations.utils.Utils;
 import com.yahoo.annotations.writer.JavaFileWriter;
+
+import java.io.IOException;
+import java.util.List;
 
 class MethodInvocation extends Expression {
 

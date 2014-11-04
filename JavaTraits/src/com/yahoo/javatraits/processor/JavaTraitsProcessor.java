@@ -44,8 +44,13 @@ public abstract class JavaTraitsProcessor<T extends TypeElementWrapper> extends 
     
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
-        Set<? extends Element> annotatedElements = env.getElementsAnnotatedWith(getAnnotationClass());
-        processElements(annotatedElements);
+        try {
+            Set<? extends Element> annotatedElements = env.getElementsAnnotatedWith(getAnnotationClass());
+            processElements(annotatedElements);
+        } catch (Exception e) {
+            messager.printMessage(Kind.ERROR, "Uncaught exception in annotation processor " + this + ": " + e + ", message " + e.getMessage());
+            throw new RuntimeException(e);
+        }
         return true;
     }
 

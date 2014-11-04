@@ -1,8 +1,8 @@
 package com.yahoo.annotations.writer.expressions;
 
-import java.io.IOException;
-
 import com.yahoo.annotations.writer.JavaFileWriter;
+
+import java.io.IOException;
 
 class InitializerBlock extends Expression {
 

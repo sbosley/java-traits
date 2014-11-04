@@ -5,10 +5,10 @@
  */
 package com.yahoo.annotations.model;
 
+import com.yahoo.annotations.utils.Utils;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import com.yahoo.annotations.utils.Utils;
 
 public class GenericName extends TypeName {
 
@@ -19,7 +19,7 @@ public class GenericName extends TypeName {
     
     private String qualifier;
     private String genericName;
-    private List<TypeName> extendsBound;
+    private List<? extends TypeName> extendsBound;
     private TypeName superBound;
 
     public GenericName(String genericName, List<TypeName> upperBound, TypeName superBound) {
@@ -29,6 +29,7 @@ public class GenericName extends TypeName {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public GenericName clone() {
         GenericName clone = (GenericName) super.clone();
         clone.qualifier = this.qualifier;
@@ -36,7 +37,7 @@ public class GenericName extends TypeName {
         clone.extendsBound = this.extendsBound == null ? null : new ArrayList<TypeName>();
         if (extendsBound != null) {
             for (TypeName t : extendsBound) {
-                clone.extendsBound.add(t);
+                ((List<TypeName>) clone.extendsBound).add(t);
             }
         }
         clone.superBound = superBound.clone();
@@ -65,11 +66,11 @@ public class GenericName extends TypeName {
         return extendsBound != null && extendsBound.size() > 0;
     }
 
-    public List<TypeName> getExtendsBound() {
+    public List<? extends TypeName> getExtendsBound() {
         return extendsBound;
     }
 
-    public void setExtendsBound(List<TypeName> newExtendsBound) {
+    public void setExtendsBound(List<? extends TypeName> newExtendsBound) {
         this.extendsBound = newExtendsBound;
     }
 
@@ -89,7 +90,9 @@ public class GenericName extends TypeName {
         if (this.qualifier != null) {
             throw new IllegalArgumentException("Generic " + genericName + " already has qualifier " + this.qualifier);
         }
-        this.qualifier = qualifier;
+        if (!WILDCARD_CHAR.equals(genericName)) {
+            this.qualifier = qualifier;
+        }
     }
 
     @Override

@@ -1,12 +1,11 @@
 package com.yahoo.annotations.writer.parameters;
 
-import java.util.List;
-
-import javax.lang.model.element.Modifier;
-
 import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.utils.Utils;
+
+import javax.lang.model.element.Modifier;
+import java.util.List;
 
 public class MethodDeclarationParameters {
 

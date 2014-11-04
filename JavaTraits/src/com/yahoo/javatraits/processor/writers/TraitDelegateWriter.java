@@ -6,6 +6,7 @@
 package com.yahoo.javatraits.processor.writers;
 
 import com.yahoo.annotations.model.DeclaredTypeName;
+import com.yahoo.annotations.utils.Utils;
 import com.yahoo.annotations.writer.JavaFileWriter.Type;
 import com.yahoo.annotations.writer.expressions.Expression;
 import com.yahoo.annotations.writer.expressions.Expressions;
@@ -143,7 +144,7 @@ public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
     }
 
     private void remapMethodDeclarationGenerics(MethodDeclarationParameters params, Map<String, Object> genericNameMap) {
-        if (genericNameMap != null) {
+        if (!Utils.isEmpty(genericNameMap)) {
             params.setReturnType(utils.remapGenericNames(params.getReturnType(), genericNameMap));
             params.setArgumentTypes(utils.remapGenericNames(params.getArgumentTypes(), genericNameMap));
             params.setThrowsTypes(utils.remapGenericNames(params.getThrowsTypes(), genericNameMap));

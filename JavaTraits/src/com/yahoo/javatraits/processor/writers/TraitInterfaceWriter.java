@@ -48,9 +48,7 @@ public class TraitInterfaceWriter extends JavaTraitsWriter<TraitElement> {
 
     private void emitMethodDeclarations() throws IOException {
         for (ExecutableElement exec : element.getDeclaredMethods()) {
-            if (utils.isGetThis(element, exec)) {
-                continue;
-            } else {
+            if (!utils.isGetThis(element, exec)) {
                 emitMethodDeclarationForExecutableElement(exec);
             }
         }

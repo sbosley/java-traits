@@ -1,10 +1,10 @@
 package com.yahoo.annotations.writer.expressions;
 
-import java.io.IOException;
-import java.util.List;
-
 import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.writer.JavaFileWriter;
+
+import java.io.IOException;
+import java.util.List;
 
 public abstract class Expression {
 

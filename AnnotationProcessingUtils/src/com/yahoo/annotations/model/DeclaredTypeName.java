@@ -5,10 +5,9 @@
  */
 package com.yahoo.annotations.model;
 
-import java.util.List;
-
 import com.yahoo.annotations.utils.Utils;
 
+import java.util.List;
 
 public class DeclaredTypeName extends TypeName {
 

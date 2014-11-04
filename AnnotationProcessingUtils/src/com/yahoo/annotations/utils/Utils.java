@@ -5,32 +5,21 @@
  */
 package com.yahoo.annotations.utils;
 
-import java.util.*;
-import java.util.Map.Entry;
-
-import javax.annotation.processing.Messager;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeParameterElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.ArrayType;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.TypeVariable;
-import javax.lang.model.type.WildcardType;
-import javax.lang.model.util.Types;
-
 import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.model.GenericName;
 import com.yahoo.annotations.model.MethodSignature;
 import com.yahoo.annotations.model.TypeName;
+import com.yahoo.annotations.model.TypeName.TypeNameVisitor;
 import com.yahoo.annotations.visitors.ImportGatheringTypeMirrorVisitor;
 import com.yahoo.annotations.visitors.ImportGatheringTypeNameVisitor;
 import com.yahoo.annotations.writer.parameters.MethodDeclarationParameters;
+
+import javax.annotation.processing.Messager;
+import javax.lang.model.element.*;
+import javax.lang.model.type.*;
+import javax.lang.model.util.Types;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class Utils {
 
@@ -79,7 +68,7 @@ public class Utils {
 
         List<TypeName> methodGenerics = typeParameterElementsToTypeNames(exec.getTypeParameters());
         TypeName returnType = getTypeNameFromTypeMirror(exec.getReturnType());
-        qualifyTypeArgGenerics(methodGenerics, returnType, genericQualifier);
+        qualifyTypeArgGenerics(returnType, methodGenerics, genericQualifier);
         result.setReturnType(returnType);
 
         List<TypeName> argTypeNames = getArgumentTypeNames(exec, genericQualifier, methodGenerics);
@@ -128,9 +117,6 @@ public class Utils {
         if (kind == TypeKind.TYPEVAR) {
             TypeVariable typeVariable = (TypeVariable) mirror;
             String genericName = getSimpleNameFromFullyQualifiedName(mirrorString);
-            if (genericQualifier != null) {
-                genericName = genericQualifier + GenericName.GENERIC_QUALIFIER_SEPARATOR + genericName;
-            }
             toReturn = getGenericName(genericName, genericQualifier, typeVariable, typeVariable.getUpperBound(), null);
         } else if (kind == TypeKind.WILDCARD) {
             WildcardType wildcardType = (WildcardType) mirror;
@@ -179,7 +165,9 @@ public class Utils {
         if (superBoundMirror != null && !OBJECT_CLASS_NAME.equals(superBoundMirror.toString())) {
             superBound = getTypeNameFromTypeMirror(superBoundMirror, genericQualifier);
         }
-        return new GenericName(genericName, extendsBound, superBound);
+        GenericName toReturn = new GenericName(genericName, extendsBound, superBound);
+        toReturn.addQualifier(genericQualifier);
+        return toReturn;
     }
 
     private List<TypeName> getUpperBoundsFromTypeMirror(TypeMirror sourceMirror, TypeMirror extendsBoundMirror, final String genericQualifier) {
@@ -232,13 +220,13 @@ public class Utils {
     public MethodDeclarationParameters methodDeclarationParamsFromExecutableElement(ExecutableElement exec, String nameOverride,
             String genericQualifier, Modifier... modifiers) {
         String name = nameOverride != null ? nameOverride : exec.getSimpleName().toString();
-        List<TypeName> methodGenerics = typeParameterElementsToTypeNames(exec.getTypeParameters(), null);
+        List<TypeName> methodGenerics = typeParameterElementsToTypeNames(exec.getTypeParameters());
         TypeName returnType = getTypeNameFromTypeMirror(exec.getReturnType());
-        qualifyTypeArgGenerics(methodGenerics, returnType, genericQualifier);
+        qualifyTypeArgGenerics(returnType, methodGenerics, genericQualifier);
 
         Pair<List<TypeName>, List<String>> arguments = getMethodArgumentsFromExecutableElement(exec, genericQualifier, methodGenerics);
 
-        MethodDeclarationParameters params = new MethodDeclarationParameters()
+        return new MethodDeclarationParameters()
             .setMethodName(name)
             .setReturnType(returnType)
             .setModifiers(modifiers)
@@ -246,16 +234,18 @@ public class Utils {
             .setArgumentTypes(arguments.getLeft())
             .setArgumentNames(arguments.getRight())
             .setThrowsTypes(getThrownTypes(exec, genericQualifier, methodGenerics));
-        
-        return params;
     }
 
-    public List<TypeName> remapGenericNames(List<? extends TypeName> types, Map<String, Object> genericNameMap) {
-        List<TypeName> newTypeNames = new ArrayList<TypeName>();
-        for (TypeName type : types) {
-            newTypeNames.add(remapGenericNames(type, genericNameMap));
+    public List<? extends TypeName> remapGenericNames(List<? extends TypeName> types, final Map<String, Object> genericNameMap) {
+        if (Utils.isEmpty(genericNameMap)) {
+            return types;
         }
-        return newTypeNames;
+        return map(types, new Mapper<TypeName, TypeName>() {
+            @Override
+            public TypeName map(TypeName arg) {
+                return remapGenericNames(arg, genericNameMap);
+            }
+        });
     }
 
     public TypeName remapGenericNames(TypeName type, Map<String, Object> genericNameMap) {
@@ -265,17 +255,10 @@ public class Utils {
         return type;
     }
 
-    private TypeName.TypeNameVisitor<TypeName, Map<String, Object>> genericNameRemappingVisitor = new TypeName.TypeNameVisitor<TypeName, Map<String, Object>>() {
+    private TypeNameVisitor<TypeName, Map<String, Object>> genericNameRemappingVisitor = new TypeNameVisitor<TypeName, Map<String, Object>>() {
         @Override
         public TypeName visitClassName(DeclaredTypeName typeName, Map<String, Object> genericNameMap) {
-            List<? extends TypeName> typeArgs = typeName.getTypeArgs();
-            List<TypeName> newTypeArgs = new ArrayList<TypeName>();
-            if (typeArgs != null) {
-                for (TypeName nestedType : typeArgs) {
-                    newTypeArgs.add(nestedType.accept(this, genericNameMap));
-                }
-            }
-            typeName.setTypeArgs(newTypeArgs);
+            typeName.setTypeArgs(remapGenericNames(typeName.getTypeArgs(), genericNameMap));
             return typeName;
         }
 
@@ -290,54 +273,52 @@ public class Utils {
                     genericName.renameTo((String) renameTo);
                 }
             }
-            List<TypeName> extendsBounds = genericName.getExtendsBound();
-            if (extendsBounds != null) {
-                List<TypeName> newExtendsBounds = new ArrayList<TypeName>();
-                for (TypeName extendsType : extendsBounds) {
-                    newExtendsBounds.add(extendsType.accept(this, genericNameMap));
-                }
-                genericName.setExtendsBound(newExtendsBounds);
-            }
-            TypeName superBound = genericName.getSuperBound();
-            if (superBound != null) {
-                genericName.setSuperBound(superBound.accept(this, genericNameMap));
-            }
+
+            genericName.setExtendsBound(remapGenericNames(genericName.getExtendsBound(), genericNameMap));
+            genericName.setSuperBound(remapGenericNames(genericName.getSuperBound(), genericNameMap));
+
             return genericName;
         }
     };
 
-    private void qualifyTypeArgGenerics(List<TypeName> methodGenerics, TypeName type, String genericQualifier) {
-        type.accept(genericQualifyingVisitor, Pair.create(methodGenerics, genericQualifier));
+    private void qualifyTypeArgGenerics(TypeName toQualify, List<TypeName> methodGenerics, String genericQualifier) {
+        qualifyTypeArgGenerics(toQualify, Pair.create(methodGenerics, genericQualifier));
     }
 
-    private TypeName.TypeNameVisitor genericQualifyingVisitor = new TypeName.TypeNameVisitor<Void, Pair<List<TypeName>, String>>() {
+    private void qualifyTypeArgGenerics(TypeName toQualify, Pair<List<TypeName>, String> params) {
+        if (toQualify != null) {
+            toQualify.accept(genericQualifyingVisitor, params);
+        }
+    }
+
+    private void qualifyTypeArgGenerics(List<? extends TypeName> toQualify, List<TypeName> methodGenerics, String genericQualifier) {
+        qualifyTypeArgGenerics(toQualify, Pair.create(methodGenerics, genericQualifier));
+    }
+
+    private void qualifyTypeArgGenerics(List<? extends TypeName> toQualify, final Pair<List<TypeName>, String> params) {
+        foreach(toQualify, new ForEachMapper<TypeName>() {
+            @Override
+            public void apply(TypeName arg) {
+                qualifyTypeArgGenerics(arg, params);
+            }
+        });
+    }
+
+    private TypeNameVisitor genericQualifyingVisitor = new TypeNameVisitor<Void, Pair<List<TypeName>, String>>() {
 
         @Override
         public Void visitClassName(DeclaredTypeName typeName, Pair<List<TypeName>, String> params) {
-            List<? extends TypeName> typeArgs = typeName.getTypeArgs();
-            if (typeArgs != null) {
-                for (TypeName nestedType : typeArgs) {
-                    nestedType.accept(this, params);
-                }
-            }
+            qualifyTypeArgGenerics(typeName.getTypeArgs(), params);
             return null;
         }
 
         @Override
         public Void visitGenericName(GenericName genericName, Pair<List<TypeName>, String> params) {
-            if (!params.getLeft().contains(genericName)) {
+            if (params.getLeft() != null && !params.getLeft().contains(genericName)) {
                 genericName.addQualifier(params.getRight());
-                List<TypeName> extendsBounds = genericName.getExtendsBound();
-                if (extendsBounds != null) {
-                    for (TypeName extendsType : extendsBounds) {
-                        extendsType.accept(this, params);
-                    }
-                }
-                TypeName superBound = genericName.getSuperBound();
-                if (superBound != null) {
-                    superBound.accept(this, params);
-                }
             }
+            qualifyTypeArgGenerics(genericName.getExtendsBound(), params);
+            qualifyTypeArgGenerics(genericName.getSuperBound(), params);
             return null;
         }
     };
@@ -349,25 +330,23 @@ public class Utils {
                 return getTypeNameFromTypeMirror(arg.asType());
             }
         });
-        map(typeNames, new Mapper<TypeName, Void>() {
-            @Override
-            public Void map(TypeName arg) {
-                qualifyTypeArgGenerics(methodGenerics, arg, genericQualifier);
-                return null;
-            }
-        });
+
+        qualifyTypeArgGenerics(typeNames, methodGenerics, genericQualifier);
         return typeNames;
     }
 
-    private Pair<List<TypeName>, List<String>> getMethodArgumentsFromExecutableElement(ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) {
-        List<? extends VariableElement> arguments = exec.getParameters();
-        List<TypeName> typeNames = getArgumentTypeNames(exec, genericQualifier, methodGenerics);
-        List<String> args = map(arguments, new Mapper<VariableElement, String>() {
+    private List<String> getArgumentNames(ExecutableElement exec) {
+        return map(exec.getParameters(), new Mapper<VariableElement, String>() {
             @Override
             public String map(VariableElement arg) {
                 return arg.toString();
             }
         });
+    }
+
+    private Pair<List<TypeName>, List<String>> getMethodArgumentsFromExecutableElement(ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) {
+        List<TypeName> typeNames = getArgumentTypeNames(exec, genericQualifier, methodGenerics);
+        List<String> args = getArgumentNames(exec);
         if (exec.isVarArgs()) {
             typeNames.get(typeNames.size() - 1).setIsVarArgs(true);
         }
@@ -375,20 +354,13 @@ public class Utils {
     }
 
     private List<TypeName> getThrownTypes(ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) {
-        List<? extends TypeMirror> thrownTypeMirrors = exec.getThrownTypes();
-        List<TypeName> thrownTypes = Utils.map(thrownTypeMirrors, new Utils.Mapper<TypeMirror, TypeName>() {
+        List<TypeName> thrownTypes = map(exec.getThrownTypes(), new Utils.Mapper<TypeMirror, TypeName>() {
             @Override
             public TypeName map(TypeMirror arg) {
                 return getTypeNameFromTypeMirror(arg);
             }
         });
-        Utils.map(thrownTypes, new Utils.Mapper<TypeName, Void>() {
-            @Override
-            public Void map(TypeName arg) {
-                qualifyTypeArgGenerics(methodGenerics, arg, genericQualifier);
-                return null;
-            }
-        });
+        qualifyTypeArgGenerics(thrownTypes, methodGenerics, genericQualifier);
         return thrownTypes;
     }
 
@@ -399,6 +371,10 @@ public class Utils {
 
     public static boolean isEmpty(Collection<?> collection) {
         return collection == null || collection.isEmpty();
+    }
+
+    public static boolean isEmpty(Map<?, ?> map) {
+        return map == null || map.isEmpty();
     }
     
     public static <T> List<T> asList(T... args) {
@@ -430,11 +406,27 @@ public class Utils {
     }
 
     public static <A, B> List<B> map(List<? extends A> list, Mapper<A, B> mapFunction) {
+        if (list == null) {
+            return null;
+        }
         List<B> result = new ArrayList<B>();
         for (A elem : list) {
             result.add(mapFunction.map(elem));
         }
         return result;
+    }
+
+    public static interface ForEachMapper<A> {
+        public void apply(A arg);
+    }
+
+    public static <A> void foreach(List<? extends A> list, ForEachMapper<A> function) {
+        if (list == null) {
+            return;
+        }
+        for (A elem : list) {
+            function.apply(elem);
+        }
     }
 
     public static boolean deepCompareTypeList(List<? extends TypeName> l1, List<? extends TypeName> l2) {

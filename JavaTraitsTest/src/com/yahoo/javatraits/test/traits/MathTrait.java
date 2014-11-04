@@ -5,11 +5,11 @@
  */
 package com.yahoo.javatraits.test.traits;
 
+import com.yahoo.javatraits.annotations.Trait;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import com.yahoo.javatraits.annotations.Trait;
 
 @Trait
 public abstract class MathTrait<A extends Number, B extends A> {

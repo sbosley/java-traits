@@ -73,7 +73,7 @@ public class ClassWithTraits extends TypeElementWrapper {
                 List<String> superclassTypeArgNames = utils.getValuesFromAnnotationValue(typeArgNames, String.class);
 
                 AnnotationValue numTypeArgs = utils.getAnnotationValueFromMirror(desiredSuperclassMirror, "numTypeArgs");
-                int superclassNumTypeArgs = numTypeArgs != null ? ((Integer) numTypeArgs.getValue()).intValue() : 0;
+                int superclassNumTypeArgs = numTypeArgs != null ? (Integer) numTypeArgs.getValue() : 0;
 
                 if (!Utils.isEmpty(superclassTypeArgs)) {
                     desiredSuperclass.setTypeArgs(superclassTypeArgs);

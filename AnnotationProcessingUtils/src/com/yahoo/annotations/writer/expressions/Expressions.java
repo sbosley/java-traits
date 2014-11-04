@@ -1,12 +1,12 @@
 package com.yahoo.annotations.writer.expressions;
 
-import java.io.IOException;
-import java.util.List;
-
 import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.utils.Utils;
 import com.yahoo.annotations.writer.JavaFileWriter;
+
+import java.io.IOException;
+import java.util.List;
 
 public class Expressions {
     

@@ -5,11 +5,11 @@
  */
 package com.yahoo.annotations.model;
 
+import com.yahoo.annotations.utils.Utils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import com.yahoo.annotations.utils.Utils;
 
 public class MethodSignature {
 
