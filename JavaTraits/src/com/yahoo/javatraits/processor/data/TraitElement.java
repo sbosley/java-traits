@@ -108,24 +108,12 @@ public class TraitElement extends TypeElementWrapper {
                 TypeName interfaceArgName = interfaceTypeParams.get(i);
                 if (interfaceArgName instanceof GenericName) {
                     genericNameMap.put(getSimpleName() + GenericName.GENERIC_QUALIFIER_SEPARATOR + ((GenericName) interfaceArgName).getGenericName(),
-                            argName.accept(genericNameMappingVisitor, null));
+                            argName);
                 }
             }
         }
         interfaceGenericNameMaps.add(genericNameMap);
     }
-
-    private TypeNameVisitor<Object, Void> genericNameMappingVisitor = new TypeNameVisitor<Object, Void>() {
-        @Override
-        public Object visitClassName(DeclaredTypeName typeName, Void param) {
-            return typeName;
-        }
-
-        @Override
-        public Object visitGenericName(GenericName genericName, Void param) {
-            return genericName.getGenericName();
-        }
-    };
 
     public DeclaredTypeName getGeneratedInterfaceName() {
         return generatedInterfaceName;

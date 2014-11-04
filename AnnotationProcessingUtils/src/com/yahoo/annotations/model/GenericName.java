@@ -132,6 +132,10 @@ public class GenericName extends TypeName {
         } else if (!getGenericName().equals(other.getGenericName())) {
             return false;
         }
+        return hasSameErasure(other);
+    }
+
+    public boolean hasSameErasure(GenericName other) {
         if (extendsBound == null) {
             if (other.extendsBound != null) {
                 return false;

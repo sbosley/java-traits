@@ -6,10 +6,13 @@
 package com.yahoo.javatraits.processor.writers;
 
 import com.yahoo.annotations.model.DeclaredTypeName;
+import com.yahoo.annotations.model.GenericName;
 import com.yahoo.annotations.model.MethodSignature;
 import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.utils.Pair;
 import com.yahoo.annotations.utils.Utils;
+import com.yahoo.annotations.utils.Utils.ForEachMapper;
+import com.yahoo.annotations.utils.Utils.Mapper;
 import com.yahoo.annotations.writer.JavaFileWriter.Type;
 import com.yahoo.annotations.writer.expressions.Expression;
 import com.yahoo.annotations.writer.expressions.Expressions;
@@ -61,29 +64,42 @@ public class ClassWithTraitsSuperclassWriter extends JavaTraitsWriter<ClassWithT
     }
 
     protected void writeClassDefinition() throws IOException {
-        Set<TypeName> generics = new LinkedHashSet<TypeName>();
+        final List<TypeName> generics = new ArrayList<TypeName>();
+        final Map<String, Integer> knownGenericNames = new HashMap<String, Integer>();
         if (element.superclassHasTypeArgs()) {
             for (TypeName t : element.getDesiredSuperclass().getTypeArgs()) {
-                if (!(t instanceof DeclaredTypeName)) {
+                if (t instanceof GenericName) {
                     generics.add(t);
+                    knownGenericNames.put(((GenericName) t).getGenericName(), generics.size() - 1);
                 }
             }
         }
         for (TraitElement elem : allTraits) {
-            if (elem.hasTypeParameters()) {
-                generics.addAll(elem.getTypeParameters());
-            }
+            Utils.foreach(elem.getTypeParameters(), new ForEachMapper<TypeName>() {
+                @Override
+                public void apply(TypeName arg) {
+                    if (arg instanceof GenericName) {
+                        String genericName = ((GenericName) arg).getGenericName();
+                        if (knownGenericNames.containsKey(genericName)) {
+                            generics.set(knownGenericNames.get(genericName).intValue(), arg);
+                        } else {
+                            generics.add(arg);
+                        }
+                    } else {
+                        generics.add(arg);
+                    }
+                }
+            });
         }
         DeclaredTypeName superclassName = element.getGeneratedSuperclassName().clone();
-        superclassName.setTypeArgs(Utils.asList(generics.toArray(new TypeName[generics.size()])));
+        superclassName.setTypeArgs(generics);
 
-        List<DeclaredTypeName> interfaces = null;
-        if (allTraits.size() > 0) {
-            interfaces = new ArrayList<DeclaredTypeName>();
-            for (TraitElement elem : allTraits) {
-                interfaces.add(elem.getGeneratedInterfaceName());
+        List<DeclaredTypeName> interfaces = Utils.map(allTraits, new Mapper<TraitElement, DeclaredTypeName>() {
+            @Override
+            public DeclaredTypeName map(TraitElement arg) {
+                return arg.getGeneratedInterfaceName();
             }
-        }
+        });
 
         TypeDeclarationParameters params = new TypeDeclarationParameters()
             .setName(superclassName)

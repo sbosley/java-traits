@@ -267,8 +267,8 @@ public class Utils {
             String genericNameString = genericName.getGenericName();
             if (genericNameMap.containsKey(genericNameString)) {
                 Object renameTo = genericNameMap.get(genericNameString);
-                if (renameTo instanceof DeclaredTypeName) {
-                    return (DeclaredTypeName) renameTo;
+                if (renameTo instanceof TypeName) {
+                    return (TypeName) renameTo;
                 } else if (renameTo instanceof String) {
                     genericName.renameTo((String) renameTo);
                 }
