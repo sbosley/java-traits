@@ -8,6 +8,7 @@ package com.yahoo.javatraits.processor.data;
 import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.model.GenericName;
 import com.yahoo.annotations.model.TypeName;
+import com.yahoo.annotations.model.TypeName.TypeNameVisitor;
 import com.yahoo.annotations.utils.Utils;
 
 import javax.lang.model.element.Element;
@@ -54,47 +55,74 @@ public class TraitElement extends TypeElementWrapper {
         initializeInterfaces();
     }
 
-    private void initializeInterfaces() {
-        List<? extends TypeMirror> interfaces = elem.getInterfaces();
-        if (!Utils.isEmpty(interfaces)) {
-            interfaceGenericNameMaps = new ArrayList<Map<String, Object>>();
-            interfaceNames = utils.getTypeNamesFromTypeMirrors(interfaces, getSimpleName());
-            for (int i = 0; i < interfaces.size(); i++) {
-                TypeMirror interfaceMirror = interfaces.get(i);
-                if (interfaceMirror instanceof DeclaredType) {
-                    DeclaredTypeName interfaceName = (DeclaredTypeName) interfaceNames.get(i);
-                    TypeElement interfaceElement = (TypeElement) ((DeclaredType) interfaceMirror).asElement();
-                    List<ExecutableElement> methods = new ArrayList<ExecutableElement>();
-                    accumulateMethods(interfaceElement, methods);
-                    interfaceMethods.add(methods);
-
-                    List<? extends TypeName> args = interfaceName.getTypeArgs();
-                    List<TypeName> interfaceTypeParams = utils.typeParameterElementsToTypeNames(interfaceElement.getTypeParameters());
-                    Map<String, Object> genericNameMap = new HashMap<String, Object>();
-                    if (!Utils.isEmpty(args)) {
-                        for (int j = 0; j < args.size(); j++) {
-                            TypeName argName = args.get(i);
-                            TypeName interfaceArgName = interfaceTypeParams.get(i);
-                            if (interfaceArgName instanceof GenericName) {
-                                genericNameMap.put(getSimpleName() + GenericName.GENERIC_QUALIFIER_SEPARATOR + ((GenericName) interfaceArgName).getGenericName(),
-                                        argName.accept(genericNameMappingVisitor, null));
-                            }
-                        }
+    private void accumulateMethods(Element element, List<ExecutableElement> methods) {
+        List<? extends Element> enclosedElements = element.getEnclosedElements();
+        for (Element e : enclosedElements) {
+            if (e.getKind() != ElementKind.METHOD || !(e instanceof ExecutableElement))
+                if (e.getKind() == ElementKind.CONSTRUCTOR && (e instanceof ExecutableElement)) {
+                    if (((ExecutableElement) e).getParameters().size() > 0) {
+                        utils.getMessager().printMessage(Kind.ERROR, "Trait constructors cannot have arguments", e);
                     }
-                    interfaceGenericNameMaps.add(genericNameMap);
+                } else {
+                    utils.getMessager().printMessage(Kind.ERROR, "Trait elements may only declare methods or abstract methods", e);
                 }
+            else {
+                ExecutableElement exec = (ExecutableElement) e;
+                methods.add(exec);
             }
         }
     }
 
-    private TypeName.TypeNameVisitor<Object, Void> genericNameMappingVisitor = new TypeName.TypeNameVisitor<Object, Void>() {
+    private void initializeInterfaces() {
+        List<? extends TypeMirror> interfaces = elem.getInterfaces();
+        if (!Utils.isEmpty(interfaces)) {
+            initializeInterfaceMappings(interfaces);
+        }
+    }
+
+    private void initializeInterfaceMappings(List<? extends TypeMirror> interfaces) {
+        interfaceGenericNameMaps = new ArrayList<Map<String, Object>>();
+        interfaceNames = utils.getTypeNamesFromTypeMirrors(interfaces, getSimpleName());
+        for (int i = 0; i < interfaces.size(); i++) {
+            TypeMirror interfaceMirror = interfaces.get(i);
+            if (interfaceMirror instanceof DeclaredType) {
+                initializeSingleInterfaceMapping((DeclaredType) interfaceMirror, (DeclaredTypeName) interfaceNames.get(i));
+            } else {
+                utils.getMessager().printMessage(Kind.WARNING, "Interface " + interfaceMirror + " from trait is not a DeclaredType", elem);
+            }
+        }
+    }
+
+    private void initializeSingleInterfaceMapping(DeclaredType interfaceMirror, DeclaredTypeName interfaceName) {
+        TypeElement interfaceElement = (TypeElement) interfaceMirror.asElement();
+        List<ExecutableElement> methods = new ArrayList<ExecutableElement>();
+        accumulateMethods(interfaceElement, methods);
+        interfaceMethods.add(methods);
+
+        List<? extends TypeName> args = interfaceName.getTypeArgs();
+        List<TypeName> interfaceTypeParams = utils.typeParameterElementsToTypeNames(interfaceElement.getTypeParameters());
+        Map<String, Object> genericNameMap = new HashMap<String, Object>();
+        if (!Utils.isEmpty(args)) {
+            for (int i = 0; i < args.size(); i++) {
+                TypeName argName = args.get(i);
+                TypeName interfaceArgName = interfaceTypeParams.get(i);
+                if (interfaceArgName instanceof GenericName) {
+                    genericNameMap.put(getSimpleName() + GenericName.GENERIC_QUALIFIER_SEPARATOR + ((GenericName) interfaceArgName).getGenericName(),
+                            argName.accept(genericNameMappingVisitor, null));
+                }
+            }
+        }
+        interfaceGenericNameMaps.add(genericNameMap);
+    }
+
+    private TypeNameVisitor<Object, Void> genericNameMappingVisitor = new TypeNameVisitor<Object, Void>() {
         @Override
-        public Object visitClassName(DeclaredTypeName typeName, Void aVoid) {
+        public Object visitClassName(DeclaredTypeName typeName, Void param) {
             return typeName;
         }
 
         @Override
-        public Object visitGenericName(GenericName genericName, Void aVoid) {
+        public Object visitGenericName(GenericName genericName, Void param) {
             return genericName.getGenericName();
         }
     };
@@ -125,24 +153,6 @@ public class TraitElement extends TypeElementWrapper {
 
     public Map<String, Object> getGenericNameMapForInterface(int ith) {
         return interfaceGenericNameMaps.get(ith);
-    }
-
-    private void accumulateMethods(Element element, List<ExecutableElement> methods) {
-        List<? extends Element> enclosedElements = element.getEnclosedElements();
-        for (Element e : enclosedElements) {
-            if (e.getKind() != ElementKind.METHOD || !(e instanceof ExecutableElement))
-                if (e.getKind() == ElementKind.CONSTRUCTOR && (e instanceof ExecutableElement)) {
-                    if (((ExecutableElement) e).getParameters().size() > 0) {
-                        utils.getMessager().printMessage(Kind.ERROR, "Trait constructors cannot have arguments", e);
-                    }
-                } else {
-                    utils.getMessager().printMessage(Kind.ERROR, "Trait elements may only declare methods or abstract methods", e);
-                }
-            else {
-                ExecutableElement exec = (ExecutableElement) e;
-                methods.add(exec);
-            }
-        }
     }
 
 }
