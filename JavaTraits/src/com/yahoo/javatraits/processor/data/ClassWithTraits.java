@@ -42,7 +42,7 @@ public class ClassWithTraits extends TypeElementWrapper {
 
     private void initTraitClasses() {
         List<TypeMirror> traitMirrors = utils.getClassMirrorsFromAnnotation(elem, HasTraits.class, "traits");
-        traitClasses = Utils.map(traitMirrors, new Utils.Mapper<TypeMirror, TraitElement>() {
+        traitClasses = Utils.map(traitMirrors, new Utils.Function<TypeMirror, TraitElement>() {
             @Override
             public TraitElement map(TypeMirror arg) {
                 if (!(arg instanceof DeclaredType)) {
@@ -79,7 +79,7 @@ public class ClassWithTraits extends TypeElementWrapper {
                 if (!Utils.isEmpty(superclassTypeArgs)) {
                     desiredSuperclass.setTypeArgs(superclassTypeArgs);
                 } else if (!Utils.isEmpty(superclassTypeArgNames)) {
-                    desiredSuperclass.setTypeArgs(Utils.map(superclassTypeArgNames, new Utils.Mapper<String, GenericName>() {
+                    desiredSuperclass.setTypeArgs(Utils.map(superclassTypeArgNames, new Utils.Function<String, GenericName>() {
                         @Override
                         public GenericName map(String arg) {
                             return new GenericName(arg, null, null);

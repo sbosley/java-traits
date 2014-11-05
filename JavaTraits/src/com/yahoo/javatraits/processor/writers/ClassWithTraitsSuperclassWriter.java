@@ -11,8 +11,6 @@ import com.yahoo.annotations.model.MethodSignature;
 import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.utils.Pair;
 import com.yahoo.annotations.utils.Utils;
-import com.yahoo.annotations.utils.Utils.ForEachMapper;
-import com.yahoo.annotations.utils.Utils.Mapper;
 import com.yahoo.annotations.writer.JavaFileWriter.Type;
 import com.yahoo.annotations.writer.expressions.Expression;
 import com.yahoo.annotations.writer.expressions.Expressions;
@@ -75,26 +73,25 @@ public class ClassWithTraitsSuperclassWriter extends JavaTraitsWriter<ClassWithT
             }
         }
         for (TraitElement elem : allTraits) {
-            Utils.foreach(elem.getTypeParameters(), new ForEachMapper<TypeName>() {
-                @Override
-                public void apply(TypeName arg) {
-                    if (arg instanceof GenericName) {
-                        String genericName = ((GenericName) arg).getGenericName();
+            if (!Utils.isEmpty(elem.getTypeParameters())) {
+                for (TypeName item : elem.getTypeParameters()) {
+                    if (item instanceof GenericName) {
+                        String genericName = ((GenericName) item).getGenericName();
                         if (knownGenericNames.containsKey(genericName)) {
-                            generics.set(knownGenericNames.get(genericName), arg);
+                            generics.set(knownGenericNames.get(genericName), item);
                         } else {
-                            generics.add(arg);
+                            generics.add(item);
                         }
                     } else {
-                        generics.add(arg);
+                        generics.add(item);
                     }
                 }
-            });
+            }
         }
         DeclaredTypeName superclassName = element.getGeneratedSuperclassName().clone();
         superclassName.setTypeArgs(generics);
 
-        List<DeclaredTypeName> interfaces = Utils.map(allTraits, new Mapper<TraitElement, DeclaredTypeName>() {
+        List<DeclaredTypeName> interfaces = Utils.map(allTraits, new Utils.Function<TraitElement, DeclaredTypeName>() {
             @Override
             public DeclaredTypeName map(TraitElement arg) {
                 return arg.getGeneratedInterfaceName();

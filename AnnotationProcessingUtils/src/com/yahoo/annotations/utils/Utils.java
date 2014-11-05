@@ -86,7 +86,7 @@ public class Utils {
     }
     
     public <T extends TypeParameterElement> List<TypeName> typeParameterElementsToTypeNames(List<T> params, final String genericQualifier) {
-        return map(params, new Mapper<T, TypeName>() {
+        return map(params, new Function<T, TypeName>() {
             @Override
             public TypeName map(TypeParameterElement arg) {
                 return typeParameterElementToTypeName(arg, genericQualifier);
@@ -125,7 +125,7 @@ public class Utils {
                 List<? extends TypeMirror> declaredTypeArgs = declaredMirror.getTypeArguments();
                 if (declaredTypeArgs.size() > 0) {
                     mirrorString = mirrorString.replaceAll("<.*>", "");
-                    typeArgs = map(declaredTypeArgs, new Mapper<TypeMirror, TypeName>() {
+                    typeArgs = map(declaredTypeArgs, new Function<TypeMirror, TypeName>() {
                         @Override
                         public TypeName map(TypeMirror arg) {
                             return getTypeNameFromTypeMirror(arg, genericQualifier);
@@ -145,7 +145,7 @@ public class Utils {
     }
 
     public List<TypeName> getTypeNamesFromTypeMirrors(List<? extends TypeMirror> mirrors, final String genericQualifier) {
-        return map(mirrors, new Mapper<TypeMirror, TypeName>() {
+        return map(mirrors, new Function<TypeMirror, TypeName>() {
             @Override
             public TypeName map(TypeMirror arg) {
                 return getTypeNameFromTypeMirror(arg, genericQualifier);
@@ -169,7 +169,7 @@ public class Utils {
 
     private List<TypeName> getUpperBoundsFromTypeMirror(TypeMirror sourceMirror, TypeMirror extendsBoundMirror, final String genericQualifier) {
         List<? extends TypeMirror> upperBounds = getUpperBoundMirrors(sourceMirror, extendsBoundMirror);
-        return map(upperBounds, new Mapper<TypeMirror, TypeName>() {
+        return map(upperBounds, new Function<TypeMirror, TypeName>() {
             @Override
             public TypeName map(TypeMirror arg) {
                 return getTypeNameFromTypeMirror(arg, genericQualifier);
@@ -237,7 +237,7 @@ public class Utils {
         if (Utils.isEmpty(genericNameMap)) {
             return types;
         }
-        return map(types, new Mapper<TypeName, TypeName>() {
+        return map(types, new Function<TypeName, TypeName>() {
             @Override
             public TypeName map(TypeName arg) {
                 return remapGenericNames(arg, genericNameMap);
@@ -293,12 +293,12 @@ public class Utils {
     }
 
     private void qualifyTypeArgGenerics(List<? extends TypeName> toQualify, final Pair<List<TypeName>, String> params) {
-        foreach(toQualify, new ForEachMapper<TypeName>() {
-            @Override
-            public void apply(TypeName arg) {
-                qualifyTypeArgGenerics(arg, params);
-            }
-        });
+        if (isEmpty(toQualify)) {
+            return;
+        }
+        for (TypeName item : toQualify) {
+            qualifyTypeArgGenerics(item, params);
+        }
     }
 
     private TypeNameVisitor genericQualifyingVisitor = new TypeNameVisitor<Void, Pair<List<TypeName>, String>>() {
@@ -321,7 +321,7 @@ public class Utils {
     };
 
     private List<TypeName> getArgumentTypeNames(ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) {
-        List<TypeName> typeNames = map(exec.getParameters(), new Mapper<VariableElement, TypeName>() {
+        List<TypeName> typeNames = map(exec.getParameters(), new Function<VariableElement, TypeName>() {
             @Override
             public TypeName map(VariableElement arg) {
                 return getTypeNameFromTypeMirror(arg.asType());
@@ -333,7 +333,7 @@ public class Utils {
     }
 
     private List<String> getArgumentNames(ExecutableElement exec) {
-        return map(exec.getParameters(), new Mapper<VariableElement, String>() {
+        return map(exec.getParameters(), new Function<VariableElement, String>() {
             @Override
             public String map(VariableElement arg) {
                 return arg.toString();
@@ -351,7 +351,7 @@ public class Utils {
     }
 
     private List<TypeName> getThrownTypes(ExecutableElement exec, final String genericQualifier, final List<TypeName> methodGenerics) {
-        List<TypeName> thrownTypes = map(exec.getThrownTypes(), new Utils.Mapper<TypeMirror, TypeName>() {
+        List<TypeName> thrownTypes = map(exec.getThrownTypes(), new Function<TypeMirror, TypeName>() {
             @Override
             public TypeName map(TypeMirror arg) {
                 return getTypeNameFromTypeMirror(arg);
@@ -398,11 +398,11 @@ public class Utils {
         return name.lastIndexOf('.');
     }
 
-    public static interface Mapper<A, B> {
+    public static interface Function<A, B> {
         public B map(A arg);
     }
 
-    public static <A, B> List<B> map(List<? extends A> list, Mapper<A, B> mapFunction) {
+    public static <A, B> List<B> map(List<? extends A> list, Function<A, B> mapFunction) {
         if (list == null) {
             return null;
         }
@@ -411,19 +411,6 @@ public class Utils {
             result.add(mapFunction.map(elem));
         }
         return result;
-    }
-
-    public static interface ForEachMapper<A> {
-        public void apply(A arg);
-    }
-
-    public static <A> void foreach(Collection<? extends A> collection, ForEachMapper<A> function) {
-        if (isEmpty(collection)) {
-            return;
-        }
-        for (A elem : collection) {
-            function.apply(elem);
-        }
     }
 
     public static boolean deepCompareTypeList(List<? extends TypeName> l1, List<? extends TypeName> l2) {
@@ -489,7 +476,7 @@ public class Utils {
     }
 
     public List<DeclaredTypeName> getTypeNamesFromAnnotationValue(AnnotationValue annotationValue) {
-        return mapValuesFromAnnotationValue(annotationValue, TypeMirror.class, new Mapper<TypeMirror, DeclaredTypeName>() {
+        return mapValuesFromAnnotationValue(annotationValue, TypeMirror.class, new Function<TypeMirror, DeclaredTypeName>() {
             @Override
             public DeclaredTypeName map(TypeMirror arg) {
                 return new DeclaredTypeName(arg.toString());
@@ -502,7 +489,7 @@ public class Utils {
     }
     
     public <T> List<T> getValuesFromAnnotationValue(AnnotationValue annotationValue, Class<T> valueClass) {
-        return mapValuesFromAnnotationValue(annotationValue, valueClass, new Mapper<T, T>() {
+        return mapValuesFromAnnotationValue(annotationValue, valueClass, new Function<T, T>() {
             @Override
             public T map(T arg) {
                 return arg;
@@ -511,7 +498,7 @@ public class Utils {
     }
     
     @SuppressWarnings("unchecked")
-    private <V, T> List<T> mapValuesFromAnnotationValue(AnnotationValue annotationValue, Class<V> valueClass, Mapper<V, T> mapResult) {
+    private <V, T> List<T> mapValuesFromAnnotationValue(AnnotationValue annotationValue, Class<V> valueClass, Function<V, T> mapResult) {
         List<T> result = new ArrayList<T>();
         if (annotationValue != null) {
             Object value = annotationValue.getValue();
