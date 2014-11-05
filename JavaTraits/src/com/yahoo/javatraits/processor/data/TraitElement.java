@@ -30,7 +30,7 @@ public class TraitElement extends TypeElementWrapper {
     private List<ExecutableElement> declaredMethods = new ArrayList<ExecutableElement>();
     private List<TypeName> interfaceNames;
     private List<List<ExecutableElement>> interfaceMethods = new ArrayList<List<ExecutableElement>>();
-    private List<Map<String, Object>> interfaceGenericNameMaps;
+    private List<Map<String, TypeName>> interfaceGenericNameMaps;
 
     private DeclaredTypeName generatedInterfaceName;
     private DeclaredTypeName delegateName;
@@ -79,7 +79,7 @@ public class TraitElement extends TypeElementWrapper {
     }
 
     private void initializeInterfaceMappings(List<? extends TypeMirror> interfaces) {
-        interfaceGenericNameMaps = new ArrayList<Map<String, Object>>();
+        interfaceGenericNameMaps = new ArrayList<Map<String, TypeName>>();
         interfaceNames = utils.getTypeNamesFromTypeMirrors(interfaces, getSimpleName());
         for (int i = 0; i < interfaces.size(); i++) {
             TypeMirror interfaceMirror = interfaces.get(i);
@@ -99,7 +99,7 @@ public class TraitElement extends TypeElementWrapper {
 
         List<? extends TypeName> args = interfaceName.getTypeArgs();
         List<TypeName> interfaceTypeParams = utils.typeParameterElementsToTypeNames(interfaceElement.getTypeParameters());
-        Map<String, Object> genericNameMap = new HashMap<String, Object>();
+        Map<String, TypeName> genericNameMap = new HashMap<String, TypeName>();
         if (!Utils.isEmpty(args)) {
             for (int i = 0; i < args.size(); i++) {
                 TypeName argName = args.get(i);
@@ -137,7 +137,7 @@ public class TraitElement extends TypeElementWrapper {
         return interfaceMethods.get(ith);
     }
 
-    public Map<String, Object> getGenericNameMapForInterface(int ith) {
+    public Map<String, TypeName> getGenericNameMapForInterface(int ith) {
         return interfaceGenericNameMaps.get(ith);
     }
 

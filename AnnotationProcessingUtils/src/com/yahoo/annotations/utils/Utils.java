@@ -233,7 +233,7 @@ public class Utils {
             .setThrowsTypes(getThrownTypes(exec, genericQualifier, methodGenerics));
     }
 
-    public List<? extends TypeName> remapGenericNames(List<? extends TypeName> types, final Map<String, Object> genericNameMap) {
+    public List<? extends TypeName> remapGenericNames(List<? extends TypeName> types, final Map<String, TypeName> genericNameMap) {
         if (Utils.isEmpty(genericNameMap)) {
             return types;
         }
@@ -245,35 +245,26 @@ public class Utils {
         });
     }
 
-    public TypeName remapGenericNames(TypeName type, Map<String, Object> genericNameMap) {
+    public TypeName remapGenericNames(TypeName type, Map<String, TypeName> genericNameMap) {
         if (type != null && genericNameMap != null) {
             return type.accept(genericNameRemappingVisitor, genericNameMap);
         }
         return type;
     }
 
-    private TypeNameVisitor<TypeName, Map<String, Object>> genericNameRemappingVisitor = new TypeNameVisitor<TypeName, Map<String, Object>>() {
+    private TypeNameVisitor<TypeName, Map<String, TypeName>> genericNameRemappingVisitor = new TypeNameVisitor<TypeName, Map<String, TypeName>>() {
         @Override
-        public TypeName visitClassName(DeclaredTypeName typeName, Map<String, Object> genericNameMap) {
+        public TypeName visitClassName(DeclaredTypeName typeName, Map<String, TypeName> genericNameMap) {
             typeName.setTypeArgs(remapGenericNames(typeName.getTypeArgs(), genericNameMap));
             return typeName;
         }
 
         @Override
-        public TypeName visitGenericName(GenericName genericName, Map<String, Object> genericNameMap) {
+        public TypeName visitGenericName(GenericName genericName, Map<String, TypeName> genericNameMap) {
             String genericNameString = genericName.getGenericName();
             if (genericNameMap.containsKey(genericNameString)) {
-                Object renameTo = genericNameMap.get(genericNameString);
-                if (renameTo instanceof TypeName) {
-                    return (TypeName) renameTo;
-                } else if (renameTo instanceof String) {
-                    genericName.renameTo((String) renameTo);
-                }
+                return genericNameMap.get(genericNameString);
             }
-
-            genericName.setExtendsBound(remapGenericNames(genericName.getExtendsBound(), genericNameMap));
-            genericName.setSuperBound(remapGenericNames(genericName.getSuperBound(), genericNameMap));
-
             return genericName;
         }
     };

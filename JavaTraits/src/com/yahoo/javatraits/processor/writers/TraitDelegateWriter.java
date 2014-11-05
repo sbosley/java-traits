@@ -6,6 +6,7 @@
 package com.yahoo.javatraits.processor.writers;
 
 import com.yahoo.annotations.model.DeclaredTypeName;
+import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.utils.Utils;
 import com.yahoo.annotations.writer.JavaFileWriter.Type;
 import com.yahoo.annotations.writer.expressions.Expression;
@@ -118,7 +119,7 @@ public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
             .finishMethodDefinition();
     }
 
-    private void emitMethodDeclaration(ExecutableElement exec, Map<String, Object> genericNameMap, boolean isDefault, Modifier... modifiers) throws IOException {
+    private void emitMethodDeclaration(ExecutableElement exec, Map<String, TypeName> genericNameMap, boolean isDefault, Modifier... modifiers) throws IOException {
         String name = isDefault ? "default__" + exec.getSimpleName().toString() : null;
         MethodDeclarationParameters methodDeclaration = utils.methodDeclarationParamsFromExecutableElement(exec, name, element.getSimpleName(), modifiers);
         remapMethodDeclarationGenerics(methodDeclaration, genericNameMap);
@@ -143,7 +144,7 @@ public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
         }
     }
 
-    private void remapMethodDeclarationGenerics(MethodDeclarationParameters params, Map<String, Object> genericNameMap) {
+    private void remapMethodDeclarationGenerics(MethodDeclarationParameters params, Map<String, TypeName> genericNameMap) {
         if (!Utils.isEmpty(genericNameMap)) {
             params.setReturnType(utils.remapGenericNames(params.getReturnType(), genericNameMap));
             params.setArgumentTypes(utils.remapGenericNames(params.getArgumentTypes(), genericNameMap));
