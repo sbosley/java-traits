@@ -15,7 +15,7 @@ public class HasTraitsProcessor extends JavaTraitsProcessor<ClassWithTraits> {
     }
 
     @Override
-    protected ClassWithTraits itemTypeFromTypeElement(TypeElement typeElem) {
+    protected ClassWithTraits itemFromTypeElement(TypeElement typeElem) {
         return new ClassWithTraits(typeElem, utils);
     }
 

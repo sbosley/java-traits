@@ -20,7 +20,7 @@ public abstract class JavaTraitsProcessor<T extends TypeElementWrapper> extends 
     protected Filer filer;
     
     protected abstract Class<? extends Annotation> getAnnotationClass();
-    protected abstract T itemTypeFromTypeElement(TypeElement typeElem);
+    protected abstract T itemFromTypeElement(TypeElement typeElem);
     protected abstract void processItem(T item);
 
     @Override
@@ -59,8 +59,7 @@ public abstract class JavaTraitsProcessor<T extends TypeElementWrapper> extends 
             if (e.getKind() != ElementKind.CLASS || !(e instanceof TypeElement)) {
                 messager.printMessage(Kind.ERROR, "Only a class can be annotated with @" + getAnnotationClass().getSimpleName(), e);
             } else {
-                TypeElement typeElem = (TypeElement) e;
-                processItem(itemTypeFromTypeElement(typeElem));
+                processItem(itemFromTypeElement((TypeElement) e));
             }
         }
     }

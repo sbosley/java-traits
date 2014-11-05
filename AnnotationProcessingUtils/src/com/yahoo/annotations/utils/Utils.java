@@ -5,10 +5,7 @@
  */
 package com.yahoo.annotations.utils;
 
-import com.yahoo.annotations.model.DeclaredTypeName;
-import com.yahoo.annotations.model.GenericName;
-import com.yahoo.annotations.model.MethodSignature;
-import com.yahoo.annotations.model.TypeName;
+import com.yahoo.annotations.model.*;
 import com.yahoo.annotations.model.TypeName.TypeNameVisitor;
 import com.yahoo.annotations.visitors.ImportGatheringTypeMirrorVisitor;
 import com.yahoo.annotations.visitors.ImportGatheringTypeNameVisitor;
@@ -23,7 +20,7 @@ import java.util.Map.Entry;
 
 public class Utils {
 
-    public static final String OBJECT_CLASS_NAME = "java.lang.Object";
+    public static final String OBJECT_CLASS_NAME = CoreTypes.JAVA_OBJECT.toString();
 
     private Messager messager;
     private Types types;
@@ -420,11 +417,11 @@ public class Utils {
         public void apply(A arg);
     }
 
-    public static <A> void foreach(List<? extends A> list, ForEachMapper<A> function) {
-        if (list == null) {
+    public static <A> void foreach(Collection<? extends A> collection, ForEachMapper<A> function) {
+        if (isEmpty(collection)) {
             return;
         }
-        for (A elem : list) {
+        for (A elem : collection) {
             function.apply(elem);
         }
     }

@@ -8,7 +8,6 @@ package com.yahoo.javatraits.processor.data;
 import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.model.GenericName;
 import com.yahoo.annotations.model.TypeName;
-import com.yahoo.annotations.model.TypeName.TypeNameVisitor;
 import com.yahoo.annotations.utils.Utils;
 
 import javax.lang.model.element.Element;
@@ -58,7 +57,7 @@ public class TraitElement extends TypeElementWrapper {
     private void accumulateMethods(Element element, List<ExecutableElement> methods) {
         List<? extends Element> enclosedElements = element.getEnclosedElements();
         for (Element e : enclosedElements) {
-            if (e.getKind() != ElementKind.METHOD || !(e instanceof ExecutableElement))
+            if (e.getKind() != ElementKind.METHOD || !(e instanceof ExecutableElement)) {
                 if (e.getKind() == ElementKind.CONSTRUCTOR && (e instanceof ExecutableElement)) {
                     if (((ExecutableElement) e).getParameters().size() > 0) {
                         utils.getMessager().printMessage(Kind.ERROR, "Trait constructors cannot have arguments", e);
@@ -66,9 +65,8 @@ public class TraitElement extends TypeElementWrapper {
                 } else {
                     utils.getMessager().printMessage(Kind.ERROR, "Trait elements may only declare methods or abstract methods", e);
                 }
-            else {
-                ExecutableElement exec = (ExecutableElement) e;
-                methods.add(exec);
+            } else {
+                methods.add((ExecutableElement) e);
             }
         }
     }

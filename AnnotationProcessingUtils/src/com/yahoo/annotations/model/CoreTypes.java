@@ -3,7 +3,8 @@ package com.yahoo.annotations.model;
 public class CoreTypes {
 
     public static final String JAVA_LANG = "java.lang";
-    
+
+    public static final DeclaredTypeName JAVA_OBJECT = new DeclaredTypeName(JAVA_LANG, "Object");
     public static final DeclaredTypeName JAVA_STRING = new DeclaredTypeName(JAVA_LANG, "String");
     public static final DeclaredTypeName JAVA_INTEGER = new DeclaredTypeName(JAVA_LANG, "Integer");
     public static final DeclaredTypeName JAVA_LONG = new DeclaredTypeName(JAVA_LANG, "Long");

@@ -5,6 +5,7 @@
  */
 package com.yahoo.annotations.writer;
 
+import com.yahoo.annotations.model.CoreTypes;
 import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.model.GenericName;
 import com.yahoo.annotations.model.TypeName;
@@ -140,7 +141,7 @@ public class JavaFileWriter {
         out.append(typeDeclaration.getKind().name).append(" ").append(typeDeclaration.getClassName().getSimpleName());
         writeGenericsList(typeDeclaration.getClassName().getTypeArgs(), true);
 
-        if (kind == Type.CLASS && typeDeclaration.getSuperclass() != null && !Utils.OBJECT_CLASS_NAME.equals(typeDeclaration.getSuperclass().toString())) {
+        if (kind == Type.CLASS && typeDeclaration.getSuperclass() != null && !CoreTypes.JAVA_OBJECT.equals(typeDeclaration.getSuperclass())) {
             out.append(" extends ").append(shortenName(typeDeclaration.getSuperclass(), false));
         }
 

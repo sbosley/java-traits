@@ -5,6 +5,7 @@
  */
 package com.yahoo.javatraits.processor.data;
 
+import com.yahoo.annotations.model.CoreTypes;
 import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.model.GenericName;
 import com.yahoo.annotations.utils.Utils;
@@ -64,7 +65,7 @@ public class ClassWithTraits extends TypeElementWrapper {
                 AnnotationValue superclassValue = utils.getAnnotationValueFromMirror(desiredSuperclassMirror, "superclass");
 
                 List<DeclaredTypeName> superclassNames = utils.getTypeNamesFromAnnotationValue(superclassValue);
-                desiredSuperclass = superclassNames.size() > 0 ? superclassNames.get(0) : new DeclaredTypeName(Utils.OBJECT_CLASS_NAME);
+                desiredSuperclass = superclassNames.size() > 0 ? superclassNames.get(0) : CoreTypes.JAVA_OBJECT;
 
                 AnnotationValue typeArgClassesValue = utils.getAnnotationValueFromMirror(desiredSuperclassMirror, "typeArgClasses");
                 List<DeclaredTypeName> superclassTypeArgs = utils.getTypeNamesFromAnnotationValue(typeArgClassesValue);
@@ -93,7 +94,7 @@ public class ClassWithTraits extends TypeElementWrapper {
                 }
             }
         } else {
-            desiredSuperclass = new DeclaredTypeName(Utils.OBJECT_CLASS_NAME);
+            desiredSuperclass = CoreTypes.JAVA_OBJECT;
         }
 
         generatedSuperclass = new DeclaredTypeName(elementName.toString() + GEN_SUFFIX);

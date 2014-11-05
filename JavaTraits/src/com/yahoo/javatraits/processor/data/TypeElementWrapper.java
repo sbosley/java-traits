@@ -10,7 +10,6 @@ import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.utils.Utils;
 
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.TypeParameterElement;
 import java.util.List;
 
 public abstract class TypeElementWrapper {
@@ -24,12 +23,7 @@ public abstract class TypeElementWrapper {
         this.elem = elem;
         this.utils = utils;
         this.elementName = new DeclaredTypeName(elem.getQualifiedName().toString());
-        this.typeParameters = initTypeParameters(elem);
-    }
-    
-    private List<TypeName> initTypeParameters(TypeElement elem) {
-        List<? extends TypeParameterElement> typeParams = elem.getTypeParameters();
-        return utils.typeParameterElementsToTypeNames(typeParams, getSimpleName());
+        this.typeParameters = utils.typeParameterElementsToTypeNames(elem.getTypeParameters(), getSimpleName());
     }
 
     public TypeElement getSourceElement() {
@@ -51,8 +45,5 @@ public abstract class TypeElementWrapper {
     public List<TypeName> getTypeParameters() {
         return typeParameters;
     }
-    
-    public boolean hasTypeParameters() {
-        return typeParameters.size() > 0;
-    }
+
 }

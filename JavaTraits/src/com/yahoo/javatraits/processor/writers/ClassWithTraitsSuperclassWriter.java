@@ -81,7 +81,7 @@ public class ClassWithTraitsSuperclassWriter extends JavaTraitsWriter<ClassWithT
                     if (arg instanceof GenericName) {
                         String genericName = ((GenericName) arg).getGenericName();
                         if (knownGenericNames.containsKey(genericName)) {
-                            generics.set(knownGenericNames.get(genericName).intValue(), arg);
+                            generics.set(knownGenericNames.get(genericName), arg);
                         } else {
                             generics.add(arg);
                         }
