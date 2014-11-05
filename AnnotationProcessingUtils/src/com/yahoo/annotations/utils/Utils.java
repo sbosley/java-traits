@@ -357,6 +357,9 @@ public class Utils {
             if (genericNameMap.containsKey(genericNameString)) {
                 return genericNameMap.get(genericNameString);
             }
+
+            genericName.setExtendsBound(remapGenericNames(genericName.getExtendsBound(), genericNameMap));
+            genericName.setSuperBound(remapGenericNames(genericName.getSuperBound(), genericNameMap));
             return genericName;
         }
     };
