@@ -12,7 +12,7 @@ import static org.junit.Assert.assertTrue;
 public class BasicTraitsTest {
 
     private SomeClass<Number, Integer, String, Long> instance = new SomeClass<Number, Integer, String, Long>();
-    
+
     @Test
     public void testBasicTraitFunctions() {
         FootballField field = new FootballField();

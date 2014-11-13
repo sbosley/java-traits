@@ -71,7 +71,10 @@ public class Utils {
         result.setReturnType(returnType);
 
         List<TypeName> argTypeNames = getArgumentTypeNames(exec, genericQualifier, methodGenerics);
-        result.addArgType(argTypeNames.toArray(new TypeName[argTypeNames.size()]));
+        result.addArgTypes(argTypeNames);
+
+        List<TypeName> throwsTypeNames = getThrownTypes(exec, genericQualifier, methodGenerics);
+        result.addThrowsTypes(throwsTypeNames);
         return result;
     }
 
@@ -445,6 +448,13 @@ public class Utils {
     }
 
     // --- static methods
+    public static boolean isEqual(Object o1, Object o2) {
+        if (o1 == null || o2 == null) {
+            return o1 == o2;
+        }
+        return o1.equals(o2);
+    }
+
     public static boolean isEmpty(String str) {
         return str == null || str.isEmpty();
     }
@@ -497,6 +507,9 @@ public class Utils {
     }
 
     public static boolean deepCompareTypeList(List<? extends TypeName> l1, List<? extends TypeName> l2) {
+        if (l1 == null || l2 == null) {
+            return l1 == l2;
+        }
         if (l1.size() != l2.size()) {
             return false;
         }
@@ -509,6 +522,9 @@ public class Utils {
     }
 
     public static boolean deepCompareTypes(TypeName t1, TypeName t2) {
+        if (t1 == null || t2 == null) {
+            return t1 == t2;
+        }
         if (!t1.equals(t2)) {
             return false;
         }
