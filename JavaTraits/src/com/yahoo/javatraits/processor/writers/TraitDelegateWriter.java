@@ -7,14 +7,14 @@ package com.yahoo.javatraits.processor.writers;
 
 import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.model.TypeName;
-import com.yahoo.annotations.utils.Utils;
+import com.yahoo.annotations.utils.AptUtils;
 import com.yahoo.annotations.writer.JavaFileWriter.Type;
 import com.yahoo.annotations.writer.expressions.Expression;
 import com.yahoo.annotations.writer.expressions.Expressions;
 import com.yahoo.annotations.writer.parameters.MethodDeclarationParameters;
 import com.yahoo.annotations.writer.parameters.TypeDeclarationParameters;
 import com.yahoo.javatraits.processor.data.TraitElement;
-import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
+import com.yahoo.javatraits.processor.utils.TraitProcessorAptUtils;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -29,7 +29,7 @@ public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
     private DeclaredTypeName traitDelegateClass;
     private DeclaredTypeName delegateInterface;
 
-    public TraitDelegateWriter(TraitElement traitElement, TraitProcessorUtils utils) {
+    public TraitDelegateWriter(TraitElement traitElement, TraitProcessorAptUtils utils) {
         super(traitElement, utils);
         this.traitDelegateClass = traitElement.getDelegateName();
         this.delegateInterface = traitElement.getGeneratedInterfaceName();
@@ -110,7 +110,7 @@ public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
 
     private void emitGetThis() throws IOException {
         MethodDeclarationParameters params = new MethodDeclarationParameters()
-            .setMethodName(TraitProcessorUtils.GET_THIS)
+            .setMethodName(TraitProcessorAptUtils.GET_THIS)
             .setReturnType(delegateInterface)
             .setModifiers(Modifier.PUBLIC);
 
@@ -145,7 +145,7 @@ public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
     }
 
     private void remapMethodDeclarationGenerics(MethodDeclarationParameters params, Map<String, TypeName> genericNameMap) {
-        if (!Utils.isEmpty(genericNameMap)) {
+        if (!AptUtils.isEmpty(genericNameMap)) {
             params.setReturnType(utils.remapGenericNames(params.getReturnType(), genericNameMap));
             params.setArgumentTypes(utils.remapGenericNames(params.getArgumentTypes(), genericNameMap));
             params.setThrowsTypes(utils.remapGenericNames(params.getThrowsTypes(), genericNameMap));

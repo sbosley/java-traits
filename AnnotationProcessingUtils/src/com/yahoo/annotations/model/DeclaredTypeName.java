@@ -5,7 +5,7 @@
  */
 package com.yahoo.annotations.model;
 
-import com.yahoo.annotations.utils.Utils;
+import com.yahoo.annotations.utils.AptUtils;
 
 import java.util.List;
 
@@ -21,8 +21,8 @@ public class DeclaredTypeName extends TypeName {
     }
 
     public DeclaredTypeName(String fullyQualifiedName) {
-        this.packageName = Utils.getPackageFromFullyQualifiedName(fullyQualifiedName);
-        this.simpleName = Utils.getSimpleNameFromFullyQualifiedName(fullyQualifiedName);
+        this.packageName = AptUtils.getPackageFromFullyQualifiedName(fullyQualifiedName);
+        this.simpleName = AptUtils.getSimpleNameFromFullyQualifiedName(fullyQualifiedName);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class DeclaredTypeName extends TypeName {
     }
 
     public String toString() {
-        if (Utils.isEmpty(packageName)) {
+        if (AptUtils.isEmpty(packageName)) {
             return simpleName;
         }
         return packageName + "." + simpleName;

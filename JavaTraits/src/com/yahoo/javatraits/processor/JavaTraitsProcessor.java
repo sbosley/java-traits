@@ -1,7 +1,7 @@
 package com.yahoo.javatraits.processor;
 
 import com.yahoo.javatraits.processor.data.TypeElementWrapper;
-import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
+import com.yahoo.javatraits.processor.utils.TraitProcessorAptUtils;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -16,7 +16,7 @@ import java.util.Set;
 public abstract class JavaTraitsProcessor<T extends TypeElementWrapper> extends AbstractProcessor {
 
     protected Messager messager;
-    protected TraitProcessorUtils utils;
+    protected TraitProcessorAptUtils utils;
     protected Filer filer;
     
     protected abstract Class<? extends Annotation> getAnnotationClass();
@@ -39,7 +39,7 @@ public abstract class JavaTraitsProcessor<T extends TypeElementWrapper> extends 
 
         this.messager = env.getMessager();
         this.filer = env.getFiler();
-        this.utils = new TraitProcessorUtils(messager, env.getTypeUtils());
+        this.utils = new TraitProcessorAptUtils(messager, env.getTypeUtils());
     }
     
     @Override

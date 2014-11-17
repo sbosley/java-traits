@@ -5,7 +5,7 @@
  */
 package com.yahoo.annotations.model;
 
-import com.yahoo.annotations.utils.Utils;
+import com.yahoo.annotations.utils.AptUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +42,7 @@ public class MethodSignature {
     }
 
     public void addArgTypes(TypeName... types) {
-        addArgTypes(Utils.asList(types));
+        addArgTypes(AptUtils.asList(types));
     }
 
     public void addArgTypes(List<? extends TypeName> types) {
@@ -56,7 +56,7 @@ public class MethodSignature {
     }
 
     public void addThrowsTypes(TypeName... types) {
-        addThrowsTypes(Utils.asList(types));
+        addThrowsTypes(AptUtils.asList(types));
     }
 
     public void addThrowsTypes(List<? extends TypeName> types) {
@@ -92,16 +92,16 @@ public class MethodSignature {
             return false;
         }
         MethodSignature other = (MethodSignature) obj;
-        if (!Utils.deepCompareTypeList(argTypes, other.argTypes)) {
+        if (!AptUtils.deepCompareTypeList(argTypes, other.argTypes)) {
             return false;
         }
-        if (!Utils.isEqual(methodName, other.methodName)) {
+        if (!AptUtils.isEqual(methodName, other.methodName)) {
             return false;
         }
-        if (!Utils.deepCompareTypes(returnType, other.returnType)) {
+        if (!AptUtils.deepCompareTypes(returnType, other.returnType)) {
             return false;
         }
-        if (!Utils.deepCompareTypeList(throwsTypes, other.throwsTypes)) {
+        if (!AptUtils.deepCompareTypeList(throwsTypes, other.throwsTypes)) {
             return false;
         }
         return true;

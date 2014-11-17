@@ -2,7 +2,7 @@ package com.yahoo.annotations.writer.expressions;
 
 import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.model.TypeName;
-import com.yahoo.annotations.utils.Utils;
+import com.yahoo.annotations.utils.AptUtils;
 import com.yahoo.annotations.writer.JavaFileWriter;
 
 import java.io.IOException;
@@ -14,7 +14,7 @@ public class Expressions {
         return new Expression() {
             @Override
             public boolean writeExpression(JavaFileWriter writer) throws IOException {
-                if (!Utils.isEmpty(str)) {
+                if (!AptUtils.isEmpty(str)) {
                     writer.appendString(str);
                     return true;
                 }

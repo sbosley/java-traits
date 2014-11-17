@@ -1,6 +1,6 @@
 package com.yahoo.javatraits.processor.utils;
 
-import com.yahoo.annotations.utils.Utils;
+import com.yahoo.annotations.utils.AptUtils;
 import com.yahoo.javatraits.processor.data.TraitElement;
 
 import javax.annotation.processing.Messager;
@@ -10,9 +10,9 @@ import javax.lang.model.type.ErrorType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 
-public class TraitProcessorUtils extends Utils {
+public class TraitProcessorAptUtils extends AptUtils {
 
-    public TraitProcessorUtils(Messager messager, Types types) {
+    public TraitProcessorAptUtils(Messager messager, Types types) {
         super(messager, types);
     }
 

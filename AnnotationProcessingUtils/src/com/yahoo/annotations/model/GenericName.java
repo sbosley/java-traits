@@ -5,7 +5,7 @@
  */
 package com.yahoo.annotations.model;
 
-import com.yahoo.annotations.utils.Utils;
+import com.yahoo.annotations.utils.AptUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -136,7 +136,7 @@ public class GenericName extends TypeName {
             if (other.extendsBound != null) {
                 return false;
             }
-        } else if (!Utils.deepCompareTypeList(extendsBound, other.extendsBound)) {
+        } else if (!AptUtils.deepCompareTypeList(extendsBound, other.extendsBound)) {
             return false;
         }
         if (superBound == null) {

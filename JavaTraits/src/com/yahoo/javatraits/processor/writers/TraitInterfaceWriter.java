@@ -10,7 +10,7 @@ import com.yahoo.annotations.writer.JavaFileWriter.Type;
 import com.yahoo.annotations.writer.parameters.MethodDeclarationParameters;
 import com.yahoo.annotations.writer.parameters.TypeDeclarationParameters;
 import com.yahoo.javatraits.processor.data.TraitElement;
-import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
+import com.yahoo.javatraits.processor.utils.TraitProcessorAptUtils;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -19,7 +19,7 @@ import java.util.Set;
 
 public class TraitInterfaceWriter extends JavaTraitsWriter<TraitElement> {
 
-    public TraitInterfaceWriter(TraitElement element, TraitProcessorUtils utils) {
+    public TraitInterfaceWriter(TraitElement element, TraitProcessorAptUtils utils) {
         super(element, utils);
     }
 

@@ -2,7 +2,7 @@ package com.yahoo.annotations.writer.parameters;
 
 import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.model.TypeName;
-import com.yahoo.annotations.utils.Utils;
+import com.yahoo.annotations.utils.AptUtils;
 import com.yahoo.annotations.writer.JavaFileWriter.Type;
 
 import javax.lang.model.element.Modifier;
@@ -39,7 +39,7 @@ public class TypeDeclarationParameters {
     }
 
     public TypeDeclarationParameters setModifiers(Modifier... modifiers) {
-        this.modifiers = Utils.asList(modifiers);
+        this.modifiers = AptUtils.asList(modifiers);
         return this;
     }
     

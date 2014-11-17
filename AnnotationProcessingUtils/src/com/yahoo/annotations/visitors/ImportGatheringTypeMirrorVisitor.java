@@ -6,7 +6,7 @@
 package com.yahoo.annotations.visitors;
 
 import com.yahoo.annotations.model.DeclaredTypeName;
-import com.yahoo.annotations.utils.Utils;
+import com.yahoo.annotations.utils.AptUtils;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
@@ -19,12 +19,12 @@ public class ImportGatheringTypeMirrorVisitor implements TypeVisitor<Void, Set<D
 
     private Element elem;
     private Messager messager;
-    private Utils utils;
+    private AptUtils aptUtils;
 
-    public ImportGatheringTypeMirrorVisitor(Element elem, Messager messager, Utils utils) {
+    public ImportGatheringTypeMirrorVisitor(Element elem, Messager messager, AptUtils aptUtils) {
         this.elem = elem;
         this.messager = messager;
-        this.utils = utils;
+        this.aptUtils = aptUtils;
     }
 
     @Override
@@ -49,7 +49,7 @@ public class ImportGatheringTypeMirrorVisitor implements TypeVisitor<Void, Set<D
     @Override
     public Void visitDeclared(DeclaredType t, Set<DeclaredTypeName> p) {
         String toAdd = t.toString();
-        if (!Utils.OBJECT_CLASS_NAME.equals(toAdd)) {
+        if (!AptUtils.OBJECT_CLASS_NAME.equals(toAdd)) {
             String mirrorString = t.toString().replaceAll("<.*>", "");
             p.add(new DeclaredTypeName(mirrorString));
         }
@@ -98,7 +98,7 @@ public class ImportGatheringTypeMirrorVisitor implements TypeVisitor<Void, Set<D
 
     @Override
     public Void visitTypeVariable(TypeVariable t, Set<DeclaredTypeName> p) {
-        List<? extends TypeMirror> upperBounds = utils.getUpperBoundMirrors(t, t.getUpperBound());
+        List<? extends TypeMirror> upperBounds = aptUtils.getUpperBoundMirrors(t, t.getUpperBound());
         for (TypeMirror upper : upperBounds) {
             upper.accept(this, p);
         }
@@ -114,7 +114,7 @@ public class ImportGatheringTypeMirrorVisitor implements TypeVisitor<Void, Set<D
 
     @Override
     public Void visitWildcard(WildcardType t, Set<DeclaredTypeName> p) {
-        List<? extends TypeMirror> upperBounds = utils.getUpperBoundMirrors(t, t.getExtendsBound());
+        List<? extends TypeMirror> upperBounds = aptUtils.getUpperBoundMirrors(t, t.getExtendsBound());
         for (TypeMirror upper : upperBounds) {
             upper.accept(this, p);
         }

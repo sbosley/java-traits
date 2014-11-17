@@ -1,7 +1,7 @@
 package com.yahoo.annotations.writer.expressions;
 
 import com.yahoo.annotations.model.DeclaredTypeName;
-import com.yahoo.annotations.utils.Utils;
+import com.yahoo.annotations.utils.AptUtils;
 import com.yahoo.annotations.writer.JavaFileWriter;
 
 import java.io.IOException;
@@ -14,7 +14,7 @@ class ConstructorInvocation extends Expression {
 
     public ConstructorInvocation(DeclaredTypeName constructorType, Object... arguments) {
         this.constructorType = constructorType;
-        this.arguments = Utils.asList(arguments);
+        this.arguments = AptUtils.asList(arguments);
     }
     
     public ConstructorInvocation(DeclaredTypeName constructorType, List<?> arguments) {

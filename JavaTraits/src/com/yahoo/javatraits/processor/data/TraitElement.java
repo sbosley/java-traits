@@ -8,7 +8,7 @@ package com.yahoo.javatraits.processor.data;
 import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.model.GenericName;
 import com.yahoo.annotations.model.TypeName;
-import com.yahoo.annotations.utils.Utils;
+import com.yahoo.annotations.utils.AptUtils;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -35,14 +35,14 @@ public class TraitElement extends TypeElementWrapper {
     private DeclaredTypeName generatedInterfaceName;
     private DeclaredTypeName delegateName;
 
-    public TraitElement(TypeElement elem, Utils utils) {
-        super(elem, utils);
+    public TraitElement(TypeElement elem, AptUtils aptUtils) {
+        super(elem, aptUtils);
         initializeElement();
     }
 
     private void initializeElement() {
-        if (!Utils.OBJECT_CLASS_NAME.equals(elem.getSuperclass().toString())) {
-            utils.getMessager().printMessage(Kind.ERROR, "Trait elements must have java.lang.Object as their superclass", elem);
+        if (!AptUtils.OBJECT_CLASS_NAME.equals(elem.getSuperclass().toString())) {
+            aptUtils.getMessager().printMessage(Kind.ERROR, "Trait elements must have java.lang.Object as their superclass", elem);
         }
         accumulateMethods(elem, declaredMethods);
         generatedInterfaceName = new DeclaredTypeName(elementName.getPackageName(), INTERFACE_PREFIX + elementName.getSimpleName());
@@ -60,10 +60,10 @@ public class TraitElement extends TypeElementWrapper {
             if (e.getKind() != ElementKind.METHOD || !(e instanceof ExecutableElement)) {
                 if (e.getKind() == ElementKind.CONSTRUCTOR && (e instanceof ExecutableElement)) {
                     if (((ExecutableElement) e).getParameters().size() > 0) {
-                        utils.getMessager().printMessage(Kind.ERROR, "Trait constructors cannot have arguments", e);
+                        aptUtils.getMessager().printMessage(Kind.ERROR, "Trait constructors cannot have arguments", e);
                     }
                 } else {
-                    utils.getMessager().printMessage(Kind.ERROR, "Trait elements may only declare methods or abstract methods", e);
+                    aptUtils.getMessager().printMessage(Kind.ERROR, "Trait elements may only declare methods or abstract methods", e);
                 }
             } else {
                 methods.add((ExecutableElement) e);
@@ -73,20 +73,20 @@ public class TraitElement extends TypeElementWrapper {
 
     private void initializeInterfaces() {
         List<? extends TypeMirror> interfaces = elem.getInterfaces();
-        if (!Utils.isEmpty(interfaces)) {
+        if (!AptUtils.isEmpty(interfaces)) {
             initializeInterfaceMappings(interfaces);
         }
     }
 
     private void initializeInterfaceMappings(List<? extends TypeMirror> interfaces) {
         interfaceGenericNameMaps = new ArrayList<Map<String, TypeName>>();
-        interfaceNames = utils.getTypeNamesFromTypeMirrors(interfaces, getSimpleName());
+        interfaceNames = aptUtils.getTypeNamesFromTypeMirrors(interfaces, getSimpleName());
         for (int i = 0; i < interfaces.size(); i++) {
             TypeMirror interfaceMirror = interfaces.get(i);
             if (interfaceMirror instanceof DeclaredType) {
                 initializeSingleInterfaceMapping((DeclaredType) interfaceMirror, (DeclaredTypeName) interfaceNames.get(i));
             } else {
-                utils.getMessager().printMessage(Kind.WARNING, "Interface " + interfaceMirror + " from trait is not a DeclaredType", elem);
+                aptUtils.getMessager().printMessage(Kind.WARNING, "Interface " + interfaceMirror + " from trait is not a DeclaredType", elem);
             }
         }
     }
@@ -98,9 +98,9 @@ public class TraitElement extends TypeElementWrapper {
         interfaceMethods.add(methods);
 
         List<? extends TypeName> args = interfaceName.getTypeArgs();
-        List<TypeName> interfaceTypeParams = utils.typeParameterElementsToTypeNames(interfaceElement.getTypeParameters());
+        List<TypeName> interfaceTypeParams = aptUtils.typeParameterElementsToTypeNames(interfaceElement.getTypeParameters());
         Map<String, TypeName> genericNameMap = new HashMap<String, TypeName>();
-        if (!Utils.isEmpty(args)) {
+        if (!AptUtils.isEmpty(args)) {
             for (int i = 0; i < args.size(); i++) {
                 TypeName argName = args.get(i);
                 TypeName interfaceArgName = interfaceTypeParams.get(i);

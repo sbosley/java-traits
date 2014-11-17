@@ -18,14 +18,14 @@ import javax.lang.model.util.Types;
 import java.util.*;
 import java.util.Map.Entry;
 
-public class Utils {
+public class AptUtils {
 
     public static final String OBJECT_CLASS_NAME = CoreTypes.JAVA_OBJECT.toString();
 
     private Messager messager;
     private Types types;
 
-    public Utils(Messager messager, Types types) {
+    public AptUtils(Messager messager, Types types) {
         this.messager = messager;
         this.types = types;
     }
@@ -329,7 +329,7 @@ public class Utils {
 
     // --- GenericName remapping functions
     public List<? extends TypeName> remapGenericNames(List<? extends TypeName> types, final Map<String, TypeName> genericNameMap) {
-        if (Utils.isEmpty(genericNameMap)) {
+        if (AptUtils.isEmpty(genericNameMap)) {
             return types;
         }
         return map(types, new Function<TypeName, TypeName>() {
