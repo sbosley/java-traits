@@ -1,5 +1,6 @@
 package com.yahoo.annotations.writer.expressions;
 
+import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.writer.JavaFileWriter;
 
@@ -7,9 +8,9 @@ import java.io.IOException;
 
 class StaticFieldReference extends Reference {
 
-    private final TypeName typeName;
+    private final DeclaredTypeName typeName;
     
-    public StaticFieldReference(TypeName typeName, String fieldName) {
+    public StaticFieldReference(DeclaredTypeName typeName, String fieldName) {
         super(fieldName);
         this.typeName = typeName;
     }
