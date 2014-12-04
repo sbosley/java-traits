@@ -197,7 +197,7 @@ public class ClassWithTraitsSuperclassWriter extends JavaTraitsWriter<ClassWithT
         writer.beginMethodDefinition(methodDeclaration);
         
         if (!isAbstract) {
-            emitMethodBody(elem, exec, methodDeclaration.getArguments());
+            emitMethodBody(elem, exec, methodDeclaration.getArgumentNames());
         }
     }
     

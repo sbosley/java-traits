@@ -8,6 +8,14 @@ import com.yahoo.annotations.writer.JavaFileWriter.Type;
 import javax.lang.model.element.Modifier;
 import java.util.List;
 
+/**
+ * An object for containing the information needed to begin a type declaration. Required by
+ * {@link com.yahoo.annotations.writer.JavaFileWriter#beginTypeDefinition(TypeDeclarationParameters)}
+ *
+ * An instance of this class can be constructed by calling the no-arg constructor and then chaining method calls:
+ *
+ * new TypeDeclarationParameters().setKind(Type.class).setName(className) etc.
+ */
 public class TypeDeclarationParameters {
 
     private DeclaredTypeName className;

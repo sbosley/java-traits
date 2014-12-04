@@ -207,7 +207,7 @@ public class JavaFileWriter {
             out.append(shortenName(methodDeclaration.getReturnType(), false));
         }
         out.append(" ").append(methodDeclaration.getMethodName());
-        writeArgumentList(methodDeclaration.getArgumentTypes(), methodDeclaration.getArguments());
+        writeArgumentList(methodDeclaration.getArgumentTypes(), methodDeclaration.getArgumentNames());
         if (!AptUtils.isEmpty(methodDeclaration.getThrowsTypes())) {
             out.append(" throws ");
             for (int i = 0; i < methodDeclaration.getThrowsTypes().size(); i++) {
@@ -243,7 +243,7 @@ public class JavaFileWriter {
         if (AptUtils.isEmpty(params.getMethodName())) {
             throw new IllegalArgumentException("Must specify a method name for MethodDeclarationParams");
         }
-        verifyArgumentTypesAndNames(params.getArgumentTypes(), params.getArguments());
+        verifyArgumentTypesAndNames(params.getArgumentTypes(), params.getArgumentNames());
     }
 
     private void verifyArgumentTypesAndNames(List<? extends TypeName> argumentTypes, List<?> arguments) {
@@ -297,7 +297,7 @@ public class JavaFileWriter {
         writeModifierList(constructorDeclaration.getModifiers());
         out.append(constructorDeclaration.getConstructorName().getSimpleName());
         writeGenericsList(constructorDeclaration.getMethodGenerics(), false);
-        writeArgumentList(constructorDeclaration.getArgumentTypes(), constructorDeclaration.getArguments());
+        writeArgumentList(constructorDeclaration.getArgumentTypes(), constructorDeclaration.getArgumentNames());
         out.append(" {\n");
         moveToScope(Scope.METHOD_DEFINITION);
         return this;
@@ -307,7 +307,7 @@ public class JavaFileWriter {
         if (!params.isConstructor()) {
             throw new IllegalArgumentException("Must specify a class name for ConstructorDeclarationParams");
         }
-        verifyArgumentTypesAndNames(params.getArgumentTypes(), params.getArguments());
+        verifyArgumentTypesAndNames(params.getArgumentTypes(), params.getArgumentNames());
     }
 
     public JavaFileWriter writeStatement(Expression statement) throws IOException {

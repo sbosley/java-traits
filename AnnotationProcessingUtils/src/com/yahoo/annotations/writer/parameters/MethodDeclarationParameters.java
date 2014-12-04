@@ -7,6 +7,14 @@ import com.yahoo.annotations.utils.AptUtils;
 import javax.lang.model.element.Modifier;
 import java.util.List;
 
+/**
+ * An object for containing the information needed to begin a method declaration. Required by
+ * {@link com.yahoo.annotations.writer.JavaFileWriter#beginMethodDefinition(MethodDeclarationParameters)}
+ *
+ * An instance of this class can be constructed by calling the no-arg constructor and then chaining method calls:
+ *
+ * new MethodDeclarationParameters().setMethodName("methodName").setReturnType(returnType) etc.
+ */
 public class MethodDeclarationParameters {
 
     private DeclaredTypeName constructorName;
@@ -15,7 +23,7 @@ public class MethodDeclarationParameters {
     private List<Modifier> modifiers;
     private List<? extends TypeName> methodGenerics;
     private List<? extends TypeName> argumentTypes;
-    private List<?> arguments;
+    private List<String> argumentNames;
     private List<? extends TypeName> throwsTypes;
     
     public boolean isConstructor() {
@@ -86,17 +94,17 @@ public class MethodDeclarationParameters {
         return this;
     }
     
-    public List<?> getArguments() {
-        return arguments;
+    public List<String> getArgumentNames() {
+        return argumentNames;
     }
     
     public MethodDeclarationParameters setArgumentNames(String... arguments) {
-        this.arguments = AptUtils.asList(arguments);
+        this.argumentNames = AptUtils.asList(arguments);
         return this;
     }
     
     public MethodDeclarationParameters setArgumentNames(List<String> arguments) {
-        this.arguments = arguments;
+        this.argumentNames = arguments;
         return this;
     }
     

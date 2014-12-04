@@ -126,7 +126,7 @@ public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
         writer.beginMethodDefinition(methodDeclaration);
         
         String callTo = isDefault ? "super" : "delegate";
-        Expression methodInvocation = Expressions.callMethodOn(callTo, exec.getSimpleName().toString(), methodDeclaration.getArguments());
+        Expression methodInvocation = Expressions.callMethodOn(callTo, exec.getSimpleName().toString(), methodDeclaration.getArgumentNames());
         
         if (exec.getReturnType().getKind() != TypeKind.VOID) {
             methodInvocation = methodInvocation.returnExpr();
