@@ -1,5 +1,12 @@
 package com.yahoo.annotations.model;
 
+/**
+ * Defines lots of constant {@link com.yahoo.annotations.model.DeclaredTypeName}s for core java types
+ * (e.g. primitives, primitive boxes, String, etc.)
+ *
+ * If you want a type representing an array of one of these or to modify them in some other way, be
+ * sure to call clone() first.
+ */
 public class CoreTypes {
 
     public static final String JAVA_LANG = "java.lang";

@@ -9,6 +9,15 @@ import com.yahoo.annotations.utils.AptUtils;
 
 import java.util.List;
 
+/**
+ * Represents a concrete type name (e.g. "java.lang.String")
+ *
+ * May contain information about type arguments that can be used when generating
+ * code in {@link com.yahoo.annotations.writer.JavaFileWriter}, but is not considered
+ * when comparing two DeclaredTypeNames to each other. For example, a DeclaredTypeName
+ * representing "List<String>" will equal a DeclaredTypeName representing "List<Integer>".
+ * For a deeper equality comparison, use {@link com.yahoo.annotations.utils.AptUtils#deepCompareTypes(TypeName, TypeName)}
+ */
 public class DeclaredTypeName extends TypeName {
 
     private String packageName;
@@ -34,18 +43,31 @@ public class DeclaredTypeName extends TypeName {
         return clone;
     }
 
+    /**
+     * @return true if this type is in the java.lang package
+     */
     public boolean isJavaLangPackage() {
         return CoreTypes.JAVA_LANG.equals(packageName);
     }
 
+    /**
+     * @return the list of type arguments for this type
+     */
     public List<? extends TypeName> getTypeArgs() {
         return typeArgs;
     }
 
+    /**
+     * @param typeArgs type arguments to set for this type
+     */
     public void setTypeArgs(List<? extends TypeName> typeArgs) {
         this.typeArgs = typeArgs;
     }
 
+    /**
+     * @return if the type has a package, returns "packageName.simpleName". Otherwise, returns simpleName
+     */
+    @Override
     public String toString() {
         if (AptUtils.isEmpty(packageName)) {
             return simpleName;
@@ -53,10 +75,16 @@ public class DeclaredTypeName extends TypeName {
         return packageName + "." + simpleName;
     }
 
+    /**
+     * @return the name of the package this type is in
+     */
     public String getPackageName() {
         return packageName;
     }
 
+    /**
+     * @return the simple name of this type (not including package name)
+     */
     public String getSimpleName() {
         return simpleName;
     }

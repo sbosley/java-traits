@@ -5,6 +5,13 @@
  */
 package com.yahoo.annotations.model;
 
+/**
+ * Abstract parent class for {@link com.yahoo.annotations.model.DeclaredTypeName} and {@link com.yahoo.annotations.model.GenericName}
+ *
+ * Contains information about if the TypeName represents an array or is a varargs type in a method. For example,
+ * Integer[][] would be represented by a {@link com.yahoo.annotations.model.DeclaredTypeName} "java.lang.Integer"
+ * with an array depth of 2.
+ */
 public abstract class TypeName implements Cloneable {
 
     private int arrayDepth = 0;
@@ -39,6 +46,10 @@ public abstract class TypeName implements Cloneable {
         return clone;
     }
 
+    /**
+     * @return a string representing the array depth of this type. If the type is not a varargs, the string
+     * will be arrayDepth * "[]", otherwise it will be (arrayDepth - 1) * "[]" + "..."
+     */
     public String getArrayStringSuffix() {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < arrayDepth; i++) {

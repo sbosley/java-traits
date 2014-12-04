@@ -254,7 +254,7 @@ public class AptUtils {
             superBound = getTypeNameFromTypeMirror(superBoundMirror, genericQualifier);
         }
         GenericName toReturn = new GenericName(genericName, extendsBound, superBound);
-        toReturn.addQualifier(genericQualifier);
+        toReturn.setQualifier(genericQualifier);
         return toReturn;
     }
 
@@ -439,7 +439,7 @@ public class AptUtils {
         @Override
         public Void visitGenericName(GenericName genericName, Pair<List<TypeName>, String> params) {
             if (params.getLeft() != null && !params.getLeft().contains(genericName)) {
-                genericName.addQualifier(params.getRight());
+                genericName.setQualifier(params.getRight());
             }
             qualifyTypeArgGenerics(genericName.getExtendsBound(), params);
             qualifyTypeArgGenerics(genericName.getSuperBound(), params);

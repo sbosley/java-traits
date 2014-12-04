@@ -10,6 +10,11 @@ import com.yahoo.annotations.utils.AptUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a type argument name
+ *
+ * Also contains information about extends or super bounds
+ */
 public class GenericName extends TypeName {
 
     public static final String WILDCARD_CHAR = "?";
@@ -44,6 +49,9 @@ public class GenericName extends TypeName {
         return clone;
     }
 
+    /**
+     * @return the name of this generic type
+     */
     public String getGenericName() {
         StringBuilder result = new StringBuilder();
         if (qualifier != null && !WILDCARD_CHAR.equals(genericName)) {
@@ -53,40 +61,68 @@ public class GenericName extends TypeName {
         return result.toString();
     }
 
+    /**
+     * @param newName renames this generic type but keeps the same bounds
+     */
     public void renameTo(String newName) {
         this.genericName = newName;
         this.qualifier = null;
     }
 
+    /**
+     * @return true if this generic type is a wildcard
+     */
     public boolean isWildcard() {
         return WILDCARD_CHAR.equals(genericName);
     }
 
+    /**
+     * @return true if this generic type has an extends bound (upper bound)
+     */
     public boolean hasExtendsBound() {
         return extendsBound != null && extendsBound.size() > 0;
     }
 
+    /**
+     * @return the extends bounds (upper bounds) of this generic type
+     */
     public List<? extends TypeName> getExtendsBound() {
         return extendsBound;
     }
 
+    /**
+     * Set the extends bounds (upper bounds) of this generic type
+     */
     public void setExtendsBound(List<? extends TypeName> newExtendsBound) {
         this.extendsBound = newExtendsBound;
     }
 
+    /**
+     * @return true if this type has a super bound (lower bound)
+     */
     public boolean hasSuperBound() {
         return superBound != null;
     }
 
+    /**
+     * @return the super bound (lower bound) of this generic type
+     */
     public TypeName getSuperBound() {
         return superBound;
     }
 
+    /**
+     * Set the super bound (lower bound) of this generic type
+     */
     public void setSuperBound(TypeName newSuperBound) {
         this.superBound = newSuperBound;
     }
 
-    public void addQualifier(String qualifier) {
+    /**
+     * Set a qualifier for the name of this generic. For example, a generic with name "T" when passed
+     * a qualifier "Q" would have the name "Q_T"
+     */
+    public void setQualifier(String qualifier) {
         if (this.qualifier != null) {
             throw new IllegalArgumentException("Generic " + genericName + " already has qualifier " + this.qualifier);
         }

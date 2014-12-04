@@ -10,6 +10,10 @@ import com.yahoo.annotations.utils.AptUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a method element. The four relevant pieces of a method signature for comparing to other methods
+ * are considered to be: method name, return type, argument types, and throws types
+ */
 public class MethodSignature {
 
     private String methodName;
@@ -21,44 +25,74 @@ public class MethodSignature {
         this.methodName = methodName;
     }
 
+    /**
+     * @return the name of this method
+     */
     public String getMethodName() {
         return methodName;
     }
 
+    /**
+     * Set the method name
+     */
     public void setMethodName(String methodName) {
         this.methodName = methodName;
     }
 
+    /**
+     * @return this method's return type
+     */
     public TypeName getReturnType() {
         return returnType;
     }
 
+    /**
+     * Sets this method's return type
+     */
     public void setReturnType(TypeName returnType) {
         this.returnType = returnType;
     }
 
+    /**
+     * @return the type arguments local to this method
+     */
     public List<TypeName> getArgTypes() {
         return argTypes;
     }
 
+    /**
+     * Add type arguments local to this method
+     */
     public void addArgTypes(TypeName... types) {
         addArgTypes(AptUtils.asList(types));
     }
 
+    /**
+     * Add type arguments local to this method
+     */
     public void addArgTypes(List<? extends TypeName> types) {
         if (types != null) {
             argTypes.addAll(types);
         }
     }
 
+    /**
+     * @return the types this method may throw
+     */
     public List<TypeName> getThrowsTypes() {
         return throwsTypes;
     }
 
+    /**
+     * Add thrown types to this method
+     */
     public void addThrowsTypes(TypeName... types) {
         addThrowsTypes(AptUtils.asList(types));
     }
 
+    /**
+     * Add thrown types to this method
+     */
     public void addThrowsTypes(List<? extends TypeName> types) {
         if (types != null) {
             throwsTypes.addAll(throwsTypes);
