@@ -3,11 +3,17 @@ package com.yahoo.annotations.visitors;
 import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.model.GenericName;
 import com.yahoo.annotations.model.TypeName;
+import com.yahoo.annotations.model.TypeName.TypeNameVisitor;
 
 import java.util.List;
 import java.util.Set;
 
-public class ImportGatheringTypeNameVisitor implements TypeName.TypeNameVisitor<Void, Set<DeclaredTypeName>> {
+/**
+ * A {@link com.yahoo.annotations.model.TypeName.TypeNameVisitor} used to accumulate required imports from
+ * {@link com.yahoo.annotations.model.TypeName}s. Basically just includes any class referenced by the
+ * {@link com.yahoo.annotations.model.TypeName} (e.g. itself, upper/lower bounds, etc.)
+ */
+public class ImportGatheringTypeNameVisitor implements TypeNameVisitor<Void, Set<DeclaredTypeName>> {
 
     @Override
     public Void visitClassName(DeclaredTypeName typeName, Set<DeclaredTypeName> imports) {

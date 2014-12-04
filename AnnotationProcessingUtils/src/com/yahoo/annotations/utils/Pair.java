@@ -5,6 +5,9 @@
  */
 package com.yahoo.annotations.utils;
 
+/**
+ * Basic class for holding a pair of values
+ */
 public class Pair<L, R> {
 
     private final L left;

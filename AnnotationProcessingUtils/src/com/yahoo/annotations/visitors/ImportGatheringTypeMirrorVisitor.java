@@ -15,6 +15,11 @@ import javax.tools.Diagnostic.Kind;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * A {@link javax.lang.model.type.TypeVisitor} used to accumulate required imports from
+ * {@link javax.lang.model.type.TypeMirror}s. Basically just includes any class referenced by the
+ * {@link javax.lang.model.type.TypeMirror} (e.g. itself, upper/lower bounds, etc.)
+ */
 public class ImportGatheringTypeMirrorVisitor implements TypeVisitor<Void, Set<DeclaredTypeName>> {
 
     private Element elem;
