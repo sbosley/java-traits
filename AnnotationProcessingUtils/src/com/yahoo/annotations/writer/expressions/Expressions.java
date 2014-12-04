@@ -37,7 +37,7 @@ public class Expressions {
      * @param value expression for the right hand side of the assignment
      *
      * @return an expression representing an assignment
-     *
+     * <br/>
      * E.g. someObject.field = anotherObject.method(arg1, arg2)
      */
     public static Expression assign(Expression assignTo, Expression value) {
@@ -49,7 +49,7 @@ public class Expressions {
      * @param value the expression being cast
      *
      * @return an expression representing a cast
-     *
+     * <br/>
      * e.g. (String) someObject
      */
     public static Expression cast(TypeName castTo, Expression value) {
@@ -61,7 +61,7 @@ public class Expressions {
      * @param arguments constructor arguments
      *
      * @return a constructor invocation expression
-     *
+     * <br/>
      * E.g. new MyObject(arg1, arg2)
      */
     public static Expression callConstructor(DeclaredTypeName type, Object... arguments) {
@@ -73,7 +73,7 @@ public class Expressions {
      * @param arguments constructor arguments
      *
      * @return a constructor invocation expression
-     *
+     * <br/>
      * E.g. new MyObject(arg1, arg2)
      */
     public static Expression callConstructor(DeclaredTypeName type, List<?> arguments) {
@@ -100,7 +100,7 @@ public class Expressions {
      *
      * @return expression to call a method. Note the method is not called on any specific object, so the call
      * is implicitly on "this", i.e. whatever the current context of the Java file is.
-     *
+     * <br/>
      * E.g. someMethod(arg1, arg2)
      */
     public static Expression callMethod(String methodName, Object... arguments) {
@@ -113,7 +113,7 @@ public class Expressions {
      *
      * @return expression to call a method. Note the method is not called on any specific object, so the call
      * is implicitly on "this", i.e. whatever the current context of the Java file is.
-     *
+     * <br/>
      * E.g. someMethod(arg1, arg2)
      */
     public static Expression callMethod(String methodName, List<?> arguments) {
@@ -126,7 +126,8 @@ public class Expressions {
      * @param methodName the name of the method to call
      * @param arguments arguments to the method. May be raw strings or other expressions
      * @return expression to call a method on a specific object.
-     * (e.g. expression.someMethod(arg1, arg2) )
+     * <br/>
+     * E.g. expression.someMethod(arg1, arg2)
      */
     public static Expression callMethodOn(Expression calledObject, String methodName, Object... arguments) {
         return new MethodInvocation(calledObject, methodName, arguments);
@@ -139,7 +140,7 @@ public class Expressions {
      * @param arguments method arguments. May be raw strings or other expressions
      *
      * @return expression to call a method on a specific object.
-     *
+     * <br/>
      * E.g. expression.someMethod(arg1, arg2)
      */
     public static Expression callMethodOn(Expression calledObject, String methodName, List<?> arguments) {
@@ -152,7 +153,7 @@ public class Expressions {
      * @param arguments method arguments. May be raw strings or other expressions
      *
      * @return expression to call a method on a specific object.
-     *
+     * <br/>
      * E.g. expression.someMethod(arg1, arg2)
      */
     public static Expression callMethodOn(String calledObject, String methodName, Object... arguments) {
@@ -165,7 +166,7 @@ public class Expressions {
      * @param arguments method arguments. May be raw strings or other expressions
      *
      * @return expression to call a method on a specific object.
-     *
+     * <br/>
      * E.g. expression.someMethod(arg1, arg2)
      */
     public static Expression callMethodOn(String calledObject, String methodName, List<?> arguments) {
@@ -186,7 +187,7 @@ public class Expressions {
      * @param fieldName the name of the field to be referenced
      *
      * @return an expression representing the field reference
-     *
+     * <br/>
      * E.g. if the referenced object is a method that returns an object with public fields:
      * myMethod().publicField
      */
@@ -199,7 +200,7 @@ public class Expressions {
      * @param fieldName the name of the field to be referenced
      *
      * @return an expression representing the field reference
-     *
+     * <br/>
      * E.g. referencedObject.fieldName
      */
     public static Expression reference(String referencedObject, String fieldName) {
@@ -220,7 +221,7 @@ public class Expressions {
      * @param fieldName the name of the static field to reference
      *
      * @return an expression representing a static reference
-     *
+     * <br/>
      * E.g. MyClass.SOME_CONSTANT
      */
     public static Expression staticReference(DeclaredTypeName typeName, String fieldName) {
@@ -231,7 +232,7 @@ public class Expressions {
      * @param typeName class name
      *
      * @return an expression representing a reference to the class field
-     *
+     * <br/>
      * E.g. MyClass.class
      */
     public static Expression classObject(DeclaredTypeName typeName) {
@@ -244,7 +245,7 @@ public class Expressions {
      * @param arguments method arguments. May be raw strings or other expressions
      *
      * @return an expression representing a static method call
-     *
+     * <br/>
      * E.g. MyClass.staticMethod(arg1, arg2)l
      */
     public static Expression staticMethod(DeclaredTypeName type, String methodName, Object... arguments) {
@@ -257,7 +258,7 @@ public class Expressions {
      * @param arguments method arguments. May be raw strings or other expressions
      *
      * @return an expression representing a static method call
-     *
+     * <br/>
      * E.g. MyClass.staticMethod(arg1, arg2)l
      */
     public static Expression staticMethod(DeclaredTypeName type, String methodName, List<?> arguments) {

@@ -20,6 +20,21 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
 
+/**
+ * Class to facilitate writing Java files during annotation processing
+ *
+ * This class handles a few things that enable you to generate more readable/debuggable Java files:
+ *
+ * <ul>
+ *     <li>Automatic imports handling and name shortening. Any references to type names will be
+ *     shortened if they exist in the imports and are unique. Otherwise, fully qualified names
+ *     will be used to prevent name conflicts.</li>
+ *     <li>Automatic indentation. This file tracks the state of the java file being emitted
+ *     to calculate a reasonable indent level for each statement written</li>
+ *     <li>Seamlessly handles {@link com.yahoo.annotations.writer.expressions.Expression} objects
+ *     when they are encountered to make writing Java expressions easy</li>
+ * </ul>
+ */
 public class JavaFileWriter {
 
     private static final String INDENT = "    ";
@@ -29,6 +44,10 @@ public class JavaFileWriter {
     private Type kind = null;
     private Deque<Scope> scopeStack = new LinkedList<Scope>();
 
+    /**
+     * Enum for the kind of object definition to write. Currently only
+     * class and interface are supported.
+     */
     public static enum Type {
         CLASS("class"),
         INTERFACE("interface");
@@ -39,6 +58,9 @@ public class JavaFileWriter {
         }
     }
 
+    /**
+     * Enum for the different states of the writer
+     */
     public static enum Scope {
         PACKAGE,
         IMPORTS,
@@ -46,6 +68,13 @@ public class JavaFileWriter {
         METHOD_DEFINITION,
     }
 
+    /**
+     * @param out writer object to output to. When writing an annotation processor, the writer object is usually obtained
+     *            like this:
+     *            <br/>
+     *            JavaFileObject jfo = filer.createSourceFile(classNameToGenerate, originatingElement);
+                  JavaFileWriter writer = new JavaFileWriter(jfo.openWriter());
+     */
     public JavaFileWriter(Writer out) {
         if (out == null) {
             throw new IllegalArgumentException("Writer must be non-null");
@@ -55,11 +84,25 @@ public class JavaFileWriter {
         scopeStack.push(Scope.PACKAGE);
     }
 
+    /**
+     * Ends the writing of this file and closes the output stream
+     *
+     * @return this
+     * @throws IOException
+     */
     public JavaFileWriter close() throws IOException {
         out.close();
         return this;
     }
 
+    /**
+     * Writes the package declaration. Should probably only ever be called as the first thing you
+     * do after opening the writer
+     *
+     * @param packageName
+     * @return this
+     * @throws IOException
+     */
     public JavaFileWriter writePackage(String packageName) throws IOException {
         checkScope(Scope.PACKAGE);
         out.append("package ").append(packageName).append(";\n\n");
@@ -68,6 +111,14 @@ public class JavaFileWriter {
         return this;
     }
 
+    /**
+     * Write import statements for the classes in this collection. Also registers known class names to
+     * facilitate name shortening
+     *
+     * @param imports classes to be imported
+     * @return this
+     * @throws IOException
+     */
     public JavaFileWriter writeImports(Collection<DeclaredTypeName> imports) throws IOException {
         checkScope(Scope.IMPORTS);
         TreeSet<String> sortedImports = new TreeSet<String>();
@@ -88,8 +139,15 @@ public class JavaFileWriter {
         finishScope(Scope.IMPORTS);
         return this;
     }
-    
-    // For names that can be shortened but don't need to be imported
+
+    /**
+     * Registers class names that can be shortened (i.e. not fully qualified) but don't need to be imported, e.g.
+     * classes in the same package as the generated class
+     *
+     * @param otherKnownNames class names that should be known to the file
+     * @return this
+     * @throws IOException
+     */
     public JavaFileWriter registerOtherKnownNames(Collection<DeclaredTypeName> otherKnownNames) throws IOException {
         if (!AptUtils.isEmpty(otherKnownNames)) {
             for (DeclaredTypeName item : otherKnownNames) {
@@ -98,7 +156,15 @@ public class JavaFileWriter {
         }
         return this;
     }
-    
+
+    /**
+     * Registers class names that can be shortened (i.e. not fully qualified) but don't need to be imported, e.g.
+     * classes in the same package as the generated class
+     *
+     * @param otherKnownNames class names that should be known to the file
+     * @return this
+     * @throws IOException
+     */
     public JavaFileWriter registerOtherKnownNames(DeclaredTypeName... otherKnownNames) throws IOException {
         return registerOtherKnownNames(AptUtils.asList(otherKnownNames));
     }
@@ -125,6 +191,13 @@ public class JavaFileWriter {
         return null;
     }
 
+    /**
+     * Begins a new type definition.
+     *
+     * @param typeDeclaration see {@link com.yahoo.annotations.writer.parameters.TypeDeclarationParameters}
+     * @return this
+     * @throws IOException
+     */
     public JavaFileWriter beginTypeDefinition(TypeDeclarationParameters typeDeclaration) throws IOException {
         validateTypeDeclarationParams(typeDeclaration);
         indent();
@@ -171,11 +244,31 @@ public class JavaFileWriter {
             throw new IllegalArgumentException("Must specify a type for TypeDeclarationParameters (one of Type.CLASS or Type.INTERFACE)");
         }
     }
-    
+
+    /**
+     * Writes a field declaration
+     *
+     * @param type the type for the field
+     * @param name the name for the field
+     * @param initializer expression with which to initialize the field. If null, the field will have no initial value
+     * @param modifiers access modifiers for the field
+     * @return this
+     * @throws IOException
+     */
     public JavaFileWriter writeFieldDeclaration(TypeName type, String name, Expression initializer, Modifier... modifiers) throws IOException {
         return writeFieldDeclaration(type, name, initializer, AptUtils.asList(modifiers));
     }
 
+    /**
+     * Writes a field declaration
+     *
+     * @param type the type for the field
+     * @param name the name for the field
+     * @param initializer expression with which to initialize the field. If null, the field will have no initial value
+     * @param modifiers access modifiers for the field
+     * @return this
+     * @throws IOException
+     */
     public JavaFileWriter writeFieldDeclaration(TypeName type, String name, Expression initializer, List<Modifier> modifiers) throws IOException {
         checkScope(Scope.TYPE_DEFINITION, Scope.METHOD_DEFINITION);
         indent();
@@ -190,6 +283,13 @@ public class JavaFileWriter {
         return this;
     }
 
+    /**
+     * Begins a method definition
+     *
+     * @param methodDeclaration see {@link com.yahoo.annotations.writer.parameters.MethodDeclarationParameters}
+     * @return this
+     * @throws IOException
+     */
     public JavaFileWriter beginMethodDefinition(MethodDeclarationParameters methodDeclaration) throws IOException {
         validateMethodDefinitionParams(methodDeclaration);
         checkScope(Scope.TYPE_DEFINITION);
@@ -225,7 +325,18 @@ public class JavaFileWriter {
         }
         return this;
     }
-    
+
+    /**
+     * Begins an initializer block
+     *
+     * @see com.yahoo.annotations.writer.expressions.Expressions#block(com.yahoo.annotations.writer.expressions.Expression, boolean, boolean, boolean, boolean)
+     *
+     * @param isStatic true if the block is static
+     * @param indentStart true if the block needs to be indented, i.e. it's on its own line and not for example
+     *                    the start of an array constant declaration
+     * @return this
+     * @throws IOException
+     */
     public JavaFileWriter beginInitializerBlock(boolean isStatic, boolean indentStart) throws IOException {
         checkScope(Scope.TYPE_DEFINITION);
         if (indentStart) {
@@ -261,23 +372,33 @@ public class JavaFileWriter {
         }
     }
 
-    public JavaFileWriter writeArgumentList(List<? extends TypeName> argumentTypes, List<?> arguments) throws IOException {
+    /**
+     * Write a comma-separated list of argument types and names
+     * <br/>
+     * E.g. Type1 name1, Type2 name2
+     *
+     * @param argumentTypes
+     * @param argumentNames
+     * @return this
+     * @throws IOException
+     */
+    public JavaFileWriter writeArgumentList(List<? extends TypeName> argumentTypes, List<?> argumentNames) throws IOException {
         out.append("(");
-        if (arguments != null) {
-            for (int i = 0; i < arguments.size(); i++) {
+        if (argumentNames != null) {
+            for (int i = 0; i < argumentNames.size(); i++) {
                 TypeName argType = argumentTypes != null ? argumentTypes.get(i) : null;
                 
                 if (argType != null) {
                     out.append(shortenName(argType, false)).append(" ");
                 }
                 
-                Object argument = arguments.get(i);
+                Object argument = argumentNames.get(i);
                 if (argument instanceof Expression) {
                     ((Expression) argument).writeExpression(this);
                 } else {
                     out.append(String.valueOf(argument));
                 }
-                if (i < arguments.size() - 1) {
+                if (i < argumentNames.size() - 1) {
                     out.append(", ");
                 }
             }
@@ -286,10 +407,27 @@ public class JavaFileWriter {
         return this;
     }
 
-    public JavaFileWriter writeArgumentNameList(List<?> arguments) throws IOException {
-        return writeArgumentList(null, arguments);
+    /**
+     * Write a comma-separated list of argument names
+     * <br/>
+     * E.g. name1, name2
+     *
+     * @param argumentNames
+     * @return this
+     * @throws IOException
+     */
+    public JavaFileWriter writeArgumentNameList(List<?> argumentNames) throws IOException {
+        return writeArgumentList(null, argumentNames);
     }
 
+    /**
+     * Begin a constructor declaration. Special case of {@link #beginMethodDefinition(com.yahoo.annotations.writer.parameters.MethodDeclarationParameters)}
+     * where the params have a constructor name rather than a method name set
+     *
+     * @param constructorDeclaration
+     * @return this
+     * @throws IOException
+     */
     public JavaFileWriter beginConstructorDeclaration(MethodDeclarationParameters constructorDeclaration) throws IOException {
         verifyConstructorDeclarationParams(constructorDeclaration);
         checkScope(Scope.TYPE_DEFINITION);
@@ -310,60 +448,130 @@ public class JavaFileWriter {
         verifyArgumentTypesAndNames(params.getArgumentTypes(), params.getArgumentNames());
     }
 
+    /**
+     * Writes an expression as a statement, ending the line with a semicolon and a \n. Indents before writing the expression
+     *
+     * @param statement
+     * @return this
+     * @throws IOException
+     */
     public JavaFileWriter writeStatement(Expression statement) throws IOException {
         indent();
         statement.writeExpression(this);
         out.append(";").append("\n");
         return this;
     }
-    
+
+    /**
+     * The same as {@link #writeStatement(com.yahoo.annotations.writer.expressions.Expression)} except does not
+     * append the semicolon or \n
+     *
+     * @param expression
+     * @return this
+     * @throws IOException
+     */
     public JavaFileWriter writeExpression(Expression expression) throws IOException {
         indent();
         expression.writeExpression(this);
         return this;
     }
-    
+
+    /**
+     * Writes an annotation
+     *
+     * @param annotationClass
+     * @return
+     * @throws IOException
+     */
     public JavaFileWriter writeAnnotation(DeclaredTypeName annotationClass) throws IOException {
         indent();
         out.append("@").append(shortenName(annotationClass, false)).append("\n");
         return this;
     }
-     
+
+    /**
+     * Similar to {@link #writeStatement(com.yahoo.annotations.writer.expressions.Expression)}
+     *
+     * @param statement
+     * @return this
+     * @throws IOException
+     */
     public JavaFileWriter writeStringStatement(String statement) throws IOException {
         indent();
         appendString(statement);
         out.append(";").append("\n");
         return this;
     }
-    
+
+    /**
+     * Directly appends the expression with no indenting
+     *
+     * @param expression
+     * @return this
+     * @throws IOException
+     */
     public JavaFileWriter appendExpression(Expression expression) throws IOException {
         expression.writeExpression(this);
         return this;
     }
-    
+
+    /**
+     * Directly appends the string with no indenting
+     *
+     * @param string
+     * @return
+     * @throws IOException
+     */
     public JavaFileWriter appendString(String string) throws IOException {
         out.append(string);
         return this;
     }
-    
+
+    /**
+     * Writes a newline (\n)
+     *
+     * @return
+     * @throws IOException
+     */
     public JavaFileWriter writeNewline() throws IOException {
         out.append("\n");
         return this;
     }
 
+    /**
+     * Writes a comment. Indents and then outputs "// <comment>\n"
+     *
+     * @param comment
+     * @return this
+     * @throws IOException
+     */
     public JavaFileWriter writeComment(String comment) throws IOException {
         indent();
         out.append("// ").append(comment).append("\n");
         return this;
     }
-    
+
+    /**
+     * Finishes a method definition
+     *
+     * @return this
+     * @throws IOException
+     */
     public JavaFileWriter finishMethodDefinition() throws IOException {
         finishScope(Scope.METHOD_DEFINITION);
         indent();
         out.append("}\n\n");
         return this;
     }
-    
+
+    /**
+     * Finshes an initializer block
+     *
+     * @param semicolon true if the block should be followed by a semicolon
+     * @param newline true if the block should be followed by a newline (\n)
+     * @return this
+     * @throws IOException
+     */
     public JavaFileWriter finishInitializerBlock(boolean semicolon, boolean newline) throws IOException {
         finishScope(Scope.METHOD_DEFINITION);
         indent();
@@ -377,6 +585,12 @@ public class JavaFileWriter {
         return this;
     }
 
+    /**
+     * Finish a type (i.e. class or interface) definition
+     *
+     * @return this
+     * @throws IOException
+     */
     public JavaFileWriter finishTypeDefinition() throws IOException {
         finishScope(Scope.TYPE_DEFINITION);
         indent();
@@ -400,7 +614,7 @@ public class JavaFileWriter {
         return !genericsList.isEmpty();
     }
 
-    public String getGenericsListString(List<? extends TypeName> generics, boolean includeBounds) {
+    private String getGenericsListString(List<? extends TypeName> generics, boolean includeBounds) {
         if (AptUtils.isEmpty(generics)) {
             return "";
         }
@@ -472,23 +686,47 @@ public class JavaFileWriter {
         }
     };
 
+    /**
+     * Returns the shortened version of this type name given the current state of the writer (e.g known imports
+     * and other names).
+     *
+     * @param name name to shorted
+     * @param includeGenericBounds true if any generics should include their extends or super bounds
+     * @return this
+     */
     public String shortenName(TypeName name, boolean includeGenericBounds) {
         return name.accept(nameShorteningVisitor, includeGenericBounds);
     }
-    
+
+    /**
+     * Shortens a name for a static reference
+     *
+     * @param name name to be shortened
+     * @return this
+     */
     public String shortenNameForStaticReference(TypeName name) {
         String shortenedName = shortenName(name, false);
         return shortenedName.replaceAll("<.*>", "");
     }
 
+    /**
+     * @return the current scope of the writer
+     */
     public Scope getCurrentScope() {
         return scopeStack.peek();
     }
 
+    /**
+     * Check the current scope of the writer against the expected legalScopes
+     *
+     * @param legalScopes
+     * @throws java.lang.IllegalStateException if the current scope is not
+     * one of the expected scopes
+     */
     public void checkScope(Scope... legalScopes) {
         Scope currentScope = getCurrentScope();
-        if (legalScopes == null || legalScopes.length == 0) {
-            throw new IllegalArgumentException("Must specify at least one legal scope");
+        if ((legalScopes == null || legalScopes.length == 0) && currentScope != null) {
+            throw new IllegalStateException("Expected no scope but was " + currentScope);
         }
         for (Scope s : legalScopes) {
             if (currentScope == s) return;
@@ -496,10 +734,19 @@ public class JavaFileWriter {
         throw new IllegalStateException("Expected one of scopes " + legalScopes + ", current scope " + currentScope);
     }
 
+    /**
+     * Move to a new scope
+     * @param moveTo
+     */
     public void moveToScope(Scope moveTo) {
         scopeStack.push(moveTo);
     }
 
+    /**
+     * Validates the current expected scope and finishes it
+     *
+     * @param expectedFinishScope
+     */
     public void finishScope(Scope expectedFinishScope) {
         checkScope(expectedFinishScope);
         scopeStack.pop();
