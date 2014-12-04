@@ -5,10 +5,10 @@
  */
 package com.yahoo.annotations.model;
 
+import com.yahoo.annotations.utils.AptUtils;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import com.yahoo.annotations.utils.Utils;
 
 public class GenericName extends TypeName {
 
@@ -19,7 +19,7 @@ public class GenericName extends TypeName {
     
     private String qualifier;
     private String genericName;
-    private List<TypeName> extendsBound;
+    private List<? extends TypeName> extendsBound;
     private TypeName superBound;
 
     public GenericName(String genericName, List<TypeName> upperBound, TypeName superBound) {
@@ -29,6 +29,7 @@ public class GenericName extends TypeName {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public GenericName clone() {
         GenericName clone = (GenericName) super.clone();
         clone.qualifier = this.qualifier;
@@ -36,10 +37,10 @@ public class GenericName extends TypeName {
         clone.extendsBound = this.extendsBound == null ? null : new ArrayList<TypeName>();
         if (extendsBound != null) {
             for (TypeName t : extendsBound) {
-                clone.extendsBound.add(t);
+                ((List<TypeName>) clone.extendsBound).add(t);
             }
         }
-        clone.superBound = (TypeName) superBound.clone();
+        clone.superBound = superBound.clone();
         return clone;
     }
 
@@ -52,6 +53,11 @@ public class GenericName extends TypeName {
         return result.toString();
     }
 
+    public void renameTo(String newName) {
+        this.genericName = newName;
+        this.qualifier = null;
+    }
+
     public boolean isWildcard() {
         return WILDCARD_CHAR.equals(genericName);
     }
@@ -60,8 +66,12 @@ public class GenericName extends TypeName {
         return extendsBound != null && extendsBound.size() > 0;
     }
 
-    public List<TypeName> getExtendsBound() {
+    public List<? extends TypeName> getExtendsBound() {
         return extendsBound;
+    }
+
+    public void setExtendsBound(List<? extends TypeName> newExtendsBound) {
+        this.extendsBound = newExtendsBound;
     }
 
     public boolean hasSuperBound() {
@@ -72,11 +82,17 @@ public class GenericName extends TypeName {
         return superBound;
     }
 
+    public void setSuperBound(TypeName newSuperBound) {
+        this.superBound = newSuperBound;
+    }
+
     public void addQualifier(String qualifier) {
         if (this.qualifier != null) {
             throw new IllegalArgumentException("Generic " + genericName + " already has qualifier " + this.qualifier);
         }
-        this.qualifier = qualifier;
+        if (!WILDCARD_CHAR.equals(genericName)) {
+            this.qualifier = qualifier;
+        }
     }
 
     @Override
@@ -89,7 +105,7 @@ public class GenericName extends TypeName {
         final int prime = 31;
         int result = 1;
         result = prime * result
-                + ((genericName == null) ? 0 : genericName.hashCode());
+                + ((getGenericName() == null) ? 0 : getGenericName().hashCode());
         result = prime * result
                 + ((extendsBound == null) ? 0 : extendsBound.hashCode());
         result = prime * result
@@ -109,18 +125,18 @@ public class GenericName extends TypeName {
             return false;
         }
         GenericName other = (GenericName) obj;
-        if (genericName == null) {
-            if (other.genericName != null) {
+        if (getGenericName() == null) {
+            if (other.getGenericName() != null) {
                 return false;
             }
-        } else if (!genericName.equals(other.genericName)) {
+        } else if (!getGenericName().equals(other.getGenericName())) {
             return false;
         }
         if (extendsBound == null) {
             if (other.extendsBound != null) {
                 return false;
             }
-        } else if (!Utils.deepCompareTypeList(extendsBound, other.extendsBound)) {
+        } else if (!AptUtils.deepCompareTypeList(extendsBound, other.extendsBound)) {
             return false;
         }
         if (superBound == null) {

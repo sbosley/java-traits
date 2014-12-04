@@ -1,10 +1,10 @@
 package com.yahoo.annotations.writer.expressions;
 
+import com.yahoo.annotations.utils.AptUtils;
+import com.yahoo.annotations.writer.JavaFileWriter;
+
 import java.io.IOException;
 import java.util.List;
-
-import com.yahoo.annotations.utils.Utils;
-import com.yahoo.annotations.writer.JavaFileWriter;
 
 class MethodInvocation extends Expression {
 
@@ -18,7 +18,7 @@ class MethodInvocation extends Expression {
     }
     
     public MethodInvocation(String methodName, Object... arguments) {
-        this(methodName, Utils.asList(arguments));
+        this(methodName, AptUtils.asList(arguments));
     }
     
     public MethodInvocation(Expression calledObject, String methodName, Object... arguments) {

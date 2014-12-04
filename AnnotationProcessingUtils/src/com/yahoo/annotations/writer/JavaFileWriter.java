@@ -5,27 +5,20 @@
  */
 package com.yahoo.annotations.writer;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
-
-import javax.lang.model.element.Modifier;
-
+import com.yahoo.annotations.model.CoreTypes;
 import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.model.GenericName;
 import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.model.TypeName.TypeNameVisitor;
-import com.yahoo.annotations.utils.Utils;
+import com.yahoo.annotations.utils.AptUtils;
 import com.yahoo.annotations.writer.expressions.Expression;
 import com.yahoo.annotations.writer.parameters.MethodDeclarationParameters;
 import com.yahoo.annotations.writer.parameters.TypeDeclarationParameters;
+
+import javax.lang.model.element.Modifier;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.*;
 
 public class JavaFileWriter {
 
@@ -78,7 +71,7 @@ public class JavaFileWriter {
     public JavaFileWriter writeImports(Collection<DeclaredTypeName> imports) throws IOException {
         checkScope(Scope.IMPORTS);
         TreeSet<String> sortedImports = new TreeSet<String>();
-        if (!Utils.isEmpty(imports)) {
+        if (!AptUtils.isEmpty(imports)) {
             for (DeclaredTypeName item : imports) {
                 DeclaredTypeName toImport = addToKnownNames(item, item.isJavaLangPackage());
                 if (toImport != null) {
@@ -86,7 +79,7 @@ public class JavaFileWriter {
                 }
             }
         }
-        if (!Utils.isEmpty(sortedImports)) {
+        if (!AptUtils.isEmpty(sortedImports)) {
             for (String item : sortedImports) {
                 out.append("import ").append(item).append(";\n");
             }
@@ -98,7 +91,7 @@ public class JavaFileWriter {
     
     // For names that can be shortened but don't need to be imported
     public JavaFileWriter registerOtherKnownNames(Collection<DeclaredTypeName> otherKnownNames) throws IOException {
-        if (!Utils.isEmpty(otherKnownNames)) {
+        if (!AptUtils.isEmpty(otherKnownNames)) {
             for (DeclaredTypeName item : otherKnownNames) {
                 addToKnownNames(item, false);
             }
@@ -107,7 +100,7 @@ public class JavaFileWriter {
     }
     
     public JavaFileWriter registerOtherKnownNames(DeclaredTypeName... otherKnownNames) throws IOException {
-        return registerOtherKnownNames(Utils.asList(otherKnownNames));
+        return registerOtherKnownNames(AptUtils.asList(otherKnownNames));
     }
     
     // Returns a type name that needs to be added to the imports
@@ -136,7 +129,7 @@ public class JavaFileWriter {
         validateTypeDeclarationParams(typeDeclaration);
         indent();
 
-        boolean isRootClass = Utils.isEmpty(scopeStack);
+        boolean isRootClass = AptUtils.isEmpty(scopeStack);
         if (!isRootClass) {
             checkScope(Scope.TYPE_DEFINITION); // Begin a new inner type definition 
         } else {
@@ -148,12 +141,16 @@ public class JavaFileWriter {
         out.append(typeDeclaration.getKind().name).append(" ").append(typeDeclaration.getClassName().getSimpleName());
         writeGenericsList(typeDeclaration.getClassName().getTypeArgs(), true);
 
-        if (typeDeclaration.getSuperclass() != null && !Utils.OBJECT_CLASS_NAME.equals(typeDeclaration.getSuperclass().toString())) {
+        if (kind == Type.CLASS && typeDeclaration.getSuperclass() != null && !CoreTypes.JAVA_OBJECT.equals(typeDeclaration.getSuperclass())) {
             out.append(" extends ").append(shortenName(typeDeclaration.getSuperclass(), false));
         }
 
-        if (!Utils.isEmpty(typeDeclaration.getInterfaces())) {
-            out.append(" implements ");
+        if (!AptUtils.isEmpty(typeDeclaration.getInterfaces())) {
+            if (kind == Type.INTERFACE) {
+                out.append(" extends ");
+            } else {
+                out.append(" implements ");
+            }
             for (int i = 0; i < typeDeclaration.getInterfaces().size(); i++) {
                 out.append(shortenName(typeDeclaration.getInterfaces().get(i), false));
                 if (i < typeDeclaration.getInterfaces().size() - 1) {
@@ -176,7 +173,7 @@ public class JavaFileWriter {
     }
     
     public JavaFileWriter writeFieldDeclaration(TypeName type, String name, Expression initializer, Modifier... modifiers) throws IOException {
-        return writeFieldDeclaration(type, name, initializer, Utils.asList(modifiers));
+        return writeFieldDeclaration(type, name, initializer, AptUtils.asList(modifiers));
     }
 
     public JavaFileWriter writeFieldDeclaration(TypeName type, String name, Expression initializer, List<Modifier> modifiers) throws IOException {
@@ -198,8 +195,8 @@ public class JavaFileWriter {
         checkScope(Scope.TYPE_DEFINITION);
         indent();
         boolean isAbstract = kind.equals(Type.INTERFACE) ||
-                (Utils.isEmpty(methodDeclaration.getModifiers()) ?
-                        false : methodDeclaration.getModifiers().contains(Modifier.ABSTRACT));
+                (!AptUtils.isEmpty(methodDeclaration.getModifiers())
+                        && methodDeclaration.getModifiers().contains(Modifier.ABSTRACT));
         writeModifierList(methodDeclaration.getModifiers());
         if (writeGenericsList(methodDeclaration.getMethodGenerics(), true)) {
             out.append(" ");
@@ -211,7 +208,7 @@ public class JavaFileWriter {
         }
         out.append(" ").append(methodDeclaration.getMethodName());
         writeArgumentList(methodDeclaration.getArgumentTypes(), methodDeclaration.getArguments());
-        if (!Utils.isEmpty(methodDeclaration.getThrowsTypes())) {
+        if (!AptUtils.isEmpty(methodDeclaration.getThrowsTypes())) {
             out.append(" throws ");
             for (int i = 0; i < methodDeclaration.getThrowsTypes().size(); i++) {
                 out.append(shortenName(methodDeclaration.getThrowsTypes().get(i), false));
@@ -243,20 +240,20 @@ public class JavaFileWriter {
     }
 
     private void validateMethodDefinitionParams(MethodDeclarationParameters params) {
-        if (Utils.isEmpty(params.getMethodName())) {
+        if (AptUtils.isEmpty(params.getMethodName())) {
             throw new IllegalArgumentException("Must specify a method name for MethodDeclarationParams");
         }
         verifyArgumentTypesAndNames(params.getArgumentTypes(), params.getArguments());
     }
 
     private void verifyArgumentTypesAndNames(List<? extends TypeName> argumentTypes, List<?> arguments) {
-        if (Utils.isEmpty(argumentTypes) && !Utils.isEmpty(arguments)) {
+        if (AptUtils.isEmpty(argumentTypes) && !AptUtils.isEmpty(arguments)) {
             throw new IllegalArgumentException("Must specify argument types for MethodDeclarationParams");
         }
-        if (!Utils.isEmpty(argumentTypes) && Utils.isEmpty(arguments)) {
+        if (!AptUtils.isEmpty(argumentTypes) && AptUtils.isEmpty(arguments)) {
             throw new IllegalArgumentException("Must specify argument names for MethodDeclarationParams");
         }
-        if (!Utils.isEmpty(argumentTypes) && !Utils.isEmpty(arguments)
+        if (!AptUtils.isEmpty(argumentTypes) && !AptUtils.isEmpty(arguments)
                 && argumentTypes.size() != arguments.size()) {
             String error = "Different number of argument types and names in MethodDeclarationParams. "
                     + argumentTypes.size() + " types, " + arguments.size() + " names.";
@@ -404,7 +401,7 @@ public class JavaFileWriter {
     }
 
     public String getGenericsListString(List<? extends TypeName> generics, boolean includeBounds) {
-        if (Utils.isEmpty(generics)) {
+        if (AptUtils.isEmpty(generics)) {
             return "";
         }
         StringBuilder builder = new StringBuilder();

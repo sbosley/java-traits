@@ -21,7 +21,7 @@ public class TraitProcessor extends JavaTraitsProcessor<TraitElement> {
     }
 
     @Override
-    protected TraitElement itemTypeFromTypeElement(TypeElement typeElem) {
+    protected TraitElement itemFromTypeElement(TypeElement typeElem) {
         return new TraitElement(typeElem, utils);
     }
 

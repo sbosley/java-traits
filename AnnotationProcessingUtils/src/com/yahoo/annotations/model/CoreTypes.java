@@ -3,7 +3,8 @@ package com.yahoo.annotations.model;
 public class CoreTypes {
 
     public static final String JAVA_LANG = "java.lang";
-    
+
+    public static final DeclaredTypeName JAVA_OBJECT = new DeclaredTypeName(JAVA_LANG, "Object");
     public static final DeclaredTypeName JAVA_STRING = new DeclaredTypeName(JAVA_LANG, "String");
     public static final DeclaredTypeName JAVA_INTEGER = new DeclaredTypeName(JAVA_LANG, "Integer");
     public static final DeclaredTypeName JAVA_LONG = new DeclaredTypeName(JAVA_LANG, "Long");
@@ -14,14 +15,14 @@ public class CoreTypes {
     public static final DeclaredTypeName JAVA_BOOLEAN = new DeclaredTypeName(JAVA_LANG, "Boolean");
     public static final DeclaredTypeName JAVA_CHARACTER = new DeclaredTypeName(JAVA_LANG, "Character");
     
-    public static final DeclaredTypeName PRIMITIVE_INT = new DeclaredTypeName(null, "int");
-    public static final DeclaredTypeName PRIMITIVE_LONG = new DeclaredTypeName(null, "long");
-    public static final DeclaredTypeName PRIMITIVE_DOUBLE = new DeclaredTypeName(null, "double");
-    public static final DeclaredTypeName PRIMITIVE_FLOAT = new DeclaredTypeName(null, "float");
-    public static final DeclaredTypeName PRIMITIVE_SHORT = new DeclaredTypeName(null, "short");
-    public static final DeclaredTypeName PRIMITIVE_BYTE = new DeclaredTypeName(null, "byte");
-    public static final DeclaredTypeName PRIMITIVE_BOOLEAN = new DeclaredTypeName(null, "boolean");
-    public static final DeclaredTypeName PRIMITIVE_CHAR = new DeclaredTypeName(null, "char");
+    public static final DeclaredTypeName PRIMITIVE_INT = new DeclaredTypeName("", "int");
+    public static final DeclaredTypeName PRIMITIVE_LONG = new DeclaredTypeName("", "long");
+    public static final DeclaredTypeName PRIMITIVE_DOUBLE = new DeclaredTypeName("", "double");
+    public static final DeclaredTypeName PRIMITIVE_FLOAT = new DeclaredTypeName("", "float");
+    public static final DeclaredTypeName PRIMITIVE_SHORT = new DeclaredTypeName("", "short");
+    public static final DeclaredTypeName PRIMITIVE_BYTE = new DeclaredTypeName("", "byte");
+    public static final DeclaredTypeName PRIMITIVE_BOOLEAN = new DeclaredTypeName("", "boolean");
+    public static final DeclaredTypeName PRIMITIVE_CHAR = new DeclaredTypeName("", "char");
     
     public static final DeclaredTypeName OVERRIDE = new DeclaredTypeName(JAVA_LANG, "Override");
     public static final DeclaredTypeName DEPRECATED = new DeclaredTypeName(JAVA_LANG, "Deprecated");

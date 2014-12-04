@@ -5,10 +5,11 @@
  */
 package com.yahoo.javatraits.processor.data;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.yahoo.annotations.model.CoreTypes;
+import com.yahoo.annotations.model.DeclaredTypeName;
+import com.yahoo.annotations.model.GenericName;
+import com.yahoo.annotations.utils.AptUtils;
+import com.yahoo.javatraits.annotations.HasTraits;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -16,11 +17,10 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
-
-import com.yahoo.annotations.model.DeclaredTypeName;
-import com.yahoo.annotations.model.GenericName;
-import com.yahoo.annotations.utils.Utils;
-import com.yahoo.javatraits.annotations.HasTraits;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ClassWithTraits extends TypeElementWrapper {
 
@@ -33,53 +33,53 @@ public class ClassWithTraits extends TypeElementWrapper {
 
     private Map<String, DeclaredTypeName> prefer;
 
-    public ClassWithTraits(TypeElement elem, Utils utils) {
-        super(elem, utils);
+    public ClassWithTraits(TypeElement elem, AptUtils aptUtils) {
+        super(elem, aptUtils);
         initTraitClasses();
         initSuperclasses();
         initPreferValues();
     }
 
     private void initTraitClasses() {
-        List<TypeMirror> traitMirrors = utils.getClassMirrorsFromAnnotation(elem, HasTraits.class, "traits");
-        traitClasses = Utils.map(traitMirrors, new Utils.Mapper<TypeMirror, TraitElement>() {
+        List<TypeMirror> traitMirrors = aptUtils.getClassMirrorsFromAnnotation(elem, HasTraits.class, "traits");
+        traitClasses = AptUtils.map(traitMirrors, new AptUtils.Function<TypeMirror, TraitElement>() {
             @Override
             public TraitElement map(TypeMirror arg) {
                 if (!(arg instanceof DeclaredType)) {
-                    utils.getMessager().printMessage(Kind.ERROR, "Type mirror " + arg + " for trait argument is not a DeclaredType");
+                    aptUtils.getMessager().printMessage(Kind.ERROR, "Type mirror " + arg + " for trait argument is not a DeclaredType");
                     return null;
                 } else {
-                    return new TraitElement((TypeElement) ((DeclaredType) arg).asElement(), utils);
+                    return new TraitElement((TypeElement) ((DeclaredType) arg).asElement(), aptUtils);
                 }
             }
         });
     }
 
     private void initSuperclasses() {
-        AnnotationMirror hasTraits = utils.getAnnotationMirror(elem, HasTraits.class);
-        AnnotationValue desiredSuperclassValue = utils.getAnnotationValueFromMirror(hasTraits, "desiredSuperclass");
+        AnnotationMirror hasTraits = aptUtils.getAnnotationMirror(elem, HasTraits.class);
+        AnnotationValue desiredSuperclassValue = aptUtils.getAnnotationValueFromMirror(hasTraits, "desiredSuperclass");
         if (desiredSuperclassValue != null) {
             Object value = desiredSuperclassValue.getValue();
             if (value instanceof AnnotationMirror) {
                 AnnotationMirror desiredSuperclassMirror = (AnnotationMirror) value;
-                AnnotationValue superclassValue = utils.getAnnotationValueFromMirror(desiredSuperclassMirror, "superclass");
+                AnnotationValue superclassValue = aptUtils.getAnnotationValueFromMirror(desiredSuperclassMirror, "superclass");
 
-                List<DeclaredTypeName> superclassNames = utils.getTypeNamesFromAnnotationValue(superclassValue);
-                desiredSuperclass = superclassNames.size() > 0 ? superclassNames.get(0) : new DeclaredTypeName(Utils.OBJECT_CLASS_NAME);
+                List<DeclaredTypeName> superclassNames = aptUtils.getTypeNamesFromAnnotationValue(superclassValue);
+                desiredSuperclass = superclassNames.size() > 0 ? superclassNames.get(0) : CoreTypes.JAVA_OBJECT;
 
-                AnnotationValue typeArgClassesValue = utils.getAnnotationValueFromMirror(desiredSuperclassMirror, "typeArgClasses");
-                List<DeclaredTypeName> superclassTypeArgs = utils.getTypeNamesFromAnnotationValue(typeArgClassesValue);
+                AnnotationValue typeArgClassesValue = aptUtils.getAnnotationValueFromMirror(desiredSuperclassMirror, "typeArgClasses");
+                List<DeclaredTypeName> superclassTypeArgs = aptUtils.getTypeNamesFromAnnotationValue(typeArgClassesValue);
 
-                AnnotationValue typeArgNames = utils.getAnnotationValueFromMirror(desiredSuperclassMirror, "typeArgNames");
-                List<String> superclassTypeArgNames = utils.getValuesFromAnnotationValue(typeArgNames, String.class);
+                AnnotationValue typeArgNames = aptUtils.getAnnotationValueFromMirror(desiredSuperclassMirror, "typeArgNames");
+                List<String> superclassTypeArgNames = aptUtils.getValuesFromAnnotationValue(typeArgNames, String.class);
 
-                AnnotationValue numTypeArgs = utils.getAnnotationValueFromMirror(desiredSuperclassMirror, "numTypeArgs");
-                int superclassNumTypeArgs = numTypeArgs != null ? ((Integer) numTypeArgs.getValue()).intValue() : 0;
+                AnnotationValue numTypeArgs = aptUtils.getAnnotationValueFromMirror(desiredSuperclassMirror, "numTypeArgs");
+                int superclassNumTypeArgs = numTypeArgs != null ? (Integer) numTypeArgs.getValue() : 0;
 
-                if (!Utils.isEmpty(superclassTypeArgs)) {
+                if (!AptUtils.isEmpty(superclassTypeArgs)) {
                     desiredSuperclass.setTypeArgs(superclassTypeArgs);
-                } else if (!Utils.isEmpty(superclassTypeArgNames)) {
-                    desiredSuperclass.setTypeArgs(Utils.map(superclassTypeArgNames, new Utils.Mapper<String, GenericName>() {
+                } else if (!AptUtils.isEmpty(superclassTypeArgNames)) {
+                    desiredSuperclass.setTypeArgs(AptUtils.map(superclassTypeArgNames, new AptUtils.Function<String, GenericName>() {
                         @Override
                         public GenericName map(String arg) {
                             return new GenericName(arg, null, null);
@@ -94,7 +94,7 @@ public class ClassWithTraits extends TypeElementWrapper {
                 }
             }
         } else {
-            desiredSuperclass = new DeclaredTypeName(Utils.OBJECT_CLASS_NAME);
+            desiredSuperclass = CoreTypes.JAVA_OBJECT;
         }
 
         generatedSuperclass = new DeclaredTypeName(elementName.toString() + GEN_SUFFIX);
@@ -102,8 +102,8 @@ public class ClassWithTraits extends TypeElementWrapper {
 
     private void initPreferValues() {
         prefer = new HashMap<String, DeclaredTypeName>();
-        AnnotationMirror hasTraits = utils.getAnnotationMirror(elem, HasTraits.class);
-        AnnotationValue preferValue = utils.getAnnotationValueFromMirror(hasTraits, "prefer");
+        AnnotationMirror hasTraits = aptUtils.getAnnotationMirror(elem, HasTraits.class);
+        AnnotationValue preferValue = aptUtils.getAnnotationValueFromMirror(hasTraits, "prefer");
         if (preferValue != null && preferValue.getValue() instanceof List) {
             @SuppressWarnings("unchecked")
             List<? extends AnnotationValue> preferList = (List<? extends AnnotationValue>) preferValue.getValue();
@@ -111,10 +111,10 @@ public class ClassWithTraits extends TypeElementWrapper {
                 Object value = entry.getValue();
                 if (value instanceof AnnotationMirror) {
                     AnnotationMirror preferMirror = (AnnotationMirror) value;
-                    AnnotationValue targetValue = utils.getAnnotationValueFromMirror(preferMirror, "target");
-                    AnnotationValue methodValue = utils.getAnnotationValueFromMirror(preferMirror, "method");
+                    AnnotationValue targetValue = aptUtils.getAnnotationValueFromMirror(preferMirror, "target");
+                    AnnotationValue methodValue = aptUtils.getAnnotationValueFromMirror(preferMirror, "method");
 
-                    DeclaredTypeName targetName = utils.getTypeNamesFromAnnotationValue(targetValue).get(0);
+                    DeclaredTypeName targetName = aptUtils.getTypeNamesFromAnnotationValue(targetValue).get(0);
                     String method = (String) methodValue.getValue();
                     prefer.put(method, targetName);
                 }
@@ -135,7 +135,7 @@ public class ClassWithTraits extends TypeElementWrapper {
     }
 
     public boolean superclassHasTypeArgs() {
-        return !Utils.isEmpty(desiredSuperclass.getTypeArgs());
+        return !AptUtils.isEmpty(desiredSuperclass.getTypeArgs());
     }
 
     public Map<String, DeclaredTypeName> getPreferMap() {

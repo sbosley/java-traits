@@ -10,7 +10,7 @@ import com.yahoo.annotations.writer.JavaFileWriter.Type;
 import com.yahoo.annotations.writer.parameters.MethodDeclarationParameters;
 import com.yahoo.annotations.writer.parameters.TypeDeclarationParameters;
 import com.yahoo.javatraits.processor.data.TraitElement;
-import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
+import com.yahoo.javatraits.processor.utils.TraitProcessorAptUtils;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -19,24 +19,26 @@ import java.util.Set;
 
 public class TraitInterfaceWriter extends JavaTraitsWriter<TraitElement> {
 
-    public TraitInterfaceWriter(TraitElement element, TraitProcessorUtils utils) {
+    public TraitInterfaceWriter(TraitElement element, TraitProcessorAptUtils utils) {
         super(element, utils);
     }
 
     @Override
     protected DeclaredTypeName getClassNameToGenerate() {
-        return element.getInterfaceName();
+        return element.getGeneratedInterfaceName();
     }
 
     @Override
     protected void gatherImports(Set<DeclaredTypeName> imports) {
+        utils.accumulateImportsFromTypeNames(imports, element.getInterfaceNames());
         utils.accumulateImportsFromElements(imports, element.getDeclaredMethods());
     }
 
     protected void writeClassDefinition() throws IOException {
         TypeDeclarationParameters params = new TypeDeclarationParameters()
-            .setName(element.getInterfaceName())
+            .setName(element.getGeneratedInterfaceName())
             .setKind(Type.INTERFACE)
+            .setInterfaces(element.getInterfaceNames())
             .setModifiers(Modifier.PUBLIC);
 
         writer.beginTypeDefinition(params);
@@ -46,9 +48,7 @@ public class TraitInterfaceWriter extends JavaTraitsWriter<TraitElement> {
 
     private void emitMethodDeclarations() throws IOException {
         for (ExecutableElement exec : element.getDeclaredMethods()) {
-            if (utils.isGetThis(element, exec)) {
-                continue;
-            } else {
+            if (!utils.isGetThis(element, exec)) {
                 emitMethodDeclarationForExecutableElement(exec);
             }
         }

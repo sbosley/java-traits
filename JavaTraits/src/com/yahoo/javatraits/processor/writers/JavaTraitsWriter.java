@@ -3,7 +3,7 @@ package com.yahoo.javatraits.processor.writers;
 import com.yahoo.annotations.model.DeclaredTypeName;
 import com.yahoo.annotations.writer.JavaFileWriter;
 import com.yahoo.javatraits.processor.data.TypeElementWrapper;
-import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
+import com.yahoo.javatraits.processor.utils.TraitProcessorAptUtils;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.FilerException;
@@ -16,10 +16,10 @@ import java.util.Set;
 public abstract class JavaTraitsWriter<T extends TypeElementWrapper> {
 
     protected final T element;
-    protected final TraitProcessorUtils utils;
+    protected final TraitProcessorAptUtils utils;
     protected JavaFileWriter writer;
 
-    public JavaTraitsWriter(T element, TraitProcessorUtils utils) {
+    public JavaTraitsWriter(T element, TraitProcessorAptUtils utils) {
         this.element = element;
         this.utils = utils;
     }

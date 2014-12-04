@@ -5,17 +5,17 @@
  */
 package com.yahoo.annotations.model;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import com.yahoo.annotations.utils.AptUtils;
 
-import com.yahoo.annotations.utils.Utils;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MethodSignature {
 
     private String methodName;
     private TypeName returnType;
     private List<TypeName> argTypes = new ArrayList<TypeName>();
+    private List<TypeName> throwsTypes = new ArrayList<TypeName>();
 
     public MethodSignature(String methodName) {
         this.methodName = methodName;
@@ -41,8 +41,28 @@ public class MethodSignature {
         return argTypes;
     }
 
-    public void addArgType(TypeName... types) {
-        argTypes.addAll(Arrays.asList(types));
+    public void addArgTypes(TypeName... types) {
+        addArgTypes(AptUtils.asList(types));
+    }
+
+    public void addArgTypes(List<? extends TypeName> types) {
+        if (types != null) {
+            argTypes.addAll(types);
+        }
+    }
+
+    public List<TypeName> getThrowsTypes() {
+        return throwsTypes;
+    }
+
+    public void addThrowsTypes(TypeName... types) {
+        addThrowsTypes(AptUtils.asList(types));
+    }
+
+    public void addThrowsTypes(List<? extends TypeName> types) {
+        if (types != null) {
+            throwsTypes.addAll(throwsTypes);
+        }
     }
 
     @Override
@@ -55,6 +75,8 @@ public class MethodSignature {
                 + ((methodName == null) ? 0 : methodName.hashCode());
         result = prime * result
                 + ((returnType == null) ? 0 : returnType.hashCode());
+        result = prime * result
+                + ((throwsTypes == null) ? 0 : throwsTypes.hashCode());
         return result;
     }
 
@@ -70,31 +92,20 @@ public class MethodSignature {
             return false;
         }
         MethodSignature other = (MethodSignature) obj;
-        if (argTypes == null) {
-            if (other.argTypes != null) {
-                return false;
-            }
-        } else if (!Utils.deepCompareTypeList(argTypes, other.argTypes)) {
+        if (!AptUtils.deepCompareTypeList(argTypes, other.argTypes)) {
             return false;
         }
-        if (methodName == null) {
-            if (other.methodName != null) {
-                return false;
-            }
-        } else if (!methodName.equals(other.methodName)) {
+        if (!AptUtils.isEqual(methodName, other.methodName)) {
             return false;
         }
-        if (returnType == null) {
-            if (other.returnType != null) {
-                return false;
-            }
-        } else if (!Utils.deepCompareTypes(returnType, other.returnType)) {
+        if (!AptUtils.deepCompareTypes(returnType, other.returnType)) {
+            return false;
+        }
+        if (!AptUtils.deepCompareTypeList(throwsTypes, other.throwsTypes)) {
             return false;
         }
         return true;
     }
-
-
 
 
 }

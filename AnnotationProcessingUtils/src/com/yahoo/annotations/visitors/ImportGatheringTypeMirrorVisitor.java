@@ -5,37 +5,26 @@
  */
 package com.yahoo.annotations.visitors;
 
-import java.util.List;
-import java.util.Set;
+import com.yahoo.annotations.model.DeclaredTypeName;
+import com.yahoo.annotations.utils.AptUtils;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
-import javax.lang.model.type.ArrayType;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.ErrorType;
-import javax.lang.model.type.ExecutableType;
-import javax.lang.model.type.NoType;
-import javax.lang.model.type.NullType;
-import javax.lang.model.type.PrimitiveType;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.TypeVariable;
-import javax.lang.model.type.TypeVisitor;
-import javax.lang.model.type.WildcardType;
+import javax.lang.model.type.*;
 import javax.tools.Diagnostic.Kind;
+import java.util.List;
+import java.util.Set;
 
-import com.yahoo.annotations.model.DeclaredTypeName;
-import com.yahoo.annotations.utils.Utils;
-
-public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<DeclaredTypeName>> {
+public class ImportGatheringTypeMirrorVisitor implements TypeVisitor<Void, Set<DeclaredTypeName>> {
 
     private Element elem;
     private Messager messager;
-    private Utils utils;
+    private AptUtils aptUtils;
 
-    public ImportGatheringTypeVisitor(Element elem, Messager messager, Utils utils) {
+    public ImportGatheringTypeMirrorVisitor(Element elem, Messager messager, AptUtils aptUtils) {
         this.elem = elem;
         this.messager = messager;
-        this.utils = utils;
+        this.aptUtils = aptUtils;
     }
 
     @Override
@@ -60,7 +49,7 @@ public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<Declare
     @Override
     public Void visitDeclared(DeclaredType t, Set<DeclaredTypeName> p) {
         String toAdd = t.toString();
-        if (!Utils.OBJECT_CLASS_NAME.equals(toAdd)) {
+        if (!AptUtils.OBJECT_CLASS_NAME.equals(toAdd)) {
             String mirrorString = t.toString().replaceAll("<.*>", "");
             p.add(new DeclaredTypeName(mirrorString));
         }
@@ -109,7 +98,7 @@ public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<Declare
 
     @Override
     public Void visitTypeVariable(TypeVariable t, Set<DeclaredTypeName> p) {
-        List<? extends TypeMirror> upperBounds = utils.getUpperBoundMirrors(t, t.getUpperBound());
+        List<? extends TypeMirror> upperBounds = aptUtils.getUpperBoundMirrors(t, t.getUpperBound());
         for (TypeMirror upper : upperBounds) {
             upper.accept(this, p);
         }
@@ -125,7 +114,7 @@ public class ImportGatheringTypeVisitor implements TypeVisitor<Void, Set<Declare
 
     @Override
     public Void visitWildcard(WildcardType t, Set<DeclaredTypeName> p) {
-        List<? extends TypeMirror> upperBounds = utils.getUpperBoundMirrors(t, t.getExtendsBound());
+        List<? extends TypeMirror> upperBounds = aptUtils.getUpperBoundMirrors(t, t.getExtendsBound());
         for (TypeMirror upper : upperBounds) {
             upper.accept(this, p);
         }

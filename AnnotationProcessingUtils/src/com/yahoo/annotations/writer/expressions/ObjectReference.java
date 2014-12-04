@@ -1,9 +1,9 @@
 package com.yahoo.annotations.writer.expressions;
 
-import java.io.IOException;
-
-import com.yahoo.annotations.utils.Utils;
+import com.yahoo.annotations.utils.AptUtils;
 import com.yahoo.annotations.writer.JavaFileWriter;
+
+import java.io.IOException;
 
 class ObjectReference extends Reference {
 
@@ -26,7 +26,7 @@ class ObjectReference extends Reference {
     
     @Override
     protected void writeReferencedObject(JavaFileWriter writer) throws IOException {
-        if (!Utils.isEmpty(referencedObject)) {
+        if (!AptUtils.isEmpty(referencedObject)) {
             writer.appendString(referencedObject).appendString(".");
         } else if (referencedExpression != null) {
             referencedExpression.writeExpression(writer);

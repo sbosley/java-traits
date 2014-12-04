@@ -6,10 +6,11 @@
 package com.yahoo.javatraits.processor.writers;
 
 import com.yahoo.annotations.model.DeclaredTypeName;
+import com.yahoo.annotations.model.GenericName;
 import com.yahoo.annotations.model.MethodSignature;
 import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.utils.Pair;
-import com.yahoo.annotations.utils.Utils;
+import com.yahoo.annotations.utils.AptUtils;
 import com.yahoo.annotations.writer.JavaFileWriter.Type;
 import com.yahoo.annotations.writer.expressions.Expression;
 import com.yahoo.annotations.writer.expressions.Expressions;
@@ -17,7 +18,7 @@ import com.yahoo.annotations.writer.parameters.MethodDeclarationParameters;
 import com.yahoo.annotations.writer.parameters.TypeDeclarationParameters;
 import com.yahoo.javatraits.processor.data.ClassWithTraits;
 import com.yahoo.javatraits.processor.data.TraitElement;
-import com.yahoo.javatraits.processor.utils.TraitProcessorUtils;
+import com.yahoo.javatraits.processor.utils.TraitProcessorAptUtils;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -29,7 +30,7 @@ public class ClassWithTraitsSuperclassWriter extends JavaTraitsWriter<ClassWithT
 
     private List<TraitElement> allTraits;
 
-    public ClassWithTraitsSuperclassWriter(ClassWithTraits cls, TraitProcessorUtils utils) {
+    public ClassWithTraitsSuperclassWriter(ClassWithTraits cls, TraitProcessorAptUtils utils) {
         super(cls, utils);
         this.allTraits = cls.getTraitClasses();
     }
@@ -44,10 +45,10 @@ public class ClassWithTraitsSuperclassWriter extends JavaTraitsWriter<ClassWithT
         for (TraitElement elem : allTraits) {
             utils.accumulateImportsFromElements(imports, elem.getDeclaredMethods());
             imports.add(elem.getDelegateName());
-            imports.add(elem.getInterfaceName());
+            imports.add(elem.getGeneratedInterfaceName());
         }
         DeclaredTypeName desiredSuperclass = element.getDesiredSuperclass();
-        if (!Utils.OBJECT_CLASS_NAME.equals(desiredSuperclass.toString())) {
+        if (!AptUtils.OBJECT_CLASS_NAME.equals(desiredSuperclass.toString())) {
             imports.add(desiredSuperclass);
             if (element.superclassHasTypeArgs()) {
                 List<? extends TypeName> superclassTypeArgs = element.getDesiredSuperclass().getTypeArgs();
@@ -61,29 +62,41 @@ public class ClassWithTraitsSuperclassWriter extends JavaTraitsWriter<ClassWithT
     }
 
     protected void writeClassDefinition() throws IOException {
-        List<TypeName> generics = new ArrayList<TypeName>();
+        final List<TypeName> generics = new ArrayList<TypeName>();
+        final Map<String, Integer> knownGenericNames = new HashMap<String, Integer>();
         if (element.superclassHasTypeArgs()) {
             for (TypeName t : element.getDesiredSuperclass().getTypeArgs()) {
-                if (!(t instanceof DeclaredTypeName)) {
+                if (t instanceof GenericName) {
                     generics.add(t);
+                    knownGenericNames.put(((GenericName) t).getGenericName(), generics.size() - 1);
                 }
             }
         }
         for (TraitElement elem : allTraits) {
-            if (elem.hasTypeParameters()) {
-                generics.addAll(elem.getTypeParameters());
+            if (!AptUtils.isEmpty(elem.getTypeParameters())) {
+                for (TypeName item : elem.getTypeParameters()) {
+                    if (item instanceof GenericName) {
+                        String genericName = ((GenericName) item).getGenericName();
+                        if (knownGenericNames.containsKey(genericName)) {
+                            generics.set(knownGenericNames.get(genericName), item);
+                        } else {
+                            generics.add(item);
+                        }
+                    } else {
+                        generics.add(item);
+                    }
+                }
             }
         }
         DeclaredTypeName superclassName = element.getGeneratedSuperclassName().clone();
         superclassName.setTypeArgs(generics);
 
-        List<DeclaredTypeName> interfaces = null;
-        if (allTraits.size() > 0) {
-            interfaces = new ArrayList<DeclaredTypeName>();
-            for (TraitElement elem : allTraits) {
-                interfaces.add(elem.getInterfaceName());
+        List<DeclaredTypeName> interfaces = AptUtils.map(allTraits, new AptUtils.Function<TraitElement, DeclaredTypeName>() {
+            @Override
+            public DeclaredTypeName map(TraitElement arg) {
+                return arg.getGeneratedInterfaceName();
             }
-        }
+        });
 
         TypeDeclarationParameters params = new TypeDeclarationParameters()
             .setName(superclassName)
