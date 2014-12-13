@@ -1,7 +1,6 @@
 package com.yahoo.annotations.writer.expressions;
 
 import com.yahoo.annotations.model.DeclaredTypeName;
-import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.writer.JavaFileWriter;
 
 import java.io.IOException;

@@ -428,7 +428,7 @@ public class AptUtils {
         }
     }
 
-    private TypeNameVisitor genericQualifyingVisitor = new TypeNameVisitor<Void, Pair<List<TypeName>, String>>() {
+    private TypeNameVisitor<Void, Pair<List<TypeName>, String>> genericQualifyingVisitor = new TypeNameVisitor<Void, Pair<List<TypeName>, String>>() {
 
         @Override
         public Void visitClassName(DeclaredTypeName typeName, Pair<List<TypeName>, String> params) {
