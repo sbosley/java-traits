@@ -144,7 +144,9 @@ public class ClassWithTraitsSuperclassWriter extends JavaTraitsWriter<ClassWithT
                         constant.getSimpleName().toString()), Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL);
             }
         }
-        writer.writeNewline();
+        if (constantNames.size() > 0) {
+            writer.writeNewline();
+        }
     }
 
     private void emitDelegateFields() throws IOException {

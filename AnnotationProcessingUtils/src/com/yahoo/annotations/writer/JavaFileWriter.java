@@ -40,6 +40,7 @@ public class JavaFileWriter {
     private static final String INDENT = "    ";
 
     private Writer out;
+    private String packageName;
     private Map<String, List<DeclaredTypeName>> knownNames;
     private Type kind = null;
     private Deque<Scope> scopeStack = new LinkedList<Scope>();
@@ -106,6 +107,7 @@ public class JavaFileWriter {
     public JavaFileWriter writePackage(String packageName) throws IOException {
         checkScope(Scope.PACKAGE);
         out.append("package ").append(packageName).append(";\n\n");
+        this.packageName = packageName;
         finishScope(Scope.PACKAGE);
         moveToScope(Scope.IMPORTS);
         return this;
@@ -124,7 +126,7 @@ public class JavaFileWriter {
         TreeSet<String> sortedImports = new TreeSet<String>();
         if (!AptUtils.isEmpty(imports)) {
             for (DeclaredTypeName item : imports) {
-                DeclaredTypeName toImport = addToKnownNames(item, item.isJavaLangPackage());
+                DeclaredTypeName toImport = addToKnownNames(item, item.isJavaLangPackage() || item.getPackageName().equals(packageName));
                 if (toImport != null) {
                     sortedImports.add(toImport.toString());
                 }
