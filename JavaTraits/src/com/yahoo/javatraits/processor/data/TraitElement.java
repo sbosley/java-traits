@@ -10,17 +10,11 @@ import com.yahoo.annotations.model.GenericName;
 import com.yahoo.annotations.model.TypeName;
 import com.yahoo.annotations.utils.AptUtils;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class TraitElement extends TypeElementWrapper {
 
@@ -29,6 +23,7 @@ public class TraitElement extends TypeElementWrapper {
 
     private List<ExecutableElement> declaredMethods = new ArrayList<ExecutableElement>();
     private List<TypeName> interfaceNames;
+    private List<VariableElement> constants = new ArrayList<VariableElement>();
     private List<List<ExecutableElement>> interfaceMethods = new ArrayList<List<ExecutableElement>>();
     private List<Map<String, TypeName>> interfaceGenericNameMaps;
 
@@ -62,13 +57,24 @@ public class TraitElement extends TypeElementWrapper {
                     if (((ExecutableElement) e).getParameters().size() > 0) {
                         aptUtils.getMessager().printMessage(Kind.ERROR, "Trait constructors cannot have arguments", e);
                     }
+                } else if (elementIsConstant(e)) {
+                    constants.add((VariableElement) e);
                 } else {
-                    aptUtils.getMessager().printMessage(Kind.ERROR, "Trait elements may only declare methods or abstract methods", e);
+                    aptUtils.getMessager().printMessage(Kind.ERROR, "Trait elements may only declare methods, abstract methods, or public static final variables", e);
                 }
             } else {
                 methods.add((ExecutableElement) e);
             }
         }
+    }
+
+    private boolean elementIsConstant(Element e) {
+        if (!(e instanceof VariableElement)) {
+            return false;
+        }
+        VariableElement var = (VariableElement) e;
+        Set<Modifier> modifiers = var.getModifiers();
+        return modifiers.containsAll(Arrays.asList(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL));
     }
 
     private void initializeInterfaces() {
@@ -139,6 +145,10 @@ public class TraitElement extends TypeElementWrapper {
 
     public Map<String, TypeName> getGenericNameMapForInterface(int ith) {
         return interfaceGenericNameMaps.get(ith);
+    }
+
+    public List<VariableElement> getConstants() {
+        return constants;
     }
 
 }

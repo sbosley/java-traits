@@ -22,6 +22,7 @@ import com.yahoo.javatraits.processor.utils.TraitProcessorAptUtils;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeKind;
 import java.io.IOException;
 import java.util.*;
@@ -46,6 +47,9 @@ public class ClassWithTraitsSuperclassWriter extends JavaTraitsWriter<ClassWithT
             utils.accumulateImportsFromElements(imports, elem.getDeclaredMethods());
             imports.add(elem.getDelegateName());
             imports.add(elem.getGeneratedInterfaceName());
+            if (elem.getConstants().size() > 0) {
+                imports.add(elem.getElementName());
+            }
         }
         DeclaredTypeName desiredSuperclass = element.getDesiredSuperclass();
         if (!AptUtils.OBJECT_CLASS_NAME.equals(desiredSuperclass.toString())) {
@@ -107,10 +111,40 @@ public class ClassWithTraitsSuperclassWriter extends JavaTraitsWriter<ClassWithT
 
         writer.beginTypeDefinition(params);
 
+        emitConstants();
         emitDelegateFields();
         emitDelegateMethods();
 
         writer.finishTypeDefinition();
+    }
+
+    private void emitConstants() throws IOException {
+        Set<String> constantNames = new HashSet<String>();
+        Set<String> duplicateNames = new HashSet<String>();
+        for (TraitElement elem : allTraits) {
+            List<VariableElement> constants = elem.getConstants();
+            for (VariableElement constant : constants) {
+                String name = constant.getSimpleName().toString();
+                if (!constantNames.add(name)) {
+                    duplicateNames.add(name);
+                }
+            }
+        }
+
+        for (TraitElement elem : allTraits) {
+            List<VariableElement> constants = elem.getConstants();
+            for (VariableElement constant : constants) {
+                TypeName constantType = utils.getTypeNameFromTypeMirror(constant.asType());
+                String name = constant.getSimpleName().toString();
+                if (duplicateNames.contains(name)) {
+                    name = elem.getSimpleName() + "_" + name;
+                }
+
+                writer.writeFieldDeclaration(constantType, name, Expressions.staticReference(elem.getElementName(),
+                        constant.getSimpleName().toString()), Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL);
+            }
+        }
+        writer.writeNewline();
     }
 
     private void emitDelegateFields() throws IOException {

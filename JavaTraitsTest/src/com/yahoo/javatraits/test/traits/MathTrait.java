@@ -14,6 +14,8 @@ import java.util.Map;
 @Trait
 public abstract class MathTrait<A extends Number, B extends A> {
 
+    public static final double PI = Math.PI;
+
     public abstract Map<String, ArrayList<B[]>>[][] getParametrizedArg();
 
     public abstract IMathTrait<A, B> getThis();
