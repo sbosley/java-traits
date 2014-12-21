@@ -1,7 +1,7 @@
-package com.yahoo.annotations.writer.expressions;
+package com.yahoo.aptutils.writer.expressions;
 
-import com.yahoo.annotations.model.TypeName;
-import com.yahoo.annotations.writer.JavaFileWriter;
+import com.yahoo.aptutils.model.TypeName;
+import com.yahoo.aptutils.writer.JavaFileWriter;
 
 import java.io.IOException;
 

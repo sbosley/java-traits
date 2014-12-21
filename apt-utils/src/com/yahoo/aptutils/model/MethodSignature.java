@@ -3,9 +3,9 @@
  *
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.yahoo.annotations.model;
+package com.yahoo.aptutils.model;
 
-import com.yahoo.annotations.utils.AptUtils;
+import com.yahoo.aptutils.utils.AptUtils;
 
 import java.util.ArrayList;
 import java.util.List;

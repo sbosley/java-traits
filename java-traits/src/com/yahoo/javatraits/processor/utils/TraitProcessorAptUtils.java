@@ -1,6 +1,6 @@
 package com.yahoo.javatraits.processor.utils;
 
-import com.yahoo.annotations.utils.AptUtils;
+import com.yahoo.aptutils.utils.AptUtils;
 import com.yahoo.javatraits.processor.data.TraitElement;
 
 import javax.annotation.processing.Messager;

@@ -3,13 +3,13 @@
  *
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.yahoo.annotations.utils;
+package com.yahoo.aptutils.utils;
 
-import com.yahoo.annotations.model.*;
-import com.yahoo.annotations.model.TypeName.TypeNameVisitor;
-import com.yahoo.annotations.visitors.ImportGatheringTypeMirrorVisitor;
-import com.yahoo.annotations.visitors.ImportGatheringTypeNameVisitor;
-import com.yahoo.annotations.writer.parameters.MethodDeclarationParameters;
+import com.yahoo.aptutils.model.*;
+import com.yahoo.aptutils.model.TypeName.TypeNameVisitor;
+import com.yahoo.aptutils.visitors.ImportGatheringTypeMirrorVisitor;
+import com.yahoo.aptutils.visitors.ImportGatheringTypeNameVisitor;
+import com.yahoo.aptutils.writer.parameters.MethodDeclarationParameters;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.*;
@@ -72,7 +72,7 @@ public class AptUtils {
 
     /**
      * @param accumulate a {@link java.util.Set} in which to add accumulated imports required by the given TypeNames
-     * @param typeNames {@link com.yahoo.annotations.model.TypeName}s to accumulate imports from
+     * @param typeNames {@link com.yahoo.aptutils.model.TypeName}s to accumulate imports from
      */
     public void accumulateImportsFromTypeNames(Set<DeclaredTypeName> accumulate, Collection<? extends TypeName> typeNames) {
         if (!isEmpty(typeNames)) {
@@ -87,7 +87,7 @@ public class AptUtils {
 
     /**
      * @param exec the {@link javax.lang.model.element.ExecutableElement} to convert
-     * @return a {@link com.yahoo.annotations.model.MethodSignature} constructed from the given
+     * @return a {@link com.yahoo.aptutils.model.MethodSignature} constructed from the given
      *          {@link javax.lang.model.element.ExecutableElement}
      */
     public MethodSignature executableElementToMethodSignature(ExecutableElement exec) {
@@ -98,7 +98,7 @@ public class AptUtils {
      * @param exec the {@link javax.lang.model.element.ExecutableElement} to convert
      * @param genericQualifier optional string to qualify any generics found in the ExecutableElement.
      *                         E.g. with qualifier "Q", generic name "T" would be replaced by "Q_T"
-     * @return a {@link com.yahoo.annotations.model.MethodSignature} constructed from the given
+     * @return a {@link com.yahoo.aptutils.model.MethodSignature} constructed from the given
      * {@link javax.lang.model.element.ExecutableElement}
      */
     public MethodSignature executableElementToMethodSignature(ExecutableElement exec, String genericQualifier) {
@@ -121,7 +121,7 @@ public class AptUtils {
     // --- TypeName creation methods
 
     /**
-     * @return a {@link com.yahoo.annotations.model.TypeName} corresponding to the given
+     * @return a {@link com.yahoo.aptutils.model.TypeName} corresponding to the given
      *          {@link javax.lang.model.element.TypeParameterElement}
      */
     public TypeName typeParameterElementToTypeName(TypeParameterElement elem) {
@@ -132,7 +132,7 @@ public class AptUtils {
      * @param elem the {@link javax.lang.model.element.TypeParameterElement} to convert
      * @param genericQualifier optional string to qualify the generic name found in the TypeParameterElement.
      *                         E.g. with qualifier "Q", generic name "T" would be replaced by "Q_T"
-     * @return a {@link com.yahoo.annotations.model.TypeName} corresponding to the given
+     * @return a {@link com.yahoo.aptutils.model.TypeName} corresponding to the given
      * {@link javax.lang.model.element.TypeParameterElement}
      */
     public TypeName typeParameterElementToTypeName(TypeParameterElement elem, String genericQualifier) {
@@ -140,7 +140,7 @@ public class AptUtils {
     }
 
     /**
-     * @return a {@link java.util.List}<{@link com.yahoo.annotations.model.TypeName}> converted from the given
+     * @return a {@link java.util.List}<{@link com.yahoo.aptutils.model.TypeName}> converted from the given
      * {@link javax.lang.model.element.TypeParameterElement}s. Equivalent to calling
      * {@link #typeParameterElementToTypeName(javax.lang.model.element.TypeParameterElement)}
      * on each item in the list.
@@ -150,7 +150,7 @@ public class AptUtils {
     }
 
     /**
-     * @return a {@link java.util.List}<{@link com.yahoo.annotations.model.TypeName}> converted from the given
+     * @return a {@link java.util.List}<{@link com.yahoo.aptutils.model.TypeName}> converted from the given
      * {@link javax.lang.model.element.TypeParameterElement}s. Equivalent to calling
      * {@link #typeParameterElementToTypeName(javax.lang.model.element.TypeParameterElement, String)}
      * on each item in the list.
@@ -165,7 +165,7 @@ public class AptUtils {
     }
 
     /**
-     * @return a {@link com.yahoo.annotations.model.TypeName} representing the given {@link javax.lang.model.type.TypeMirror}
+     * @return a {@link com.yahoo.aptutils.model.TypeName} representing the given {@link javax.lang.model.type.TypeMirror}
      */
     public TypeName getTypeNameFromTypeMirror(TypeMirror mirror) {
         return getTypeNameFromTypeMirror(mirror, null);
@@ -175,7 +175,7 @@ public class AptUtils {
      * @param mirror the {@link javax.lang.model.type.TypeMirror} to convert
      * @param genericQualifier optional string to qualify the generic name found in the TypeParameterElement.
      *                         E.g. with qualifier "Q", generic name "T" would be replaced by "Q_T"
-     * @return a {@link com.yahoo.annotations.model.TypeName} representing the given {@link javax.lang.model.type.TypeMirror}
+     * @return a {@link com.yahoo.aptutils.model.TypeName} representing the given {@link javax.lang.model.type.TypeMirror}
      */
     public TypeName getTypeNameFromTypeMirror(TypeMirror mirror, final String genericQualifier) {
         TypeKind kind = mirror.getKind();
@@ -220,7 +220,7 @@ public class AptUtils {
     }
 
     /**
-     * @return a {@link java.util.List}<{@link com.yahoo.annotations.model.TypeName}> converted from the given
+     * @return a {@link java.util.List}<{@link com.yahoo.aptutils.model.TypeName}> converted from the given
      * {@link javax.lang.model.type.TypeMirror}s. Equivalent to calling
      * {@link #getTypeNameFromTypeMirror(javax.lang.model.type.TypeMirror)}
      * on each item in the list.
@@ -230,7 +230,7 @@ public class AptUtils {
     }
 
     /**
-     * @return a {@link java.util.List}<{@link com.yahoo.annotations.model.TypeName}> converted from the given
+     * @return a {@link java.util.List}<{@link com.yahoo.aptutils.model.TypeName}> converted from the given
      * {@link javax.lang.model.type.TypeMirror}s. Equivalent to calling
      * {@link #getTypeNameFromTypeMirror(javax.lang.model.type.TypeMirror, java.lang.String)}
      * on each item in the list.
@@ -310,10 +310,10 @@ public class AptUtils {
 
     /**
      * @param exec the {@link javax.lang.model.element.ExecutableElement} to convert to
-     * {@link com.yahoo.annotations.writer.parameters.MethodDeclarationParameters}
+     * {@link com.yahoo.aptutils.writer.parameters.MethodDeclarationParameters}
      * @param modifiers the desired modifiers for the new method declaration
-     * @return a {@link com.yahoo.annotations.writer.parameters.MethodDeclarationParameters} suitable as an argument
-     * to {@link com.yahoo.annotations.writer.JavaFileWriter#beginMethodDefinition(com.yahoo.annotations.writer.parameters.MethodDeclarationParameters)}
+     * @return a {@link com.yahoo.aptutils.writer.parameters.MethodDeclarationParameters} suitable as an argument
+     * to {@link com.yahoo.aptutils.writer.JavaFileWriter#beginMethodDefinition(com.yahoo.aptutils.writer.parameters.MethodDeclarationParameters)}
      */
     public MethodDeclarationParameters methodDeclarationParamsFromExecutableElement(ExecutableElement exec, Modifier... modifiers) {
         return methodDeclarationParamsFromExecutableElement(exec, null, modifiers);
@@ -321,11 +321,11 @@ public class AptUtils {
 
     /**
      * @param exec exec the {@link javax.lang.model.element.ExecutableElement} to convert to
-     * {@link com.yahoo.annotations.writer.parameters.MethodDeclarationParameters}
+     * {@link com.yahoo.aptutils.writer.parameters.MethodDeclarationParameters}
      * @param nameOverride the desired name for the new method, or null if the name from exec should be used
      * @param modifiers the desired modifiers for the new method declaration
-     * @return a {@link com.yahoo.annotations.writer.parameters.MethodDeclarationParameters} suitable as an argument
-     * to {@link com.yahoo.annotations.writer.JavaFileWriter#beginMethodDefinition(com.yahoo.annotations.writer.parameters.MethodDeclarationParameters)}
+     * @return a {@link com.yahoo.aptutils.writer.parameters.MethodDeclarationParameters} suitable as an argument
+     * to {@link com.yahoo.aptutils.writer.JavaFileWriter#beginMethodDefinition(com.yahoo.aptutils.writer.parameters.MethodDeclarationParameters)}
      */
     public MethodDeclarationParameters methodDeclarationParamsFromExecutableElement(ExecutableElement exec, String nameOverride, Modifier... modifiers) {
         return methodDeclarationParamsFromExecutableElement(exec, nameOverride, null, modifiers);
@@ -333,13 +333,13 @@ public class AptUtils {
 
     /**
      * @param exec exec the {@link javax.lang.model.element.ExecutableElement} to convert to
-     * {@link com.yahoo.annotations.writer.parameters.MethodDeclarationParameters}
+     * {@link com.yahoo.aptutils.writer.parameters.MethodDeclarationParameters}
      * @param nameOverride the desired name for the new method, or null if the name from exec should be used
      * @param genericQualifier optional string to qualify the generic name found in the TypeParameterElement.
       *                         E.g. with qualifier "Q", generic name "T" would be replaced by "Q_T"
      * @param modifiers the desired modifiers for the new method declaration
-     * @return a {@link com.yahoo.annotations.writer.parameters.MethodDeclarationParameters} suitable as an argument
-     * to {@link com.yahoo.annotations.writer.JavaFileWriter#beginMethodDefinition(com.yahoo.annotations.writer.parameters.MethodDeclarationParameters)}
+     * @return a {@link com.yahoo.aptutils.writer.parameters.MethodDeclarationParameters} suitable as an argument
+     * to {@link com.yahoo.aptutils.writer.JavaFileWriter#beginMethodDefinition(com.yahoo.aptutils.writer.parameters.MethodDeclarationParameters)}
      */
     public MethodDeclarationParameters methodDeclarationParamsFromExecutableElement(ExecutableElement exec, String nameOverride,
             String genericQualifier, Modifier... modifiers) {
@@ -450,8 +450,8 @@ public class AptUtils {
     // --- GenericName remapping functions
 
     /**
-     * @param types {@link com.yahoo.annotations.model.TypeName}s to remap
-     * @param genericNameMap map specifying which names should be remapped to a different {@link com.yahoo.annotations.model.TypeName}
+     * @param types {@link com.yahoo.aptutils.model.TypeName}s to remap
+     * @param genericNameMap map specifying which names should be remapped to a different {@link com.yahoo.aptutils.model.TypeName}
      * @return a list of remapped type names
      *
      * Note: This method shouldn't need to be used very often. Sometimes it comes up that the generic name used at
@@ -472,8 +472,8 @@ public class AptUtils {
     }
 
     /**
-     * @param type {@link com.yahoo.annotations.model.TypeName} to remap
-     * @param genericNameMap map specifying which names should be remapped to a different {@link com.yahoo.annotations.model.TypeName}
+     * @param type {@link com.yahoo.aptutils.model.TypeName} to remap
+     * @param genericNameMap map specifying which names should be remapped to a different {@link com.yahoo.aptutils.model.TypeName}
      * @return a list of remapped type names
      *
      * Note: This method shouldn't need to be used very often. Sometimes it comes up that the generic name used at
@@ -549,7 +549,7 @@ public class AptUtils {
     }
 
     /**
-     * Reads class values from an annotation and converts them to {@link com.yahoo.annotations.model.DeclaredTypeName}s
+     * Reads class values from an annotation and converts them to {@link com.yahoo.aptutils.model.DeclaredTypeName}s
      */
     public List<DeclaredTypeName> getClassValuesFromAnnotation(Element elem, Class<?> annotationClass, String propertyName) {
         AnnotationValue annotationValue = getAnnotationValue(elem, annotationClass, propertyName);
@@ -565,7 +565,7 @@ public class AptUtils {
     }
 
     /**
-     * Reads class values from an {@link javax.lang.model.element.AnnotationValue} and converts them to {@link com.yahoo.annotations.model.DeclaredTypeName}s
+     * Reads class values from an {@link javax.lang.model.element.AnnotationValue} and converts them to {@link com.yahoo.aptutils.model.DeclaredTypeName}s
      */
     public List<DeclaredTypeName> getTypeNamesFromAnnotationValue(AnnotationValue annotationValue) {
         return mapValuesFromAnnotationValue(annotationValue, TypeMirror.class, new Function<TypeMirror, DeclaredTypeName>() {
@@ -687,7 +687,7 @@ public class AptUtils {
     }
 
     /**
-     * Mapping function used by {@link #map(java.util.List, com.yahoo.annotations.utils.AptUtils.Function)}
+     * Mapping function used by {@link #map(java.util.List, AptUtils.Function)}
      */
     public static interface Function<A, B> {
         public B map(A arg);
@@ -711,7 +711,7 @@ public class AptUtils {
     }
 
     /**
-     * Equivalent to calling {@link #deepCompareTypes(com.yahoo.annotations.model.TypeName, com.yahoo.annotations.model.TypeName)}
+     * Equivalent to calling {@link #deepCompareTypes(com.yahoo.aptutils.model.TypeName, com.yahoo.aptutils.model.TypeName)}
      * on each pair corresponding elements from the source lists
      */
     public static boolean deepCompareTypeList(List<? extends TypeName> l1, List<? extends TypeName> l2) {

@@ -1,17 +1,17 @@
-package com.yahoo.annotations.writer.expressions;
+package com.yahoo.aptutils.writer.expressions;
 
-import com.yahoo.annotations.model.DeclaredTypeName;
-import com.yahoo.annotations.model.TypeName;
-import com.yahoo.annotations.utils.AptUtils;
-import com.yahoo.annotations.writer.JavaFileWriter;
+import com.yahoo.aptutils.model.DeclaredTypeName;
+import com.yahoo.aptutils.model.TypeName;
+import com.yahoo.aptutils.utils.AptUtils;
+import com.yahoo.aptutils.writer.JavaFileWriter;
 
 import java.io.IOException;
 import java.util.List;
 
 /**
- * Convenience methods for constructing various kinds of {@link com.yahoo.annotations.writer.expressions.Expression}s
+ * Convenience methods for constructing various kinds of {@link Expression}s
  *
- * @see {@link com.yahoo.annotations.writer.expressions.Expression}
+ * @see {@link Expression}
  */
 public class Expressions {
 
@@ -121,7 +121,7 @@ public class Expressions {
     }
 
     /**
-     * @param calledObject an {@link com.yahoo.annotations.writer.expressions.Expression} on which to call this
+     * @param calledObject an {@link Expression} on which to call this
      *                     method. May be an object reference, another method call, or any other expression.
      * @param methodName the name of the method to call
      * @param arguments arguments to the method. May be raw strings or other expressions
@@ -134,7 +134,7 @@ public class Expressions {
     }
 
     /**
-     * @param calledObject an {@link com.yahoo.annotations.writer.expressions.Expression} on which to call this
+     * @param calledObject an {@link Expression} on which to call this
      *                     method. May be an object reference, another method call, or any other expression.
      * @param methodName the name of the method to call
      * @param arguments method arguments. May be raw strings or other expressions

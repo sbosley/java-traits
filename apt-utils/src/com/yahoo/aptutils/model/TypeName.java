@@ -3,13 +3,13 @@
  *
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.yahoo.annotations.model;
+package com.yahoo.aptutils.model;
 
 /**
- * Abstract parent class for {@link com.yahoo.annotations.model.DeclaredTypeName} and {@link com.yahoo.annotations.model.GenericName}
+ * Abstract parent class for {@link DeclaredTypeName} and {@link GenericName}
  *
  * Contains information about if the TypeName represents an array or is a varargs type in a method. For example,
- * Integer[][] would be represented by a {@link com.yahoo.annotations.model.DeclaredTypeName} "java.lang.Integer"
+ * Integer[][] would be represented by a {@link DeclaredTypeName} "java.lang.Integer"
  * with an array depth of 2.
  */
 public abstract class TypeName implements Cloneable {

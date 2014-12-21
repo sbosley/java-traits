@@ -5,9 +5,9 @@
  */
 package com.yahoo.javatraits.processor.data;
 
-import com.yahoo.annotations.model.DeclaredTypeName;
-import com.yahoo.annotations.model.TypeName;
-import com.yahoo.annotations.utils.AptUtils;
+import com.yahoo.aptutils.model.DeclaredTypeName;
+import com.yahoo.aptutils.model.TypeName;
+import com.yahoo.aptutils.utils.AptUtils;
 
 import javax.lang.model.element.TypeElement;
 import java.util.List;

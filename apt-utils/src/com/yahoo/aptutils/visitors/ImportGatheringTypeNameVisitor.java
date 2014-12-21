@@ -1,17 +1,17 @@
-package com.yahoo.annotations.visitors;
+package com.yahoo.aptutils.visitors;
 
-import com.yahoo.annotations.model.DeclaredTypeName;
-import com.yahoo.annotations.model.GenericName;
-import com.yahoo.annotations.model.TypeName;
-import com.yahoo.annotations.model.TypeName.TypeNameVisitor;
+import com.yahoo.aptutils.model.DeclaredTypeName;
+import com.yahoo.aptutils.model.GenericName;
+import com.yahoo.aptutils.model.TypeName;
+import com.yahoo.aptutils.model.TypeName.TypeNameVisitor;
 
 import java.util.List;
 import java.util.Set;
 
 /**
- * A {@link com.yahoo.annotations.model.TypeName.TypeNameVisitor} used to accumulate required imports from
- * {@link com.yahoo.annotations.model.TypeName}s. Basically just includes any class referenced by the
- * {@link com.yahoo.annotations.model.TypeName} (e.g. itself, upper/lower bounds, etc.)
+ * A {@link com.yahoo.aptutils.model.TypeName.TypeNameVisitor} used to accumulate required imports from
+ * {@link com.yahoo.aptutils.model.TypeName}s. Basically just includes any class referenced by the
+ * {@link com.yahoo.aptutils.model.TypeName} (e.g. itself, upper/lower bounds, etc.)
  */
 public class ImportGatheringTypeNameVisitor implements TypeNameVisitor<Void, Set<DeclaredTypeName>> {
 

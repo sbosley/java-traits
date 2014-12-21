@@ -5,14 +5,14 @@
  */
 package com.yahoo.javatraits.processor.writers;
 
-import com.yahoo.annotations.model.DeclaredTypeName;
-import com.yahoo.annotations.model.TypeName;
-import com.yahoo.annotations.utils.AptUtils;
-import com.yahoo.annotations.writer.JavaFileWriter.Type;
-import com.yahoo.annotations.writer.expressions.Expression;
-import com.yahoo.annotations.writer.expressions.Expressions;
-import com.yahoo.annotations.writer.parameters.MethodDeclarationParameters;
-import com.yahoo.annotations.writer.parameters.TypeDeclarationParameters;
+import com.yahoo.aptutils.model.DeclaredTypeName;
+import com.yahoo.aptutils.model.TypeName;
+import com.yahoo.aptutils.utils.AptUtils;
+import com.yahoo.aptutils.writer.JavaFileWriter.Type;
+import com.yahoo.aptutils.writer.expressions.Expression;
+import com.yahoo.aptutils.writer.expressions.Expressions;
+import com.yahoo.aptutils.writer.parameters.MethodDeclarationParameters;
+import com.yahoo.aptutils.writer.parameters.TypeDeclarationParameters;
 import com.yahoo.javatraits.processor.data.TraitElement;
 import com.yahoo.javatraits.processor.utils.TraitProcessorAptUtils;
 

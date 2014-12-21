@@ -5,10 +5,10 @@
  */
 package com.yahoo.javatraits.processor.data;
 
-import com.yahoo.annotations.model.CoreTypes;
-import com.yahoo.annotations.model.DeclaredTypeName;
-import com.yahoo.annotations.model.GenericName;
-import com.yahoo.annotations.utils.AptUtils;
+import com.yahoo.aptutils.model.CoreTypes;
+import com.yahoo.aptutils.model.DeclaredTypeName;
+import com.yahoo.aptutils.model.GenericName;
+import com.yahoo.aptutils.utils.AptUtils;
 import com.yahoo.javatraits.annotations.HasTraits;
 
 import javax.lang.model.element.AnnotationMirror;

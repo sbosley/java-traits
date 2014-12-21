@@ -3,7 +3,7 @@
  * 
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.yahoo.annotations.utils;
+package com.yahoo.aptutils.utils;
 
 /**
  * Basic class for holding a pair of values

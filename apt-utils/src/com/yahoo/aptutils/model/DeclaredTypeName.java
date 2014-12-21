@@ -3,9 +3,9 @@
  *
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.yahoo.annotations.model;
+package com.yahoo.aptutils.model;
 
-import com.yahoo.annotations.utils.AptUtils;
+import com.yahoo.aptutils.utils.AptUtils;
 
 import java.util.List;
 
@@ -13,10 +13,10 @@ import java.util.List;
  * Represents a concrete type name (e.g. "java.lang.String")
  *
  * May contain information about type arguments that can be used when generating
- * code in {@link com.yahoo.annotations.writer.JavaFileWriter}, but is not considered
+ * code in {@link com.yahoo.aptutils.writer.JavaFileWriter}, but is not considered
  * when comparing two DeclaredTypeNames to each other. For example, a DeclaredTypeName
  * representing "List<String>" will equal a DeclaredTypeName representing "List<Integer>".
- * For a deeper equality comparison, use {@link com.yahoo.annotations.utils.AptUtils#deepCompareTypes(TypeName, TypeName)}
+ * For a deeper equality comparison, use {@link com.yahoo.aptutils.utils.AptUtils#deepCompareTypes(TypeName, TypeName)}
  */
 public class DeclaredTypeName extends TypeName {
 

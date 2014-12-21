@@ -1,16 +1,16 @@
-package com.yahoo.annotations.writer.parameters;
+package com.yahoo.aptutils.writer.parameters;
 
-import com.yahoo.annotations.model.DeclaredTypeName;
-import com.yahoo.annotations.model.TypeName;
-import com.yahoo.annotations.utils.AptUtils;
-import com.yahoo.annotations.writer.JavaFileWriter.Type;
+import com.yahoo.aptutils.model.DeclaredTypeName;
+import com.yahoo.aptutils.model.TypeName;
+import com.yahoo.aptutils.utils.AptUtils;
+import com.yahoo.aptutils.writer.JavaFileWriter;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
 
 /**
  * An object for containing the information needed to begin a type declaration. Required by
- * {@link com.yahoo.annotations.writer.JavaFileWriter#beginTypeDefinition(TypeDeclarationParameters)}
+ * {@link com.yahoo.aptutils.writer.JavaFileWriter#beginTypeDefinition(TypeDeclarationParameters)}
  *
  * An instance of this class can be constructed by calling the no-arg constructor and then chaining method calls:
  *
@@ -19,7 +19,7 @@ import java.util.List;
 public class TypeDeclarationParameters {
 
     private DeclaredTypeName className;
-    private Type kind;
+    private JavaFileWriter.Type kind;
     private List<Modifier> modifiers;
     private DeclaredTypeName superclass;
     private List<? extends TypeName> interfaces;
@@ -33,11 +33,11 @@ public class TypeDeclarationParameters {
         return this;
     }
     
-    public Type getKind() {
+    public JavaFileWriter.Type getKind() {
         return kind;
     }
     
-    public TypeDeclarationParameters setKind(Type kind) {
+    public TypeDeclarationParameters setKind(JavaFileWriter.Type kind) {
         this.kind = kind;
         return this;
     }

@@ -5,10 +5,10 @@
  */
 package com.yahoo.javatraits.processor.writers;
 
-import com.yahoo.annotations.model.DeclaredTypeName;
-import com.yahoo.annotations.writer.JavaFileWriter.Type;
-import com.yahoo.annotations.writer.parameters.MethodDeclarationParameters;
-import com.yahoo.annotations.writer.parameters.TypeDeclarationParameters;
+import com.yahoo.aptutils.model.DeclaredTypeName;
+import com.yahoo.aptutils.writer.JavaFileWriter.Type;
+import com.yahoo.aptutils.writer.parameters.MethodDeclarationParameters;
+import com.yahoo.aptutils.writer.parameters.TypeDeclarationParameters;
 import com.yahoo.javatraits.processor.data.TraitElement;
 import com.yahoo.javatraits.processor.utils.TraitProcessorAptUtils;
 

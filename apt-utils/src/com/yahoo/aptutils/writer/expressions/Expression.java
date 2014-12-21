@@ -1,14 +1,14 @@
-package com.yahoo.annotations.writer.expressions;
+package com.yahoo.aptutils.writer.expressions;
 
-import com.yahoo.annotations.model.TypeName;
-import com.yahoo.annotations.writer.JavaFileWriter;
+import com.yahoo.aptutils.model.TypeName;
+import com.yahoo.aptutils.writer.JavaFileWriter;
 
 import java.io.IOException;
 import java.util.List;
 
 /**
  Expression represent various types of expressions you might find in a typical Java file, and are useful
- * when writing files using {@link com.yahoo.annotations.writer.JavaFileWriter}. For example--say you want to emit a
+ * when writing files using {@link com.yahoo.aptutils.writer.JavaFileWriter}. For example--say you want to emit a
  * statement that calls a method on some object, where the argument to that method is a method call on another object.
  * This can be composed entirely using expressions:
  *

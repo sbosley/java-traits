@@ -3,17 +3,17 @@
  *
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.yahoo.annotations.writer;
+package com.yahoo.aptutils.writer;
 
-import com.yahoo.annotations.model.CoreTypes;
-import com.yahoo.annotations.model.DeclaredTypeName;
-import com.yahoo.annotations.model.GenericName;
-import com.yahoo.annotations.model.TypeName;
-import com.yahoo.annotations.model.TypeName.TypeNameVisitor;
-import com.yahoo.annotations.utils.AptUtils;
-import com.yahoo.annotations.writer.expressions.Expression;
-import com.yahoo.annotations.writer.parameters.MethodDeclarationParameters;
-import com.yahoo.annotations.writer.parameters.TypeDeclarationParameters;
+import com.yahoo.aptutils.model.CoreTypes;
+import com.yahoo.aptutils.model.DeclaredTypeName;
+import com.yahoo.aptutils.model.GenericName;
+import com.yahoo.aptutils.model.TypeName;
+import com.yahoo.aptutils.model.TypeName.TypeNameVisitor;
+import com.yahoo.aptutils.utils.AptUtils;
+import com.yahoo.aptutils.writer.expressions.Expression;
+import com.yahoo.aptutils.writer.parameters.MethodDeclarationParameters;
+import com.yahoo.aptutils.writer.parameters.TypeDeclarationParameters;
 
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
@@ -31,7 +31,7 @@ import java.util.*;
  *     will be used to prevent name conflicts.</li>
  *     <li>Automatic indentation. This file tracks the state of the java file being emitted
  *     to calculate a reasonable indent level for each statement written</li>
- *     <li>Seamlessly handles {@link com.yahoo.annotations.writer.expressions.Expression} objects
+ *     <li>Seamlessly handles {@link com.yahoo.aptutils.writer.expressions.Expression} objects
  *     when they are encountered to make writing Java expressions easy</li>
  * </ul>
  */
@@ -196,7 +196,7 @@ public class JavaFileWriter {
     /**
      * Begins a new type definition.
      *
-     * @param typeDeclaration see {@link com.yahoo.annotations.writer.parameters.TypeDeclarationParameters}
+     * @param typeDeclaration see {@link com.yahoo.aptutils.writer.parameters.TypeDeclarationParameters}
      * @return this
      * @throws IOException
      */
@@ -288,7 +288,7 @@ public class JavaFileWriter {
     /**
      * Begins a method definition
      *
-     * @param methodDeclaration see {@link com.yahoo.annotations.writer.parameters.MethodDeclarationParameters}
+     * @param methodDeclaration see {@link com.yahoo.aptutils.writer.parameters.MethodDeclarationParameters}
      * @return this
      * @throws IOException
      */
@@ -331,7 +331,7 @@ public class JavaFileWriter {
     /**
      * Begins an initializer block
      *
-     * @see com.yahoo.annotations.writer.expressions.Expressions#block(com.yahoo.annotations.writer.expressions.Expression, boolean, boolean, boolean, boolean)
+     * @see com.yahoo.aptutils.writer.expressions.Expressions#block(com.yahoo.aptutils.writer.expressions.Expression, boolean, boolean, boolean, boolean)
      *
      * @param isStatic true if the block is static
      * @param indentStart true if the block needs to be indented, i.e. it's on its own line and not for example
@@ -423,7 +423,7 @@ public class JavaFileWriter {
     }
 
     /**
-     * Begin a constructor declaration. Special case of {@link #beginMethodDefinition(com.yahoo.annotations.writer.parameters.MethodDeclarationParameters)}
+     * Begin a constructor declaration. Special case of {@link #beginMethodDefinition(com.yahoo.aptutils.writer.parameters.MethodDeclarationParameters)}
      * where the params have a constructor name rather than a method name set
      *
      * @param constructorDeclaration
@@ -465,7 +465,7 @@ public class JavaFileWriter {
     }
 
     /**
-     * The same as {@link #writeStatement(com.yahoo.annotations.writer.expressions.Expression)} except does not
+     * The same as {@link #writeStatement(com.yahoo.aptutils.writer.expressions.Expression)} except does not
      * append the semicolon or \n
      *
      * @param expression
@@ -492,7 +492,7 @@ public class JavaFileWriter {
     }
 
     /**
-     * Similar to {@link #writeStatement(com.yahoo.annotations.writer.expressions.Expression)}
+     * Similar to {@link #writeStatement(com.yahoo.aptutils.writer.expressions.Expression)}
      *
      * @param statement
      * @return this

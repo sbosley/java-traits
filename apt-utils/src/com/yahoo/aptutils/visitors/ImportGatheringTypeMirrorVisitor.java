@@ -3,10 +3,10 @@
  *
  * See the file "LICENSE" for the full license governing this code.
  */
-package com.yahoo.annotations.visitors;
+package com.yahoo.aptutils.visitors;
 
-import com.yahoo.annotations.model.DeclaredTypeName;
-import com.yahoo.annotations.utils.AptUtils;
+import com.yahoo.aptutils.model.DeclaredTypeName;
+import com.yahoo.aptutils.utils.AptUtils;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;

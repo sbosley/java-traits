@@ -1,15 +1,15 @@
-package com.yahoo.annotations.writer.parameters;
+package com.yahoo.aptutils.writer.parameters;
 
-import com.yahoo.annotations.model.DeclaredTypeName;
-import com.yahoo.annotations.model.TypeName;
-import com.yahoo.annotations.utils.AptUtils;
+import com.yahoo.aptutils.model.DeclaredTypeName;
+import com.yahoo.aptutils.model.TypeName;
+import com.yahoo.aptutils.utils.AptUtils;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
 
 /**
  * An object for containing the information needed to begin a method declaration. Required by
- * {@link com.yahoo.annotations.writer.JavaFileWriter#beginMethodDefinition(MethodDeclarationParameters)}
+ * {@link com.yahoo.aptutils.writer.JavaFileWriter#beginMethodDefinition(MethodDeclarationParameters)}
  *
  * An instance of this class can be constructed by calling the no-arg constructor and then chaining method calls:
  *
