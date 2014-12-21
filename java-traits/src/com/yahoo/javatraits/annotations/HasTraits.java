@@ -34,7 +34,7 @@ import java.lang.annotation.Target;
  * implement all the interfaces implicitly defined by the specified
  * {@literal @}{@link Trait} classes.
  *
- * @author Sam Bosley <sboz88@gmail.com>
+ * @author Sam Bosley
  */
 @Target(ElementType.TYPE)
 public @interface HasTraits {
@@ -43,7 +43,6 @@ public @interface HasTraits {
      * that the annotated class uses.
      */
     Class<?>[] traits();
-
 
     /**
      * An annotation describing the desired superclass for this class. Classes annotated with

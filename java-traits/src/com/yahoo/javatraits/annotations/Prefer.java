@@ -30,12 +30,12 @@ import java.lang.annotation.Target;
  * class will be used; otherwise, the implementation of whichever
  * trait was declared first in the {@literal @}{@link HasTraits} annotation will be used.
  *
- * @author Sam Bosley <sboz88@gmail.com>
+ * @author Sam Bosley
  */
 @Target(ElementType.METHOD)
 public @interface Prefer {
     /**
-     * The target annotation class to prefer
+     * The target trait class to prefer
      * for implementing the specified method name.
      */
     Class<?> target();

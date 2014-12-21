@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  * interfaces, so you can/should feel free to reference the interfaces
  * elsewhere in your code. (See {@literal @}{@link HasTraits})
  * 
- * @author Sam Bosley <sboz88@gmail.com>
+ * @author Sam Bosley
  */
 @Target(ElementType.TYPE)
 public @interface Trait {}
