@@ -25,12 +25,15 @@ class ObjectReference extends Reference {
     }
     
     @Override
-    protected void writeReferencedObject(JavaFileWriter writer) throws IOException {
+    protected boolean writeReferencedObject(JavaFileWriter writer) throws IOException {
         if (!AptUtils.isEmpty(referencedObject)) {
-            writer.appendString(referencedObject).appendString(".");
+            writer.appendString(referencedObject);
+            return true;
         } else if (referencedExpression != null) {
             referencedExpression.writeExpression(writer);
+            return true;
         }
+        return false;
     }
 
 }

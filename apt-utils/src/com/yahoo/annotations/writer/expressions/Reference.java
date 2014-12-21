@@ -11,18 +11,20 @@ abstract class Reference extends Expression {
     
     public Reference(String fieldName) {
         if (AptUtils.isEmpty(fieldName)) {
-            throw new IllegalArgumentException("fieldName can't be numm for a FieldReference expression");
+            throw new IllegalArgumentException("fieldName can't be null for a Reference expression");
         }
         this.fieldName = fieldName;
     }
     
     @Override
     public boolean writeExpression(JavaFileWriter writer) throws IOException {
-        writeReferencedObject(writer);
+        if (writeReferencedObject(writer)) {
+            writer.appendString(".");
+        }
         writer.appendString(fieldName);
         return true;
     }
     
-    protected abstract void writeReferencedObject(JavaFileWriter writer) throws IOException;
+    protected abstract boolean writeReferencedObject(JavaFileWriter writer) throws IOException;
     
 }
