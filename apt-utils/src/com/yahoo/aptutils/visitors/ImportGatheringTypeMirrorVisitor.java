@@ -33,25 +33,23 @@ import java.util.Set;
 public class ImportGatheringTypeMirrorVisitor implements TypeVisitor<Void, Set<DeclaredTypeName>> {
 
     private Element elem;
-    private Messager messager;
     private AptUtils aptUtils;
 
-    public ImportGatheringTypeMirrorVisitor(Element elem, Messager messager, AptUtils aptUtils) {
+    public ImportGatheringTypeMirrorVisitor(Element elem, AptUtils aptUtils) {
         this.elem = elem;
-        this.messager = messager;
         this.aptUtils = aptUtils;
     }
 
     @Override
     public Void visit(TypeMirror t) {
-        messager.printMessage(Kind.WARNING, "No arg visit() called accumulating imports", elem);
+        aptUtils.getMessager().printMessage(Kind.WARNING, "No arg visit() called accumulating imports", elem);
         return null;
     }
 
     @Override
     public Void visit(TypeMirror t, Set<DeclaredTypeName> p) {
         t.accept(this, p);
-        messager.printMessage(Kind.WARNING, "Generic visit() called accumulating imports", elem);
+        aptUtils.getMessager().printMessage(Kind.WARNING, "Generic visit() called accumulating imports", elem);
         return null;
     }
 
@@ -77,7 +75,7 @@ public class ImportGatheringTypeMirrorVisitor implements TypeVisitor<Void, Set<D
 
     @Override
     public Void visitError(ErrorType t, Set<DeclaredTypeName> p) {
-        messager.printMessage(Kind.WARNING, "Encountered ErrorType accumulating imports", t.asElement());
+        aptUtils.getMessager().printMessage(Kind.WARNING, "Encountered ErrorType accumulating imports", t.asElement());
         return null;
     }
 
@@ -123,7 +121,7 @@ public class ImportGatheringTypeMirrorVisitor implements TypeVisitor<Void, Set<D
 
     @Override
     public Void visitUnknown(TypeMirror t, Set<DeclaredTypeName> p) {
-        messager.printMessage(Kind.WARNING, "Encountered unknown TypeMirror accumulating imports", elem);
+        aptUtils.getMessager().printMessage(Kind.WARNING, "Encountered unknown TypeMirror accumulating imports", elem);
         return null;
     }
 

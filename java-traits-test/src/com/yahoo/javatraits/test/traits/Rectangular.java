@@ -20,6 +20,10 @@ import com.yahoo.javatraits.annotations.Trait;
 @Trait
 public abstract class Rectangular {
 
+    public void doSomething() {
+        System.err.print("Hello");
+    }
+
     public abstract int getWidth();
     
     public abstract int getHeight();

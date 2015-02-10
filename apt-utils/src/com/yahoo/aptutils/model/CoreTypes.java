@@ -15,6 +15,8 @@
  */
 package com.yahoo.aptutils.model;
 
+import javax.lang.model.type.DeclaredType;
+
 /**
  * Defines lots of constant {@link DeclaredTypeName}s for core java types
  * (e.g. primitives, primitive boxes, String, etc.)
@@ -25,6 +27,8 @@ package com.yahoo.aptutils.model;
 public class CoreTypes {
 
     public static final String JAVA_LANG = "java.lang";
+
+    public static final DeclaredTypeName VOID = new DeclaredTypeName("", "void");
 
     public static final DeclaredTypeName JAVA_OBJECT = new DeclaredTypeName(JAVA_LANG, "Object");
     public static final DeclaredTypeName JAVA_STRING = new DeclaredTypeName(JAVA_LANG, "String");

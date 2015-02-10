@@ -75,7 +75,7 @@ public class AptUtils {
     public void accumulateImportsFromElements(Set<DeclaredTypeName> accumulate, Collection<? extends Element> elems) {
         if (!isEmpty(elems)) {
             for (Element elem : elems) {
-                elem.asType().accept(new ImportGatheringTypeMirrorVisitor(elem, messager, this), accumulate);
+                elem.asType().accept(new ImportGatheringTypeMirrorVisitor(elem, this), accumulate);
             }
         }
     }
@@ -200,7 +200,9 @@ public class AptUtils {
 
         String mirrorString = mirror.toString();
         TypeName toReturn;
-        if (kind == TypeKind.TYPEVAR) {
+        if (kind == TypeKind.VOID) {
+            return CoreTypes.VOID;
+        } else if (kind == TypeKind.TYPEVAR) {
             TypeVariable typeVariable = (TypeVariable) mirror;
             String genericName = getSimpleNameFromFullyQualifiedName(mirrorString);
             toReturn = getGenericName(genericName, genericQualifier, typeVariable, typeVariable.getUpperBound(), null);
