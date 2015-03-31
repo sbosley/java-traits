@@ -489,6 +489,20 @@ public class JavaFileWriter {
     }
 
     /**
+     * The same as {@link #writeExpression(com.yahoo.aptutils.writer.expressions.Expression)} but with a raw String
+     * instead of an Expression
+     *
+     * @param string
+     * @return this
+     * @throws IOException
+     */
+    public JavaFileWriter writeString(String string) throws IOException {
+        indent();
+        out.append(string);
+        return this;
+    }
+
+    /**
      * Writes an annotation
      *
      * @param annotationClass
