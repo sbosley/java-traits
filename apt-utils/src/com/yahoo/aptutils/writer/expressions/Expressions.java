@@ -96,6 +96,17 @@ public class Expressions {
     }
 
     /**
+     * @param arrayType the base type of the array
+     * @param arrayDepth how many dimensions in the array--e.g. for int[][], array depth = 2
+     * @param sizes the sizes for each dimension of the array. The number of elements passed must be equal to arrayDepth
+     *
+     * @return an array allocation expression
+     */
+    public static Expression arrayAllocation(DeclaredTypeName arrayType, int arrayDepth, int... sizes) {
+        return new ArrayAllocation(arrayType, arrayDepth, sizes);
+    }
+
+    /**
      * @param body an expression representing the body of this block. This may be a custom expression
      * @param indentStart pass true if the block should be indented, e.g. if it starts on its own line
      * @param isStatic pass true if the block is a static intializer block
