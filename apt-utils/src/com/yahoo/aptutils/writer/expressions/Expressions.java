@@ -223,6 +223,24 @@ public class Expressions {
     }
 
     /**
+     * @param array expression for referencing the array
+     * @param index index of the array to access
+     * @return an expression representing accessing the array at the given index
+     */
+    public static Expression arrayReference(Expression array, int index) {
+        return new ArrayReference(array, index);
+    }
+
+    /**
+     * @param array name of the array to reference
+     * @param index index of the array to access
+     * @return an expression representing accessing the array at the given index
+     */
+    public static Expression arrayReference(String array, int index) {
+        return new ArrayReference(array, index);
+    }
+
+    /**
      * @param toReturn expression representing the value to return
      *
      * @return an expression representing a return statement
