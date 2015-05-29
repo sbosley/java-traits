@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * Convenience methods for constructing various kinds of {@link Expression}s
  *
- * @see {@link Expression}
+ * @see com.yahoo.aptutils.writer.expressions.Expression
  */
 public class Expressions {
 

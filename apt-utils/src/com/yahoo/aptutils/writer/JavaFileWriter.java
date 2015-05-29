@@ -506,7 +506,7 @@ public class JavaFileWriter {
      * Writes an annotation
      *
      * @param annotationClass
-     * @return
+     * @return this
      * @throws IOException
      */
     public JavaFileWriter writeAnnotation(DeclaredTypeName annotationClass) throws IOException {
@@ -545,7 +545,7 @@ public class JavaFileWriter {
      * Directly appends the string with no indenting
      *
      * @param string
-     * @return
+     * @return this
      * @throws IOException
      */
     public JavaFileWriter appendString(String string) throws IOException {
@@ -556,7 +556,7 @@ public class JavaFileWriter {
     /**
      * Writes a newline (\n)
      *
-     * @return
+     * @return this
      * @throws IOException
      */
     public JavaFileWriter writeNewline() throws IOException {
