@@ -53,7 +53,8 @@ public abstract class AnotherTrait<A, B> {
     public String intToStringV1(int someArg) {
         return Integer.toBinaryString(someArg);
     }
-    
+
+    @Deprecated
     public String intToStringV2(int someArg) {
         return Integer.toBinaryString(someArg);
     }

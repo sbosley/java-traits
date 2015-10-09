@@ -25,6 +25,7 @@ import com.yahoo.aptutils.writer.expressions.Expression;
 import com.yahoo.aptutils.writer.parameters.MethodDeclarationParameters;
 import com.yahoo.aptutils.writer.parameters.TypeDeclarationParameters;
 
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
@@ -308,6 +309,13 @@ public class JavaFileWriter {
         validateMethodDefinitionParams(methodDeclaration);
         checkScope(Scope.TYPE_DEFINITION);
         indent();
+        if(!AptUtils.isEmpty(methodDeclaration.getAnnotations())){
+            for(AnnotationMirror annotationMirror:methodDeclaration.getAnnotations()) {
+                out.write(annotationMirror.toString());
+                out.append("\n");
+                indent();
+            }
+        }
         boolean isAbstract = kind.equals(Type.INTERFACE) ||
                 (!AptUtils.isEmpty(methodDeclaration.getModifiers())
                         && methodDeclaration.getModifiers().contains(Modifier.ABSTRACT));

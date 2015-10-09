@@ -408,7 +408,8 @@ public class AptUtils {
             .setMethodGenerics(methodGenerics)
             .setArgumentTypes(arguments.getLeft())
             .setArgumentNames(arguments.getRight())
-            .setThrowsTypes(getThrownTypes(exec, genericQualifier, methodGenerics));
+            .setThrowsTypes(getThrownTypes(exec, genericQualifier, methodGenerics))
+            .setAnnotations(exec.getAnnotationMirrors());
     }
 
     private TypeName getReturnTypeName(ExecutableElement exec, String genericQualifier, List<TypeName> methodGenerics) {
