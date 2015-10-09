@@ -86,4 +86,10 @@ public class BasicTraitsTest {
         assertTrue(list instanceof IBetterList);
     }
 
+    @Test
+    public void testTraitVariables() {
+       instance.setTestVariable(5);
+        assertEquals(5, instance.getTestVariable());
+    }
+
 }

@@ -19,7 +19,17 @@ import com.yahoo.javatraits.annotations.Trait;
 
 @Trait
 public abstract class AnotherTrait<A, B> {
-    
+
+    private int testVariable;
+
+    public int getTestVariable() {
+        return testVariable;
+    }
+
+    public void setTestVariable(int testVariable) {
+        this.testVariable = testVariable;
+    }
+
     public abstract A[] copyANTimes(A a, int n);
     
     public abstract B[] copyBNTimes(B b, int n);
