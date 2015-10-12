@@ -20,7 +20,7 @@ import com.yahoo.javatraits.annotations.Trait;
 import java.util.List;
 
 @Trait
-public abstract class BetterList<T extends CharSequence> implements List<T> {
+public abstract class BetterList<T extends CharSequence, S extends IRectangular> implements List<T> {
 
     public void printAll() {
         for (int i = 0; i < size(); i++) {

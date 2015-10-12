@@ -140,7 +140,7 @@ public class JavaFileWriter {
         if (!AptUtils.isEmpty(imports)) {
             for (DeclaredTypeName item : imports) {
                 DeclaredTypeName toImport = addToKnownNames(item, item.isJavaLangPackage() || item.getPackageName().equals(packageName));
-                if (toImport != null) {
+                if (toImport != null && toImport.getPackageName() != null && !toImport.getPackageName().isEmpty()) {
                     sortedImports.add(toImport.toString());
                 }
             }

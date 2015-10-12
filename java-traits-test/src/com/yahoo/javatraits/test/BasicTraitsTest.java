@@ -83,7 +83,7 @@ public class BasicTraitsTest {
 
     @Test
     public void testTraitExtendingInterface() {
-        IBetterList<String> list = new BetterArrayList<String>();
+        IBetterList<String, IRectangular> list = new BetterArrayList<>();
         assertTrue(list instanceof List);
         assertTrue(list instanceof IBetterList);
     }
