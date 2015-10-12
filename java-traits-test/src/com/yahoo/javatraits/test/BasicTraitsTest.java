@@ -15,6 +15,10 @@
  */
 package com.yahoo.javatraits.test;
 
+import com.yahoo.javatraits.test.classes.BetterArrayList;
+import com.yahoo.javatraits.test.classes.FootballField;
+import com.yahoo.javatraits.test.classes.LyingRectangle;
+import com.yahoo.javatraits.test.classes.SomeClass;
 import com.yahoo.javatraits.test.traits.*;
 import org.junit.Test;
 

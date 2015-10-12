@@ -54,6 +54,13 @@ public class ClassWithTraitsSuperclassWriter extends JavaTraitsWriter<ClassWithT
     @Override
     protected void gatherImports(Set<DeclaredTypeName> imports) {
         for (TraitElement elem : allTraits) {
+            utils.accumulateImportsFromTypeNames(imports, elem.getTypeParameters());
+            new HashSet<>(imports).stream().filter(n -> n.getPackageName().isEmpty()).forEach(n -> {
+                DeclaredTypeName n2 = new DeclaredTypeName(elem.getPackageName(), n.getSimpleName());
+                n2.setTypeArgs(n.getTypeArgs());
+                imports.remove(n);
+                imports.add(n2);
+            });
             utils.accumulateImportsFromElements(imports, elem.getDeclaredMethods());
             imports.add(elem.getDelegateName());
             imports.add(elem.getGeneratedInterfaceName());
