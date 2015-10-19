@@ -35,10 +35,12 @@ public abstract class TypeElementWrapper {
         this.elem = elem;
         this.aptUtils = aptUtils;
         Element pack=elem.getEnclosingElement();
+        String prefix="";
         while(pack.getKind()!=ElementKind.PACKAGE){
+            prefix+=pack.getSimpleName().toString()+"_";
             pack=pack.getEnclosingElement();
         }
-        this.elementName = new DeclaredTypeName(pack.toString(),elem.getSimpleName().toString());
+        this.elementName = new DeclaredTypeName(pack.toString(),prefix+elem.getSimpleName().toString());
         this.typeParameters = aptUtils.typeParameterElementsToTypeNames(elem.getTypeParameters(), getSimpleName());
     }
 

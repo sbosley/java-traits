@@ -37,7 +37,7 @@ public class LyingRectangle extends LyingRectangleWithTraits {
     }
 
     @HasTraits(traits=Rectangular.class)
-    public class InnerRectangle extends InnerRectangleWithTraits{
+    public class InnerRectangle extends LyingRectangle_InnerRectangleWithTraits{
 
         @Override
         public int getWidth() {
