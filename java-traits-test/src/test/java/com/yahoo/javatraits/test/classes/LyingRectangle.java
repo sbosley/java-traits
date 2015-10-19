@@ -35,5 +35,18 @@ public class LyingRectangle extends LyingRectangleWithTraits {
     public int getArea() {
         return 0;
     }
-    
+
+    @HasTraits(traits=Rectangular.class)
+    public class InnerRectangle extends InnerRectangleWithTraits{
+
+        @Override
+        public int getWidth() {
+            return LyingRectangle.this.getWidth()/2;
+        }
+
+        @Override
+        public int getHeight() {
+            return LyingRectangle.this.getHeight()/2;
+        }
+    }
 }

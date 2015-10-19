@@ -19,6 +19,8 @@ import com.yahoo.aptutils.model.DeclaredTypeName;
 import com.yahoo.aptutils.model.TypeName;
 import com.yahoo.aptutils.utils.AptUtils;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
 
@@ -32,7 +34,11 @@ public abstract class TypeElementWrapper {
     public TypeElementWrapper(TypeElement elem, AptUtils aptUtils) {
         this.elem = elem;
         this.aptUtils = aptUtils;
-        this.elementName = new DeclaredTypeName(elem.getQualifiedName().toString());
+        Element pack=elem.getEnclosingElement();
+        while(pack.getKind()!=ElementKind.PACKAGE){
+            pack=pack.getEnclosingElement();
+        }
+        this.elementName = new DeclaredTypeName(pack.toString(),elem.getSimpleName().toString());
         this.typeParameters = aptUtils.typeParameterElementsToTypeNames(elem.getTypeParameters(), getSimpleName());
     }
 
