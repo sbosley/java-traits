@@ -25,6 +25,7 @@ import com.yahoo.aptutils.writer.expressions.Expression;
 import com.yahoo.aptutils.writer.parameters.MethodDeclarationParameters;
 import com.yahoo.aptutils.writer.parameters.TypeDeclarationParameters;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
 import java.io.Writer;
@@ -578,6 +579,29 @@ public class JavaFileWriter {
     }
 
     /**
+     * Writes a javadoc comment
+     *
+     * @param javadoc string representing the javadoc to write. This method expects this string to be formatted as
+     *                described by the {@link javax.lang.model.util.Elements#getDocComment(Element)} method
+     * @return this
+     * @throws IOException
+     */
+    public JavaFileWriter writeJavadoc(String javadoc) throws IOException {
+        if (!AptUtils.isEmpty(javadoc)) {
+            if (!javadoc.endsWith("\n")) {
+                javadoc = javadoc + "\n";
+            }
+            indent();
+            String indentString = getIndentString();
+            out.append("/**\n").append(indentString).append(" *");
+            javadoc = javadoc.replaceAll("\n", "\n" + indentString + " *");
+            out.append(javadoc);
+            out.append("/\n");
+        }
+        return this;
+    }
+
+    /**
      * Finishes a method definition
      *
      * @return this
@@ -663,6 +687,16 @@ public class JavaFileWriter {
         for (int i = 0; i < indentLevel; i++) {
             out.append(INDENT);
         }
+    }
+
+    // Returns an indent string for the current level
+    private String getIndentString() {
+        StringBuilder builder = new StringBuilder();
+        int indentLevel = scopeStack.size();
+        for (int i = 0; i < indentLevel; i++) {
+            builder.append(INDENT);
+        }
+        return builder.toString();
     }
 
     private TypeNameVisitor<String, Boolean> nameShorteningVisitor = new TypeNameVisitor<String, Boolean>() {
