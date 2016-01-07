@@ -54,7 +54,7 @@ public abstract class JavaTraitsProcessor<T extends TypeElementWrapper> extends 
 
         this.messager = env.getMessager();
         this.filer = env.getFiler();
-        this.utils = new TraitProcessorAptUtils(messager, env.getTypeUtils());
+        this.utils = new TraitProcessorAptUtils(messager, env.getTypeUtils(), env.getElementUtils());
     }
     
     @Override

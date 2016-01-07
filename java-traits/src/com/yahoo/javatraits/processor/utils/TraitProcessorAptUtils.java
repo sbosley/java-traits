@@ -23,12 +23,13 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.ErrorType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
 public class TraitProcessorAptUtils extends AptUtils {
 
-    public TraitProcessorAptUtils(Messager messager, Types types) {
-        super(messager, types);
+    public TraitProcessorAptUtils(Messager messager, Types types, Elements elements) {
+        super(messager, types, elements);
     }
 
     public static final String GET_THIS = "getThis";
