@@ -22,12 +22,15 @@ import com.yahoo.aptutils.visitors.ImportGatheringTypeNameVisitor;
 import com.yahoo.aptutils.writer.JavaFileWriter;
 import com.yahoo.aptutils.writer.parameters.MethodDeclarationParameters;
 
+import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.*;
 import javax.lang.model.util.Types;
 import javax.lang.model.util.Elements;
+import javax.tools.JavaFileObject;
+import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -43,40 +46,68 @@ public class AptUtils {
      */
     public static final String OBJECT_CLASS_NAME = CoreTypes.JAVA_OBJECT.toString();
 
+    private final ProcessingEnvironment env;
     private final Messager messager;
     private final Types types;
     private final Elements elements;
+    private final Filer filer;
 
     /**
-     * @param messager {@link Messager} object. Should be obtained from {@link ProcessingEnvironment#getMessager()}
-     * @param types {@link Types} object. Should be obtained from {@link ProcessingEnvironment#getTypeUtils()}
-     * @param elements {@link Elements} object. Should be obtained from {@link ProcessingEnvironment#getElementUtils()} ()}
+     * @param env a {@link ProcessingEnvironment}
      */
-    public AptUtils(Messager messager, Types types, Elements elements) {
-        this.messager = messager;
-        this.types = types;
-        this.elements = elements;
+    public AptUtils(ProcessingEnvironment env) {
+        this.env = env;
+        this.messager = env.getMessager();
+        this.types = env.getTypeUtils();
+        this.elements = env.getElementUtils();
+        this.filer = env.getFiler();
     }
 
     /**
-     * @return the {@link Messager} this AptUtils was constructed with
+     * @return the {@link ProcessingEnvironment} this AptUtils was constructed from
+     */
+    public ProcessingEnvironment getProcessingEnvironment() {
+        return env;
+    }
+
+    /**
+     * @return an instance of {@link Messager} for the ProcessingEnvironment this AptUtils was constructed with
      */
     public Messager getMessager() {
         return messager;
     }
 
     /**
-     * @return the {@link Types} this AptUtils was constructed with
+     * @return an instance of {@link Types} for the ProcessingEnvironment this AptUtils was constructed with
      */
     public Types getTypes() {
         return types;
     }
 
     /**
-     * @return the {@link Elements} this AptUtils was constructed with
+     * @return an instance of {@link Elements} for the ProcessingEnvironment this AptUtils was constructed with
      */
     public Elements getElements() {
         return elements;
+    }
+
+    /**
+     * @return an instance of {@link Filer} for the ProcessingEnvironment this AptUtils was constructed with
+     */
+    public Filer getFiler() {
+        return filer;
+    }
+
+    /**
+     *
+     * @param generatedTypeName the fully qualified type name for the file to be generated
+     * @param sourceElement the {@link Element} that caused this file to be generated
+     * @return a new instance of {@link JavaFileWriter} for the given type
+     * @throws IOException
+     */
+    public JavaFileWriter newJavaFileWriter(DeclaredTypeName generatedTypeName, Element sourceElement) throws IOException {
+        JavaFileObject jfo = filer.createSourceFile(generatedTypeName.toString(), sourceElement);
+        return new JavaFileWriter(jfo.openWriter());
     }
 
     // --- Imports helpers
