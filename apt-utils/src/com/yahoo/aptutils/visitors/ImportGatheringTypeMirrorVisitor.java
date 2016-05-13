@@ -49,7 +49,7 @@ public class ImportGatheringTypeMirrorVisitor implements TypeVisitor<Void, Set<D
     @Override
     public Void visit(TypeMirror t, Set<DeclaredTypeName> p) {
         t.accept(this, p);
-        aptUtils.getMessager().printMessage(Kind.WARNING, "Generic visit() called accumulating imports", elem);
+        aptUtils.getMessager().printMessage(Kind.NOTE, "Generic visit() called accumulating imports", elem);
         return null;
     }
 
@@ -75,7 +75,7 @@ public class ImportGatheringTypeMirrorVisitor implements TypeVisitor<Void, Set<D
 
     @Override
     public Void visitError(ErrorType t, Set<DeclaredTypeName> p) {
-        aptUtils.getMessager().printMessage(Kind.WARNING, "Encountered ErrorType accumulating imports", t.asElement());
+        aptUtils.getMessager().printMessage(Kind.NOTE, "Encountered ErrorType accumulating imports", t.asElement());
         return null;
     }
 
