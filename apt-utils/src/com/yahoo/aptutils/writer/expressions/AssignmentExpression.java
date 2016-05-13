@@ -24,7 +24,7 @@ class AssignmentExpression extends Expression {
     private Expression assignTo;
     private Expression assignFrom;
     
-    public AssignmentExpression(Expression assignTo, Expression assignFrom) {
+    AssignmentExpression(Expression assignTo, Expression assignFrom) {
         this.assignTo = assignTo;
         this.assignFrom = assignFrom;
     }

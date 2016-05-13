@@ -15,8 +15,6 @@
  */
 package com.yahoo.aptutils.model;
 
-import javax.lang.model.type.DeclaredType;
-
 /**
  * Defines lots of constant {@link DeclaredTypeName}s for core java types
  * (e.g. primitives, primitive boxes, String, etc.)

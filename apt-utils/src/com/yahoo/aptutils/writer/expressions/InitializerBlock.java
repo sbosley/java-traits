@@ -27,7 +27,7 @@ class InitializerBlock extends Expression {
     private final boolean endWithSemicolon;
     private final boolean endWithNewline;
     
-    public InitializerBlock(Expression blockInternals, boolean indentStart, 
+    InitializerBlock(Expression blockInternals, boolean indentStart,
             boolean isStatic, boolean endWithSemicolon, boolean endWithNewline) {
         this.blockInternals = blockInternals;
         this.indentStart = indentStart;

@@ -26,12 +26,12 @@ class ArrayReference extends Expression {
     private String referencedObject;
     private int index;
 
-    public ArrayReference(String array, int index) {
+    ArrayReference(String array, int index) {
         this.referencedObject = array;
         this.index = index;
     }
 
-    public ArrayReference(Expression array, int index) {
+    ArrayReference(Expression array, int index) {
         this.referencedExpression = array;
         this.index = index;
     }

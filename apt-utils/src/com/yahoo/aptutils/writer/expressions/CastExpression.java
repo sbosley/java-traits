@@ -25,7 +25,7 @@ class CastExpression extends Expression {
     private final TypeName castTo;
     private final Expression toCast;
     
-    public CastExpression(TypeName castTo, Expression toCast) {
+    CastExpression(TypeName castTo, Expression toCast) {
         this.castTo = castTo;
         this.toCast = toCast;
     }

@@ -322,7 +322,7 @@ public class AptUtils {
      * contain more than one element if the upper bound is an intersection type
      */
     public List<? extends TypeMirror> getUpperBoundMirrors(TypeMirror sourceMirror, TypeMirror extendsBoundMirror) {
-        List<TypeMirror> result = new ArrayList<TypeMirror>();
+        List<TypeMirror> result = new ArrayList<>();
         if (extendsBoundMirror == null) {
             return result;
         }
@@ -637,7 +637,7 @@ public class AptUtils {
 
     @SuppressWarnings("unchecked")
     private <V, T> List<T> mapValuesFromAnnotationValue(AnnotationValue annotationValue, Class<V> valueClass, Function<V, T> mapResult) {
-        List<T> result = new ArrayList<T>();
+        List<T> result = new ArrayList<>();
         if (annotationValue != null) {
             Object value = annotationValue.getValue();
             if (valueClass.isAssignableFrom(value.getClass())) {
@@ -696,7 +696,7 @@ public class AptUtils {
      * Null-safe version of {@link java.util.Arrays#asList(Object[])}
      * @return null if args is null or {@link java.util.Arrays#asList(Object[])} if not
      */
-    public static <T> List<T> asList(T... args) {
+    public static <T> List<T> asList(T[] args) {
         return args == null ? null : Arrays.asList(args);
     }
 
@@ -743,7 +743,7 @@ public class AptUtils {
         if (list == null) {
             return null;
         }
-        List<B> result = new ArrayList<B>();
+        List<B> result = new ArrayList<>();
         for (A elem : list) {
             result.add(mapFunction.map(elem));
         }

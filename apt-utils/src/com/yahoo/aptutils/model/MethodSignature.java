@@ -28,8 +28,8 @@ public class MethodSignature {
 
     private String methodName;
     private TypeName returnType;
-    private List<TypeName> argTypes = new ArrayList<TypeName>();
-    private List<TypeName> throwsTypes = new ArrayList<TypeName>();
+    private List<TypeName> argTypes = new ArrayList<>();
+    private List<TypeName> throwsTypes = new ArrayList<>();
 
     public MethodSignature(String methodName) {
         this.methodName = methodName;
@@ -105,7 +105,7 @@ public class MethodSignature {
      */
     public void addThrowsTypes(List<? extends TypeName> types) {
         if (types != null) {
-            throwsTypes.addAll(throwsTypes);
+            throwsTypes.addAll(types);
         }
     }
 

@@ -24,7 +24,7 @@ abstract class Reference extends Expression {
 
     private final String fieldName;
     
-    public Reference(String fieldName) {
+    Reference(String fieldName) {
         if (AptUtils.isEmpty(fieldName)) {
             throw new IllegalArgumentException("fieldName can't be null for a Reference expression");
         }

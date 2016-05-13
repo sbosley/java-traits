@@ -72,9 +72,9 @@ public abstract class TypeName implements Cloneable {
         return builder.toString();
     }
 
-    public static interface TypeNameVisitor<RET, PARAM> {
-        public RET visitClassName(DeclaredTypeName typeName, PARAM param);
-        public RET visitGenericName(GenericName genericName, PARAM param);
+    public interface TypeNameVisitor<RET, PARAM> {
+        RET visitClassName(DeclaredTypeName typeName, PARAM param);
+        RET visitGenericName(GenericName genericName, PARAM param);
     }
 
     public abstract <RET, PARAM> RET accept(TypeNameVisitor<RET, PARAM> visitor, PARAM data);

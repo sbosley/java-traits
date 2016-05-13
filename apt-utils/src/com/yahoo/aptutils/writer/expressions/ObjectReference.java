@@ -25,16 +25,16 @@ class ObjectReference extends Reference {
     private String referencedObject;
     private Expression referencedExpression;
     
-    public ObjectReference(String fieldName) {
+    ObjectReference(String fieldName) {
         super(fieldName);
     }
     
-    public ObjectReference(String referencedObject, String fieldName) {
+    ObjectReference(String referencedObject, String fieldName) {
         this(fieldName);
         this.referencedObject = referencedObject;
     }
     
-    public ObjectReference(Expression referencedExpression, String fieldName) {
+    ObjectReference(Expression referencedExpression, String fieldName) {
         this(fieldName);
         this.referencedExpression = referencedExpression;
     }

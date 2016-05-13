@@ -27,21 +27,21 @@ class MethodInvocation extends Expression {
     private final String methodName;
     private final List<?> arguments;
     
-    public MethodInvocation(String methodName, List<?> arguments) {
+    MethodInvocation(String methodName, List<?> arguments) {
         this.methodName = methodName;
         this.arguments = arguments;
     }
     
-    public MethodInvocation(String methodName, Object... arguments) {
+    MethodInvocation(String methodName, Object... arguments) {
         this(methodName, AptUtils.asList(arguments));
     }
     
-    public MethodInvocation(Expression calledObject, String methodName, Object... arguments) {
+    MethodInvocation(Expression calledObject, String methodName, Object... arguments) {
         this(methodName, arguments);
         this.calledObject = calledObject;
     }
     
-    public MethodInvocation(Expression calledObject, String methodName, List<?> arguments) {
+    MethodInvocation(Expression calledObject, String methodName, List<?> arguments) {
         this(methodName, arguments);
         this.calledObject = calledObject;
     }

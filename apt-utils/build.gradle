@@ -5,13 +5,13 @@
  */
 project.ext.artifactId = 'apt-utils'
 group = 'com.yahoo.squidb'
-version = '1.0.2'
+version = '1.0.3'
 
 apply plugin: 'java'
 apply plugin: 'maven'
 
-sourceCompatibility = 1.6
-targetCompatibility = 1.6
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
 
 sourceSets {
     main {

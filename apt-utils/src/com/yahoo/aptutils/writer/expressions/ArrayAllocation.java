@@ -26,7 +26,7 @@ class ArrayAllocation extends Expression {
     private int arrayDepth;
     private int[] sizes;
 
-    public ArrayAllocation(DeclaredTypeName arrayBaseType, int arrayDepth, int... sizes) {
+    ArrayAllocation(DeclaredTypeName arrayBaseType, int arrayDepth, int... sizes) {
         if (arrayDepth != sizes.length) {
             throw new IllegalArgumentException("Must specify as many sizes as the array is deep");
         }

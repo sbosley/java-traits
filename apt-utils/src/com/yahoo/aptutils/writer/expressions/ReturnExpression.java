@@ -23,7 +23,7 @@ class ReturnExpression extends Expression {
 
     private final Expression toReturn;
     
-    public ReturnExpression(Expression toReturn) {
+    ReturnExpression(Expression toReturn) {
         this.toReturn = toReturn;
     }
     

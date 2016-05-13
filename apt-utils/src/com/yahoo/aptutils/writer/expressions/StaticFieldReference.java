@@ -24,7 +24,7 @@ class StaticFieldReference extends Reference {
 
     private final DeclaredTypeName typeName;
     
-    public StaticFieldReference(DeclaredTypeName typeName, String fieldName) {
+    StaticFieldReference(DeclaredTypeName typeName, String fieldName) {
         super(fieldName);
         this.typeName = typeName;
     }

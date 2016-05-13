@@ -126,6 +126,17 @@ public class ImportGatheringTypeMirrorVisitor implements TypeVisitor<Void, Set<D
     }
 
     @Override
+    public Void visitUnion(UnionType t, Set<DeclaredTypeName> p) {
+        List<? extends TypeMirror> alternatives = t.getAlternatives();
+        if (alternatives != null) {
+            for (TypeMirror alternative : alternatives) {
+                alternative.accept(this, p);
+            }
+        }
+        return null;
+    }
+
+    @Override
     public Void visitWildcard(WildcardType t, Set<DeclaredTypeName> p) {
         List<? extends TypeMirror> upperBounds = aptUtils.getUpperBoundMirrors(t, t.getExtendsBound());
         for (TypeMirror upper : upperBounds) {

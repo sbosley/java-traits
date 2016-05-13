@@ -28,11 +28,11 @@ class StaticMethodInvocation extends Expression {
     private final String methodName;
     private final List<?> arguments;
     
-    public StaticMethodInvocation(DeclaredTypeName calledType, String methodName, Object... arguments) {
+    StaticMethodInvocation(DeclaredTypeName calledType, String methodName, Object... arguments) {
         this(calledType, methodName, AptUtils.asList(arguments));
     }
     
-    public StaticMethodInvocation(DeclaredTypeName calledType, String methodName, List<?> arguments) {
+    StaticMethodInvocation(DeclaredTypeName calledType, String methodName, List<?> arguments) {
         this.calledType = calledType;
         this.methodName = methodName;
         this.arguments = arguments;
