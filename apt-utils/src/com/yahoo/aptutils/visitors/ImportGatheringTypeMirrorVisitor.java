@@ -18,7 +18,6 @@ package com.yahoo.aptutils.visitors;
 import com.yahoo.aptutils.model.DeclaredTypeName;
 import com.yahoo.aptutils.utils.AptUtils;
 
-import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.*;
 import javax.tools.Diagnostic.Kind;
@@ -131,6 +130,17 @@ public class ImportGatheringTypeMirrorVisitor implements TypeVisitor<Void, Set<D
         if (alternatives != null) {
             for (TypeMirror alternative : alternatives) {
                 alternative.accept(this, p);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitIntersection(IntersectionType t, Set<DeclaredTypeName> p) {
+        List<? extends TypeMirror> bounds = t.getBounds();
+        if (bounds != null) {
+            for (TypeMirror bound : bounds) {
+                bound.accept(this, p);
             }
         }
         return null;

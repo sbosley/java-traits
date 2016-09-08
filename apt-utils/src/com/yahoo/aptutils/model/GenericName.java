@@ -49,7 +49,7 @@ public class GenericName extends TypeName {
         GenericName clone = (GenericName) super.clone();
         clone.qualifier = this.qualifier;
         clone.genericName = this.genericName;
-        clone.extendsBound = this.extendsBound == null ? null : new ArrayList<TypeName>();
+        clone.extendsBound = this.extendsBound == null ? null : new ArrayList<>();
         if (extendsBound != null) {
             for (TypeName t : extendsBound) {
                 ((List<TypeName>) clone.extendsBound).add(t);
