@@ -83,9 +83,10 @@ public class JavaFileWriter {
     /**
      * @param out writer object to output to. When writing an annotation processor, the writer object is usually obtained
      *            like this:
-     *            <br/>
+     *            <pre>
      *            JavaFileObject jfo = filer.createSourceFile(classNameToGenerate, originatingElement);
-                  JavaFileWriter writer = new JavaFileWriter(jfo.openWriter());
+     *            JavaFileWriter writer = new JavaFileWriter(jfo.openWriter());
+     *            </pre>
      */
     public JavaFileWriter(Writer out) {
         if (out == null) {
@@ -100,7 +101,7 @@ public class JavaFileWriter {
      * Ends the writing of this file and closes the output stream
      *
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter close() throws IOException {
         out.close();
@@ -113,7 +114,7 @@ public class JavaFileWriter {
      *
      * @param packageName
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter writePackage(String packageName) throws IOException {
         checkScope(Scope.PACKAGE);
@@ -130,7 +131,7 @@ public class JavaFileWriter {
      *
      * @param imports classes to be imported
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter writeImports(Collection<DeclaredTypeName> imports) throws IOException {
         checkScope(Scope.IMPORTS);
@@ -159,7 +160,7 @@ public class JavaFileWriter {
      *
      * @param otherKnownNames class names that should be known to the file
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter registerOtherKnownNames(Collection<DeclaredTypeName> otherKnownNames) throws IOException {
         if (!AptUtils.isEmpty(otherKnownNames)) {
@@ -176,7 +177,7 @@ public class JavaFileWriter {
      *
      * @param otherKnownNames class names that should be known to the file
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter registerOtherKnownNames(DeclaredTypeName... otherKnownNames) throws IOException {
         return registerOtherKnownNames(AptUtils.asList(otherKnownNames));
@@ -209,7 +210,7 @@ public class JavaFileWriter {
      *
      * @param typeDeclaration see {@link com.yahoo.aptutils.writer.parameters.TypeDeclarationParameters}
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter beginTypeDefinition(TypeDeclarationParameters typeDeclaration) throws IOException {
         validateTypeDeclarationParams(typeDeclaration);
@@ -266,7 +267,7 @@ public class JavaFileWriter {
      * @param initializer expression with which to initialize the field. If null, the field will have no initial value
      * @param modifiers access modifiers for the field
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter writeFieldDeclaration(TypeName type, String name, Expression initializer, Modifier... modifiers) throws IOException {
         return writeFieldDeclaration(type, name, initializer, AptUtils.asList(modifiers));
@@ -280,7 +281,7 @@ public class JavaFileWriter {
      * @param initializer expression with which to initialize the field. If null, the field will have no initial value
      * @param modifiers access modifiers for the field
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter writeFieldDeclaration(TypeName type, String name, Expression initializer, List<Modifier> modifiers) throws IOException {
         checkScope(Scope.TYPE_DEFINITION, Scope.METHOD_DEFINITION);
@@ -301,7 +302,7 @@ public class JavaFileWriter {
      *
      * @param methodDeclaration see {@link com.yahoo.aptutils.writer.parameters.MethodDeclarationParameters}
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter beginMethodDefinition(MethodDeclarationParameters methodDeclaration) throws IOException {
         validateMethodDefinitionParams(methodDeclaration);
@@ -348,7 +349,7 @@ public class JavaFileWriter {
      * @param indentStart true if the block needs to be indented, i.e. it's on its own line and not for example
      *                    the start of an array constant declaration
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter beginInitializerBlock(boolean isStatic, boolean indentStart) throws IOException {
         checkScope(Scope.TYPE_DEFINITION);
@@ -386,14 +387,12 @@ public class JavaFileWriter {
     }
 
     /**
-     * Write a comma-separated list of argument types and names
-     * <br/>
-     * E.g. Type1 name1, Type2 name2
+     * Write a comma-separated list of argument types and names, e.g. Type1 name1, Type2 name2
      *
      * @param argumentTypes
      * @param argumentNames
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter writeArgumentList(List<? extends TypeName> argumentTypes, List<?> argumentNames) throws IOException {
         out.append("(");
@@ -421,13 +420,11 @@ public class JavaFileWriter {
     }
 
     /**
-     * Write a comma-separated list of argument names
-     * <br/>
-     * E.g. name1, name2
+     * Write a comma-separated list of argument names e.g. name1, name2
      *
      * @param argumentNames
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter writeArgumentNameList(List<?> argumentNames) throws IOException {
         return writeArgumentList(null, argumentNames);
@@ -439,7 +436,7 @@ public class JavaFileWriter {
      *
      * @param constructorDeclaration
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter beginConstructorDeclaration(MethodDeclarationParameters constructorDeclaration) throws IOException {
         verifyConstructorDeclarationParams(constructorDeclaration);
@@ -466,7 +463,7 @@ public class JavaFileWriter {
      *
      * @param statement
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter writeStatement(Expression statement) throws IOException {
         indent();
@@ -481,7 +478,7 @@ public class JavaFileWriter {
      *
      * @param expression
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter writeExpression(Expression expression) throws IOException {
         indent();
@@ -495,7 +492,7 @@ public class JavaFileWriter {
      *
      * @param string
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter writeString(String string) throws IOException {
         indent();
@@ -508,7 +505,7 @@ public class JavaFileWriter {
      *
      * @param annotationClass
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter writeAnnotation(DeclaredTypeName annotationClass) throws IOException {
         indent();
@@ -521,7 +518,7 @@ public class JavaFileWriter {
      *
      * @param statement
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter writeStringStatement(String statement) throws IOException {
         indent();
@@ -535,7 +532,7 @@ public class JavaFileWriter {
      *
      * @param expression
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter appendExpression(Expression expression) throws IOException {
         expression.writeExpression(this);
@@ -547,7 +544,7 @@ public class JavaFileWriter {
      *
      * @param string
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter appendString(String string) throws IOException {
         out.append(string);
@@ -558,7 +555,7 @@ public class JavaFileWriter {
      * Writes a newline (\n)
      *
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter writeNewline() throws IOException {
         out.append("\n");
@@ -566,11 +563,11 @@ public class JavaFileWriter {
     }
 
     /**
-     * Writes a comment. Indents and then outputs "// <comment>\n"
+     * Writes a comment. Indents and then outputs "// comment\n"
      *
      * @param comment
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter writeComment(String comment) throws IOException {
         indent();
@@ -584,7 +581,7 @@ public class JavaFileWriter {
      * @param javadoc string representing the javadoc to write. This method expects this string to be formatted as
      *                described by the {@link javax.lang.model.util.Elements#getDocComment(Element)} method
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter writeJavadoc(String javadoc) throws IOException {
         if (!AptUtils.isEmpty(javadoc)) {
@@ -605,7 +602,7 @@ public class JavaFileWriter {
      * Finishes a method definition
      *
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter finishMethodDefinition() throws IOException {
         finishScope(Scope.METHOD_DEFINITION);
@@ -620,7 +617,7 @@ public class JavaFileWriter {
      * @param semicolon true if the block should be followed by a semicolon
      * @param newline true if the block should be followed by a newline (\n)
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter finishInitializerBlock(boolean semicolon, boolean newline) throws IOException {
         finishScope(Scope.METHOD_DEFINITION);
@@ -639,7 +636,7 @@ public class JavaFileWriter {
      * Finish a type (i.e. class or interface) definition
      *
      * @return this
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter finishTypeDefinition() throws IOException {
         finishScope(Scope.TYPE_DEFINITION);

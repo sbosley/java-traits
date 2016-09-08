@@ -103,7 +103,7 @@ public class AptUtils {
      * @param generatedTypeName the fully qualified type name for the file to be generated
      * @param sourceElement the {@link Element} that caused this file to be generated
      * @return a new instance of {@link JavaFileWriter} for the given type
-     * @throws IOException
+     * @throws IOException if there was a problem writing to the file
      */
     public JavaFileWriter newJavaFileWriter(DeclaredTypeName generatedTypeName, Element sourceElement) throws IOException {
         JavaFileObject jfo = filer.createSourceFile(generatedTypeName.toString(), sourceElement);

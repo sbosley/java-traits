@@ -51,9 +51,7 @@ public class Expressions {
      * @param assignTo expression for the left hand side of the assignment
      * @param value expression for the right hand side of the assignment
      *
-     * @return an expression representing an assignment
-     * <br/>
-     * E.g. someObject.field = anotherObject.method(arg1, arg2)
+     * @return an expression representing an assignment e.g. <pre>someObject.field = anotherObject.method(arg1, arg2)</pre>
      */
     public static Expression assign(Expression assignTo, Expression value) {
         return new AssignmentExpression(assignTo, value);
@@ -63,9 +61,7 @@ public class Expressions {
      * @param castTo type name to cast the expression to
      * @param value the expression being cast
      *
-     * @return an expression representing a cast
-     * <br/>
-     * e.g. (String) someObject
+     * @return an expression representing a cast e.g. <pre>(String) someObject</pre>
      */
     public static Expression cast(TypeName castTo, Expression value) {
         return new CastExpression(castTo, value);
@@ -75,9 +71,7 @@ public class Expressions {
      * @param type class name of the constructor to invoke
      * @param arguments constructor arguments
      *
-     * @return a constructor invocation expression
-     * <br/>
-     * E.g. new MyObject(arg1, arg2)
+     * @return a constructor invocation expression e.g. <pre>new MyObject(arg1, arg2)</pre>
      */
     public static Expression callConstructor(DeclaredTypeName type, Object... arguments) {
         return new ConstructorInvocation(type, arguments);
@@ -87,9 +81,7 @@ public class Expressions {
      * @param type class name of the constructor to invoke
      * @param arguments constructor arguments
      *
-     * @return a constructor invocation expression
-     * <br/>
-     * E.g. new MyObject(arg1, arg2)
+     * @return a constructor invocation expression e.g. <pre>new MyObject(arg1, arg2)</pre>
      */
     public static Expression callConstructor(DeclaredTypeName type, List<?> arguments) {
         return new ConstructorInvocation(type, arguments);
@@ -125,9 +117,7 @@ public class Expressions {
      * @param arguments arguments to the method. May be raw strings or other expressions
      *
      * @return expression to call a method. Note the method is not called on any specific object, so the call
-     * is implicitly on "this", i.e. whatever the current context of the Java file is.
-     * <br/>
-     * E.g. someMethod(arg1, arg2)
+     * is implicitly on "this", i.e. whatever the current context of the Java file is e.g. <pre>someMethod(arg1, arg2)</pre>
      */
     public static Expression callMethod(String methodName, Object... arguments) {
         return new MethodInvocation(methodName, arguments);
@@ -138,9 +128,7 @@ public class Expressions {
      * @param arguments arguments to the method. May be raw strings or other expressions
      *
      * @return expression to call a method. Note the method is not called on any specific object, so the call
-     * is implicitly on "this", i.e. whatever the current context of the Java file is.
-     * <br/>
-     * E.g. someMethod(arg1, arg2)
+     * is implicitly on "this", i.e. whatever the current context of the Java file is e.g. <pre>someMethod(arg1, arg2)</pre>
      */
     public static Expression callMethod(String methodName, List<?> arguments) {
         return new MethodInvocation(methodName, arguments);
@@ -151,9 +139,7 @@ public class Expressions {
      *                     method. May be an object reference, another method call, or any other expression.
      * @param methodName the name of the method to call
      * @param arguments arguments to the method. May be raw strings or other expressions
-     * @return expression to call a method on a specific object.
-     * <br/>
-     * E.g. expression.someMethod(arg1, arg2)
+     * @return expression to call a method on a specific object e.g. <pre>expression.someMethod(arg1, arg2)</pre>
      */
     public static Expression callMethodOn(Expression calledObject, String methodName, Object... arguments) {
         return new MethodInvocation(calledObject, methodName, arguments);
@@ -165,9 +151,7 @@ public class Expressions {
      * @param methodName the name of the method to call
      * @param arguments method arguments. May be raw strings or other expressions
      *
-     * @return expression to call a method on a specific object.
-     * <br/>
-     * E.g. expression.someMethod(arg1, arg2)
+     * @return expression to call a method on a specific object e.g. <pre>expression.someMethod(arg1, arg2)</pre>
      */
     public static Expression callMethodOn(Expression calledObject, String methodName, List<?> arguments) {
         return new MethodInvocation(calledObject, methodName, arguments);
@@ -178,9 +162,7 @@ public class Expressions {
      * @param methodName the name of the method to call
      * @param arguments method arguments. May be raw strings or other expressions
      *
-     * @return expression to call a method on a specific object.
-     * <br/>
-     * E.g. expression.someMethod(arg1, arg2)
+     * @return expression to call a method on a specific object e.g. <pre>expression.someMethod(arg1, arg2)</pre>
      */
     public static Expression callMethodOn(String calledObject, String methodName, Object... arguments) {
         return reference(calledObject).callMethod(methodName, arguments);
@@ -191,9 +173,7 @@ public class Expressions {
      * @param methodName the name of the method to call
      * @param arguments method arguments. May be raw strings or other expressions
      *
-     * @return expression to call a method on a specific object.
-     * <br/>
-     * E.g. expression.someMethod(arg1, arg2)
+     * @return expression to call a method on a specific object e.g. <pre>expression.someMethod(arg1, arg2)</pre>
      */
     public static Expression callMethodOn(String calledObject, String methodName, List<?> arguments) {
         return reference(calledObject).callMethod(methodName, arguments);
@@ -212,10 +192,8 @@ public class Expressions {
      * @param referencedObject an expression representing the object containing the field to be referenced
      * @param fieldName the name of the field to be referenced
      *
-     * @return an expression representing the field reference
-     * <br/>
-     * E.g. if the referenced object is a method that returns an object with public fields:
-     * myMethod().publicField
+     * @return an expression representing the field reference e.g. if the referenced object is a method call expression
+     * that returns an object with public fields: <pre>myMethod().publicField</pre>
      */
     public static Expression reference(Expression referencedObject, String fieldName) {
         return new ObjectReference(referencedObject, fieldName);
@@ -225,9 +203,7 @@ public class Expressions {
      * @param referencedObject an string representing the name of the object containing the field to be referenced
      * @param fieldName the name of the field to be referenced
      *
-     * @return an expression representing the field reference
-     * <br/>
-     * E.g. referencedObject.fieldName
+     * @return an expression representing the field reference e.g. <pre>referencedObject.fieldName</pre>
      */
     public static Expression reference(String referencedObject, String fieldName) {
         return new ObjectReference(referencedObject, fieldName);
@@ -264,9 +240,7 @@ public class Expressions {
      * @param typeName the name of the class being referenced
      * @param fieldName the name of the static field to reference
      *
-     * @return an expression representing a static reference
-     * <br/>
-     * E.g. MyClass.SOME_CONSTANT
+     * @return an expression representing a static reference e.g. <pre>MyClass.SOME_CONSTANT</pre>
      */
     public static Expression staticReference(DeclaredTypeName typeName, String fieldName) {
         return new StaticFieldReference(typeName, fieldName);
@@ -275,9 +249,7 @@ public class Expressions {
     /**
      * @param typeName class name
      *
-     * @return an expression representing a reference to the class field
-     * <br/>
-     * E.g. MyClass.class
+     * @return an expression representing a reference to the class field e.g. <pre>MyClass.class</pre>
      */
     public static Expression classObject(DeclaredTypeName typeName) {
         return staticReference(typeName, "class");
@@ -288,9 +260,7 @@ public class Expressions {
      * @param methodName static method name
      * @param arguments method arguments. May be raw strings or other expressions
      *
-     * @return an expression representing a static method call
-     * <br/>
-     * E.g. MyClass.staticMethod(arg1, arg2)l
+     * @return an expression representing a static method call e.g. <pre>MyClass.staticMethod(arg1, arg2)</pre>
      */
     public static Expression staticMethod(DeclaredTypeName type, String methodName, Object... arguments) {
         return new StaticMethodInvocation(type, methodName, arguments);
@@ -301,9 +271,7 @@ public class Expressions {
      * @param methodName static method name
      * @param arguments method arguments. May be raw strings or other expressions
      *
-     * @return an expression representing a static method call
-     * <br/>
-     * E.g. MyClass.staticMethod(arg1, arg2)l
+     * @return an expression representing a static method call e.g. <pre>MyClass.staticMethod(arg1, arg2)</pre>
      */
     public static Expression staticMethod(DeclaredTypeName type, String methodName, List<?> arguments) {
         return new StaticMethodInvocation(type, methodName, arguments);
