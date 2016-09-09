@@ -327,7 +327,9 @@ public class AptUtils {
             return result;
         }
 
-        if (extendsBoundMirror instanceof DeclaredType) {
+        if (extendsBoundMirror instanceof IntersectionType) {
+            result.addAll(((IntersectionType) extendsBoundMirror).getBounds());
+        } else if (extendsBoundMirror instanceof DeclaredType) {
             if (extendsBoundMirror.toString().contains("&")) { // Is intersection type
                 addSupertypesToUpperBoundList(result, extendsBoundMirror);
             } else {
