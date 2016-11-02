@@ -34,11 +34,17 @@ public class ImportGatheringTypeMirrorVisitor extends AbstractTypeVisitor6<Void,
 
     private Element elem;
     private AptUtils aptUtils;
+    private boolean logWarnings;
 
     public ImportGatheringTypeMirrorVisitor(Element elem, AptUtils aptUtils) {
+        this(elem, aptUtils, false);
+    }
+
+    public ImportGatheringTypeMirrorVisitor(Element elem, AptUtils aptUtils, boolean logWarnings) {
         super();
         this.elem = elem;
         this.aptUtils = aptUtils;
+        this.logWarnings = logWarnings;
     }
 
     @Override
@@ -63,7 +69,9 @@ public class ImportGatheringTypeMirrorVisitor extends AbstractTypeVisitor6<Void,
 
     @Override
     public Void visitError(ErrorType t, Set<DeclaredTypeName> p) {
-        aptUtils.getMessager().printMessage(Kind.NOTE, "Encountered ErrorType accumulating imports", t.asElement());
+        if (logWarnings) {
+            aptUtils.getMessager().printMessage(Kind.WARNING, "Encountered ErrorType accumulating imports", t.asElement());
+        }
         return null;
     }
 
@@ -109,7 +117,9 @@ public class ImportGatheringTypeMirrorVisitor extends AbstractTypeVisitor6<Void,
 
     @Override
     public Void visitUnknown(TypeMirror t, Set<DeclaredTypeName> p) {
-        aptUtils.getMessager().printMessage(Kind.WARNING, "Encountered unknown TypeMirror accumulating imports", elem);
+        if (logWarnings) {
+            aptUtils.getMessager().printMessage(Kind.WARNING, "Encountered unknown TypeMirror accumulating imports", elem);
+        }
         return null;
     }
 

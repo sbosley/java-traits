@@ -117,9 +117,19 @@ public class AptUtils {
      * @param elems {@link Element}s to accumulate imports from
      */
     public void accumulateImportsFromElements(Set<DeclaredTypeName> accumulate, Collection<? extends Element> elems) {
+        accumulateImportsFromElements(accumulate, elems, false);
+    }
+
+    /**
+     * @param accumulate a {@link Set} in which to add accumulated imports required by the given elements
+     * @param elems {@link Element}s to accumulate imports from
+     * @param logWarnings true to log warnings if ErrorTypes or UnknownTypes are encountered
+     */
+    public void accumulateImportsFromElements(Set<DeclaredTypeName> accumulate, Collection<? extends Element> elems,
+                                              boolean logWarnings) {
         if (!isEmpty(elems)) {
             for (Element elem : elems) {
-                elem.asType().accept(new ImportGatheringTypeMirrorVisitor(elem, this), accumulate);
+                elem.asType().accept(new ImportGatheringTypeMirrorVisitor(elem, this, logWarnings), accumulate);
             }
         }
     }
