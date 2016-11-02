@@ -20,6 +20,7 @@ import com.yahoo.aptutils.utils.AptUtils;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.type.*;
+import javax.lang.model.util.AbstractTypeVisitor6;
 import javax.tools.Diagnostic.Kind;
 import java.util.List;
 import java.util.Set;
@@ -29,27 +30,15 @@ import java.util.Set;
  * {@link javax.lang.model.type.TypeMirror}s. Basically just includes any class referenced by the
  * {@link javax.lang.model.type.TypeMirror} (e.g. itself, upper/lower bounds, etc.)
  */
-public class ImportGatheringTypeMirrorVisitor implements TypeVisitor<Void, Set<DeclaredTypeName>> {
+public class ImportGatheringTypeMirrorVisitor extends AbstractTypeVisitor6<Void, Set<DeclaredTypeName>> {
 
     private Element elem;
     private AptUtils aptUtils;
 
     public ImportGatheringTypeMirrorVisitor(Element elem, AptUtils aptUtils) {
+        super();
         this.elem = elem;
         this.aptUtils = aptUtils;
-    }
-
-    @Override
-    public Void visit(TypeMirror t) {
-        aptUtils.getMessager().printMessage(Kind.WARNING, "No arg visit() called accumulating imports", elem);
-        return null;
-    }
-
-    @Override
-    public Void visit(TypeMirror t, Set<DeclaredTypeName> p) {
-        t.accept(this, p);
-        aptUtils.getMessager().printMessage(Kind.NOTE, "Generic visit() called accumulating imports", elem);
-        return null;
     }
 
     @Override
