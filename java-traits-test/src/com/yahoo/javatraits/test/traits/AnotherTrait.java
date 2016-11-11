@@ -19,7 +19,17 @@ import com.yahoo.javatraits.annotations.Trait;
 
 @Trait
 public abstract class AnotherTrait<A, B> {
-    
+
+    private int testVariable;
+
+    public int getTestVariable() {
+        return testVariable;
+    }
+
+    public void setTestVariable(int testVariable) {
+        this.testVariable = testVariable;
+    }
+
     public abstract A[] copyANTimes(A a, int n);
     
     public abstract B[] copyBNTimes(B b, int n);
@@ -43,7 +53,8 @@ public abstract class AnotherTrait<A, B> {
     public String intToStringV1(int someArg) {
         return Integer.toBinaryString(someArg);
     }
-    
+
+    @Deprecated
     public String intToStringV2(int someArg) {
         return Integer.toBinaryString(someArg);
     }

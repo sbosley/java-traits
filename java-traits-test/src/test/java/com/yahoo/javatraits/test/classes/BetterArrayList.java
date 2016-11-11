@@ -13,19 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yahoo.javatraits.test.traits;
+package com.yahoo.javatraits.test.classes;
 
-import com.yahoo.javatraits.annotations.Trait;
+import com.yahoo.javatraits.annotations.DesiredSuperclass;
+import com.yahoo.javatraits.annotations.HasTraits;
+import com.yahoo.javatraits.test.traits.BetterList;
+import com.yahoo.javatraits.test.traits.IRectangular;
 
-import java.util.List;
+import java.util.ArrayList;
 
-@Trait
-public abstract class BetterList<T extends CharSequence, S extends IRectangular> implements List<T> {
-
-    public void printAll() {
-        for (int i = 0; i < size(); i++) {
-            T item = get(i);
-            System.out.println("Item " + item);
-        }
-    }
+@HasTraits(traits=BetterList.class,
+        desiredSuperclass=@DesiredSuperclass(superclass=ArrayList.class, typeArgNames = "BetterList_T"))
+public class BetterArrayList<T extends CharSequence> extends BetterArrayListWithTraits<T, IRectangular> {
 }

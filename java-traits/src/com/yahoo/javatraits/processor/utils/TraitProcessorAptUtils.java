@@ -18,18 +18,16 @@ package com.yahoo.javatraits.processor.utils;
 import com.yahoo.aptutils.utils.AptUtils;
 import com.yahoo.javatraits.processor.data.TraitElement;
 
-import javax.annotation.processing.Messager;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.ErrorType;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Elements;
-import javax.lang.model.util.Types;
 
 public class TraitProcessorAptUtils extends AptUtils {
 
-    public TraitProcessorAptUtils(Messager messager, Types types, Elements elements) {
-        super(messager, types, elements);
+    public TraitProcessorAptUtils(ProcessingEnvironment processingEnvironment) {
+        super(processingEnvironment);
     }
 
     public static final String GET_THIS = "getThis";

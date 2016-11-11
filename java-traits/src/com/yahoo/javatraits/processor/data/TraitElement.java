@@ -69,8 +69,10 @@ public class TraitElement extends TypeElementWrapper {
                     }
                 } else if (elementIsConstant(e)) {
                     constants.add((VariableElement) e);
+                } else if (e.getModifiers().contains(Modifier.PRIVATE)) {
+                    //do nothing
                 } else {
-                    aptUtils.getMessager().printMessage(Kind.ERROR, "Trait elements may only declare methods, abstract methods, or public static final variables", e);
+                    aptUtils.getMessager().printMessage(Kind.ERROR, "Trait elements may only declare methods, abstract methods, private fields or public static final variables", e);
                 }
             } else {
                 methods.add((ExecutableElement) e);

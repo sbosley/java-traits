@@ -40,8 +40,8 @@ public class DeclaredTypeName extends TypeName {
     }
 
     public DeclaredTypeName(String fullyQualifiedName) {
-        this.packageName = AptUtils.getPackageFromFullyQualifiedName(fullyQualifiedName);
-        this.simpleName = AptUtils.getSimpleNameFromFullyQualifiedName(fullyQualifiedName);
+        this(AptUtils.getPackageFromFullyQualifiedName(fullyQualifiedName),
+                AptUtils.getSimpleNameFromFullyQualifiedName(fullyQualifiedName));
     }
 
     @Override

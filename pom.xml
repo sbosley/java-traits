@@ -10,8 +10,8 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>JavaTraits</module>
-        <module>JavaTraitsTest</module>
+        <module>java-traits</module>
+        <module>java-traits-test</module>
     </modules>
 
     <properties>
@@ -27,8 +27,9 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.1</version>
                     <configuration>
-                        <source>1.6</source>
-                        <target>1.6</target>
+                        <source>1.8</source>
+                        <target>1.8</target>
+                        <compilerArgument>-proc:none</compilerArgument>
                     </configuration>
                 </plugin>
             </plugins>

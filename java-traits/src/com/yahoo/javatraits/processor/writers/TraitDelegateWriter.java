@@ -30,6 +30,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeKind;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,6 +53,13 @@ public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
 
     @Override
     protected void gatherImports(Set<DeclaredTypeName> imports) {
+        utils.accumulateImportsFromTypeNames(imports, element.getTypeParameters());
+        new HashSet<>(imports).stream().filter(n -> n.getPackageName().isEmpty()).forEach(n -> {
+            DeclaredTypeName n2 = new DeclaredTypeName(element.getPackageName(), n.getSimpleName());
+            n2.setTypeArgs(n.getTypeArgs());
+            imports.remove(n);
+            imports.add(n2);
+        });
         utils.accumulateImportsFromElements(imports, element.getDeclaredMethods());
         for (int i = 0; i < element.getNumSuperinterfaces(); i++) {
             utils.accumulateImportsFromElements(imports, element.getExecutableElementsForInterface(i));
@@ -61,12 +69,9 @@ public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
     protected void writeClassDefinition() throws IOException {
         DeclaredTypeName superclass = element.getElementName().clone();
         superclass.setTypeArgs(element.getTypeParameters());
-        
-        TypeDeclarationParameters params = new TypeDeclarationParameters()
-            .setName(traitDelegateClass)
-            .setKind(Type.CLASS)
-            .setModifiers(Modifier.PUBLIC, Modifier.FINAL)
-            .setSuperclass(superclass);
+
+        TypeDeclarationParameters params = new TypeDeclarationParameters().setName(traitDelegateClass)
+                .setKind(Type.CLASS).setModifiers(Modifier.PUBLIC, Modifier.FINAL).setSuperclass(superclass);
 
         writer.registerOtherKnownNames(delegateInterface, element.getElementName());
         writer.beginTypeDefinition(params);
@@ -84,16 +89,13 @@ public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
     }
 
     private void emitConstructor() throws IOException {
-        MethodDeclarationParameters params = new MethodDeclarationParameters()
-            .setConstructorName(traitDelegateClass)
-            .setModifiers(Modifier.PUBLIC)
-            .setArgumentTypes(delegateInterface)
-            .setArgumentNames("delegate");
+        MethodDeclarationParameters params = new MethodDeclarationParameters().setConstructorName(traitDelegateClass)
+                .setModifiers(Modifier.PUBLIC).setArgumentTypes(delegateInterface).setArgumentNames("delegate");
 
         writer.beginConstructorDeclaration(params)
-            .writeStringStatement("super()")
-            .writeStatement(Expressions.assign(Expressions.reference("this", "delegate"), Expressions.reference("delegate")))
-            .finishMethodDefinition();
+                .writeStringStatement("super()").writeStatement(Expressions
+                .assign(Expressions.reference("this", "delegate"), Expressions.reference("delegate")))
+                .finishMethodDefinition();
     }
 
     private void emitDefaultMethodImplementations() throws IOException {
@@ -120,29 +122,29 @@ public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
 
     private void emitGetThis() throws IOException {
         MethodDeclarationParameters params = new MethodDeclarationParameters()
-            .setMethodName(TraitProcessorAptUtils.GET_THIS)
-            .setReturnType(delegateInterface)
-            .setModifiers(Modifier.PUBLIC);
+                .setMethodName(TraitProcessorAptUtils.GET_THIS).setReturnType(delegateInterface)
+                .setModifiers(Modifier.PUBLIC);
 
-        writer.beginMethodDefinition(params)
-            .writeStatement(Expressions.reference("delegate").returnExpr())
-            .finishMethodDefinition();
+        writer.beginMethodDefinition(params).writeStatement(Expressions.reference("delegate").returnExpr())
+                .finishMethodDefinition();
     }
 
-    private void emitMethodDeclaration(ExecutableElement exec, Map<String, TypeName> genericNameMap, boolean isDefault, Modifier... modifiers) throws IOException {
+    private void emitMethodDeclaration(ExecutableElement exec, Map<String, TypeName> genericNameMap, boolean isDefault,
+            Modifier... modifiers) throws IOException {
         String name = isDefault ? "default__" + exec.getSimpleName().toString() : null;
-        MethodDeclarationParameters methodDeclaration = utils.methodDeclarationParamsFromExecutableElement(exec, name, element.getSimpleName(), modifiers);
+        MethodDeclarationParameters methodDeclaration = utils.methodDeclarationParamsFromExecutableElement(exec, name,
+                element.getSimpleName(), modifiers);
         remapMethodDeclarationGenerics(methodDeclaration, genericNameMap);
         writer.beginMethodDefinition(methodDeclaration);
-        
+
         String callTo = isDefault ? "super" : "delegate";
-        Expression methodInvocation = Expressions.callMethodOn(callTo, exec.getSimpleName().toString(), methodDeclaration.getArgumentNames());
-        
+        Expression methodInvocation = Expressions.callMethodOn(callTo, exec.getSimpleName().toString(),
+                methodDeclaration.getArgumentNames());
+
         if (exec.getReturnType().getKind() != TypeKind.VOID) {
             methodInvocation = methodInvocation.returnExpr();
         }
-        writer.writeStatement(methodInvocation)
-            .finishMethodDefinition();
+        writer.writeStatement(methodInvocation).finishMethodDefinition();
     }
 
     private void emitInterfaceMethods() throws IOException {
@@ -154,7 +156,8 @@ public class TraitDelegateWriter extends JavaTraitsWriter<TraitElement> {
         }
     }
 
-    private void remapMethodDeclarationGenerics(MethodDeclarationParameters params, Map<String, TypeName> genericNameMap) {
+    private void remapMethodDeclarationGenerics(MethodDeclarationParameters params,
+            Map<String, TypeName> genericNameMap) {
         if (!AptUtils.isEmpty(genericNameMap)) {
             params.setReturnType(utils.remapGenericNames(params.getReturnType(), genericNameMap));
             params.setArgumentTypes(utils.remapGenericNames(params.getArgumentTypes(), genericNameMap));

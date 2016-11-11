@@ -13,19 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yahoo.javatraits.test.traits;
+package com.yahoo.javatraits.test.classes;
 
-import com.yahoo.javatraits.annotations.Trait;
+import com.yahoo.javatraits.annotations.HasTraits;
+import com.yahoo.javatraits.test.traits.Rectangular;
 
-import java.util.List;
+@HasTraits(traits=Rectangular.class)
+public class FootballField extends FootballFieldWithTraits {
 
-@Trait
-public abstract class BetterList<T extends CharSequence, S extends IRectangular> implements List<T> {
-
-    public void printAll() {
-        for (int i = 0; i < size(); i++) {
-            T item = get(i);
-            System.out.println("Item " + item);
-        }
+    public static final int WIDTH = 160;
+    public static final int HEIGHT = 320;
+    
+    @Override
+    public int getWidth() {
+        return WIDTH;
     }
+
+    @Override
+    public int getHeight() {
+        return HEIGHT;
+    }
+
 }

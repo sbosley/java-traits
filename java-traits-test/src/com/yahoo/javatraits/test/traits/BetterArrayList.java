@@ -22,5 +22,5 @@ import java.util.ArrayList;
 
 @HasTraits(traits=BetterList.class,
         desiredSuperclass=@DesiredSuperclass(superclass=ArrayList.class, typeArgNames = "BetterList_T"))
-public class BetterArrayList<T extends CharSequence> extends BetterArrayListWithTraits<T> {
+public class BetterArrayList<T extends CharSequence> extends BetterArrayListWithTraits<T, IRectangular> {
 }

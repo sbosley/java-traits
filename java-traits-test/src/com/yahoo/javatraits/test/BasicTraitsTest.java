@@ -15,13 +15,19 @@
  */
 package com.yahoo.javatraits.test;
 
+import com.yahoo.javatraits.test.classes.BetterArrayList;
+import com.yahoo.javatraits.test.classes.FootballField;
+import com.yahoo.javatraits.test.classes.LyingRectangle;
+import com.yahoo.javatraits.test.classes.SomeClass;
 import com.yahoo.javatraits.test.traits.*;
 import org.junit.Test;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class BasicTraitsTest {
@@ -81,9 +87,21 @@ public class BasicTraitsTest {
 
     @Test
     public void testTraitExtendingInterface() {
-        IBetterList<String> list = new BetterArrayList<String>();
+        IBetterList<String, IRectangular> list = new BetterArrayList<>();
         assertTrue(list instanceof List);
         assertTrue(list instanceof IBetterList);
+    }
+
+    @Test
+    public void testTraitVariables() {
+       instance.setTestVariable(5);
+        assertEquals(5, instance.getTestVariable());
+    }
+
+    @Test
+    public void testCopyAnnotations() throws NoSuchMethodException {
+        Method method=SomeClass.class.getMethod("intToStringV2", int.class);
+        assertNotNull(method.getAnnotation(Deprecated.class));
     }
 
 }

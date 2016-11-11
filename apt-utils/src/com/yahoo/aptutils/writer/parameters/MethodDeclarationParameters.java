@@ -19,6 +19,7 @@ import com.yahoo.aptutils.model.DeclaredTypeName;
 import com.yahoo.aptutils.model.TypeName;
 import com.yahoo.aptutils.utils.AptUtils;
 
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Modifier;
 import java.util.List;
 
@@ -40,6 +41,7 @@ public class MethodDeclarationParameters {
     private List<? extends TypeName> argumentTypes;
     private List<String> argumentNames;
     private List<? extends TypeName> throwsTypes;
+    private List<? extends AnnotationMirror> annotations;
     
     public boolean isConstructor() {
         return getConstructorName() != null;
@@ -131,5 +133,13 @@ public class MethodDeclarationParameters {
         this.throwsTypes = throwsTypes;
         return this;
     }
-    
+
+    public List<? extends AnnotationMirror> getAnnotations() {
+        return annotations;
+    }
+
+    public MethodDeclarationParameters setAnnotations(List<? extends AnnotationMirror> annotations) {
+        this.annotations = annotations;
+        return this;
+    }
 }
